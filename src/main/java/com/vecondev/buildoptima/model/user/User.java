@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "users")
 public class User extends Domain {
+
 
     @Column(name = "first_name")
     private String firstName;
@@ -39,11 +41,11 @@ public class User extends Domain {
 
     @CreationTimestamp
     @Column(name = "creation_date")
-    private LocalDate creationDate;
+    private LocalDateTime creationDate;
 
     @UpdateTimestamp
     @Column(name = "update_date")
-    private LocalDate updateDate;
+    private LocalDateTime updateDate;
 
     @Column(name = "active")
     private boolean active;

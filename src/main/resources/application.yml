@@ -6,7 +6,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
         show_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    url: jdbc:postgresql://localhost:5432/build_optima
+    user: postgres
+    password: root
+    schemas: build_optima
+    locations: classpath:db/migration
+    baseline-on-migrate: true
