@@ -6,7 +6,8 @@ create table users
     phone varchar(255) unique,
     email varchar(255) unique not null,
     password varchar(255) not null,
+    role varchar(255) not null,
     creation_date timestamp not null,
     update_date timestamp not null,
-    active boolean not null
+    enabled boolean not null
 );

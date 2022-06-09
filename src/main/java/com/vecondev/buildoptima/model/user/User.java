@@ -8,10 +8,11 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 import java.time.LocalDateTime;
 
 
@@ -39,6 +40,10 @@ public class User extends Domain {
     @Column(name = "password")
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Role role;
+
     @CreationTimestamp
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
@@ -47,6 +52,6 @@ public class User extends Domain {
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
-    @Column(name = "active")
-    private boolean active;
+    @Column(name = "enabled")
+    private boolean enabled;
 }
