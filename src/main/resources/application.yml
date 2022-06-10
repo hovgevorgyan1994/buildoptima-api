@@ -1,4 +1,3 @@
-
 spring:
   datasource:
     username: postgres
@@ -11,6 +10,7 @@ spring:
     properties:
       hibernate:
         show_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     url: jdbc:postgresql://localhost:5432/buildoptima
@@ -18,7 +18,6 @@ spring:
     password: root
     schemas: buildoptima
     locations: classpath:db/migration
-    baseline-on-migrate: true
 
 
 springdoc:
@@ -26,3 +25,19 @@ springdoc:
     path: /api-docs
 
 
+
+platform:
+  security:
+    jwt:
+      publicKeyPath: data/keys/public.der
+      privateKeyPath: data/keys/private.der
+      signatureAlgorithm: RS256
+      authorizationHeader: "Authorization"
+      authorizationHeaderPrefix: "Bearer "
+      issuer: "Buildoptima API"
+      refreshToken:
+        validity: 60 #minutes
+      accessToken:
+        validity: 6 #months
+
+#debug: true

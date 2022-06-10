@@ -16,26 +16,28 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String SWAGGER_UI_URI = "/swagger-ui/**";
-    private static final String API_DOCS_URI = "/api-docs/**";
+  private static final String SWAGGER_UI_URI = "/swagger-ui/**";
+  private static final String API_DOCS_URI = "/api-docs/**";
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManagerBuilder builder) throws Exception {
-        http.csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers( SWAGGER_UI_URI, API_DOCS_URI)
-                .permitAll()
-                .anyRequest()
-                .authenticated();
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManagerBuilder builder)
+      throws Exception {
+    http.csrf()
+        .disable()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .authorizeRequests()
+        .antMatchers(SWAGGER_UI_URI, API_DOCS_URI)
+        .permitAll()
+        .anyRequest()
+        .permitAll();
 
-        return http.build();
-    }
+    return http.build();
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(12);
+  }
 }
