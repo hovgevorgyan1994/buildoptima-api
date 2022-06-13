@@ -4,7 +4,6 @@ import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
