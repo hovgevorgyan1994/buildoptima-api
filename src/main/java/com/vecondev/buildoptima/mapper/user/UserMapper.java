@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.mapper.user;
 
-import com.vecondev.buildoptima.dto.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.user.UserRegistrationResponseDto;
+import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.response.UserRegistrationResponseDto;
 import com.vecondev.buildoptima.model.user.User;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;

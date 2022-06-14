@@ -6,7 +6,7 @@ import com.vecondev.buildoptima.dto.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.error.AuthErrorCode;
 import com.vecondev.buildoptima.exception.AuthException;
-import com.vecondev.buildoptima.model.RefreshToken;
+import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.UserRepository;

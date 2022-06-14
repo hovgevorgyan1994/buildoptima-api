@@ -17,17 +17,17 @@ public class JwtConfigProperties {
   private String authorizationHeaderPrefix;
 
   private SignatureAlgorithm signatureAlgorithm;
-  private RefreshTokenConfigProperties refreshToken;
-  private AccessTokenConfigProperties accessToken;
+  private RefreshToken refreshToken;
+  private AccessToken accessToken;
 
   @Data
-  public static class AccessTokenConfigProperties {
+  public static class AccessToken {
 
     private Integer validity;
   }
 
   @Data
-  public static class RefreshTokenConfigProperties {
+  public static class RefreshToken {
 
     private Integer validity;
   }

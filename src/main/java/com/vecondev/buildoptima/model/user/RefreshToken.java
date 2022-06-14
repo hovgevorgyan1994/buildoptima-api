@@ -1,6 +1,7 @@
-package com.vecondev.buildoptima.model;
+package com.vecondev.buildoptima.model.user;
 
 
+import com.vecondev.buildoptima.model.AbstractEntity;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "refresh_token")
-public class RefreshToken extends AbstractEntity{
+public class RefreshToken extends AbstractEntity {
 
     @Column(name = "refresh_token")
     private String refreshToken;

@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.dto.user;
+package com.vecondev.buildoptima.dto.response;
 
 import com.vecondev.buildoptima.model.user.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,15 +16,15 @@ import java.util.UUID;
 @Schema(name = "User registration response DTO")
 public class UserRegistrationResponseDto {
 
-    private UUID id;
+  private UUID id;
 
-    private String firstName;
-    private String lastName;
+  private String firstName;
+  private String lastName;
 
-    private String phone;
-    private String email;
-    private Role role;
+  private String phone;
+  private String email;
+  private Role role;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime updateDate;
+  private LocalDateTime creationDate;
+  private LocalDateTime updateDate;
 }

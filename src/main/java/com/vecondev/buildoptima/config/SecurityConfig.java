@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .antMatchers( SWAGGER_UI_URI, API_DOCS_URI).permitAll()
                 .antMatchers(REGISTRATION_URI).permitAll()
                 .anyRequest()
-                .authenticated();
+                .permitAll();
 
         return http.build();
     }
@@ -40,4 +40,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
+
+
 }

@@ -5,6 +5,7 @@ spring:
     password: root
     url: jdbc:postgresql://localhost:5432/buildoptima?currentSchema=buildoptima
 
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -36,5 +37,29 @@ spring:
 springdoc:
   api-docs:
     path: /api-docs
+
+
+server:
+  port: 8443
+  ssl:
+    key-store-type: PKCS12
+    key-store: classpath:keystore.p12
+    key-store-password: 123456
+    key-alias: tomcat
+    enabled: true
+
+platform:
+  security:
+    jwt:
+      issuer: buildoptima
+      privateKeyPath: data/keys/private.der
+      publicKeyPath: data/keys/public.der
+      signatureAlgorithm: RS256
+      authorizationHeader: "Authorization"
+      authorizationHeaderPrefix: "Bearer "
+      accessToken:
+        validity: 1 #days
+      refreshToken:
+        validity: 6 #months
 
 

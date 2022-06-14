@@ -19,7 +19,7 @@ public class AppUserDetails implements UserDetails {
         username = user.getEmail();
         password = user.getPassword();
         authorities = user.getRole().getAuthorities();
-        enabled = user.isEnabled();
+        enabled = user.getEnabled();
     }
 
     @Override

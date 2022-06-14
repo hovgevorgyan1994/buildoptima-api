@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Builder;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -55,5 +56,6 @@ public class User extends AbstractEntity {
     private LocalDateTime updateDate;
 
     @Column(name = "enabled")
-    private boolean enabled;
+    @ColumnDefault("false")
+    private Boolean enabled;
 }

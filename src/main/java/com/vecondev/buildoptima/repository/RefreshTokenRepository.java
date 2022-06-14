@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.repository;
 
-import com.vecondev.buildoptima.model.RefreshToken;
+import com.vecondev.buildoptima.model.user.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -58,7 +58,6 @@ public class JwtAuthenticationUtil {
     return claimsResolver.apply(claims);
   }
 
-  //TODO: change the ChronoUnit
   private Date accessTokenExpiration() {
     return java.sql.Date.valueOf(
         LocalDate.now()
