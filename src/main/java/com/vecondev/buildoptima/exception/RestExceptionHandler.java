@@ -38,4 +38,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.badRequest().body(error);
     }
+
+    @ExceptionHandler({AuthException.class})
+    public ResponseEntity<ApiError> handle(AuthException e){
+        ApiError error = new ApiError(e.getErrorCode().getHttpStatus(),LocalDateTime.now(),e.getErrorCode().getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+
 }

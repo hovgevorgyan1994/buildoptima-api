@@ -37,7 +37,7 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
   public ConfirmationToken getByToken(String token) {
     return confirmationTokenRepository
         .findByToken(token)
-        .orElseThrow(() -> new AuthException(AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new AuthException(AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND, AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND.getMessage()));
   }
 
   @Override

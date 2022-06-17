@@ -1,45 +1,57 @@
 package com.vecondev.buildoptima.config;
 
+import com.vecondev.buildoptima.filter.RestAuthorizationFilter;
+import com.vecondev.buildoptima.security.JwtConfigProperties;
+import com.vecondev.buildoptima.security.JwtTokenManager;
+import com.vecondev.buildoptima.security.SecurityContextService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String SWAGGER_UI_URI = "/swagger-ui/**";
-    private static final String API_DOCS_URI = "/api-docs/**";
+  private final JwtTokenManager jwtTokenManager;
+  private final JwtConfigProperties jwtConfigProperties;
+  private final SecurityContextService securityContextService;
+  private final UserDetailsService userDetailsService;
 
-    private static final String REGISTRATION_URI = "/registration";
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManagerBuilder builder) throws Exception {
-        http.csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers( SWAGGER_UI_URI, API_DOCS_URI).permitAll()
-                .antMatchers(REGISTRATION_URI).permitAll()
-                .anyRequest()
-                .permitAll();
-
-        return http.build();
-    }
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.sessionManagement()
+        .sessionCreationPolicy(STATELESS)
+        .and()
+        .authorizeRequests()
+        .antMatchers("/**")
+        .permitAll()
+        .and()
+        .csrf()
+        .disable()
+        .formLogin()
+        .disable()
+        .httpBasic()
+        .disable()
+        .logout()
+        .disable();
+    http.addFilterAfter(
+        new RestAuthorizationFilter(
+            jwtTokenManager, jwtConfigProperties, securityContextService, userDetailsService),
+        BasicAuthenticationFilter.class);
+  }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
-
-
 }

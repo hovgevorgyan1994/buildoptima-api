@@ -51,7 +51,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     ConfirmationToken confirmationToken = confirmationTokenService.getByToken(token);
     if (!isValid(confirmationToken)) {
       log.warn("The email confirmation token is not valid");
-      throw new AuthException(AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND);
+      throw new AuthException(AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND,AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND.getMessage());
     }
     return activateUserAccount(confirmationToken);
   }

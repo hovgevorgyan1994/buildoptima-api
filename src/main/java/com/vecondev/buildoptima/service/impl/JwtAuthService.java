@@ -44,37 +44,57 @@ public class JwtAuthService implements AuthService {
     final User user =
         userRepository
             .findByEmail(authRequestDto.getUsername())
-            .orElseThrow(() -> new AuthException(AuthErrorCode.AUTH_BAD_CREDENTIALS));
+            .orElseThrow(
+                () ->
+                    new AuthException(
+                        AuthErrorCode.AUTH_BAD_CREDENTIALS,
+                        AuthErrorCode.AUTH_BAD_CREDENTIALS.getMessage()));
 
     if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
       log.warn("User {} provided wrong credentials", authRequestDto.getUsername());
-      throw new AuthException(AuthErrorCode.AUTH_BAD_CREDENTIALS);
+      throw new AuthException(
+          AuthErrorCode.AUTH_BAD_CREDENTIALS, AuthErrorCode.AUTH_BAD_CREDENTIALS.getMessage());
     }
     return buildAuthDto(user);
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional
   public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request) {
     log.info("Request to refresh the access token");
 
     final RefreshToken refreshToken =
         refreshTokenRepository
             .findById(UUID.fromString(request.getRefreshTokenId()))
-            .orElseThrow(() -> new AuthException(AuthErrorCode.AUTH_REFRESH_TOKEN_INVALID));
+            .orElseThrow(
+                () ->
+                    new AuthException(
+                        AuthErrorCode.AUTH_REFRESH_TOKEN_INVALID,
+                        AuthErrorCode.AUTH_REFRESH_TOKEN_INVALID.getMessage()));
 
     if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
       log.warn("Refresh token is expired");
-      throw new AuthException(AuthErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
+      throw new AuthException(
+          AuthErrorCode.AUTH_REFRESH_TOKEN_EXPIRED,
+          AuthErrorCode.AUTH_REFRESH_TOKEN_EXPIRED.getMessage());
     }
 
     User user =
         userRepository
             .findById(refreshToken.getUserId())
-            .orElseThrow(() -> new AuthException(AuthErrorCode.AUTH_CREDENTIALS_NOT_FOUND));
+            .orElseThrow(
+                () ->
+                    new AuthException(
+                        AuthErrorCode.AUTH_CREDENTIALS_NOT_FOUND,
+                        AuthErrorCode.AUTH_CREDENTIALS_NOT_FOUND.getMessage()));
 
+    refreshTokenRepository.deleteById(refreshToken.getId());
+    final RefreshToken newRefreshToken = createRefreshToken(user.getId());
     log.info("New access token is created for user {}", user.getEmail());
-    return RefreshTokenResponseDto.builder().accessToken(generateAccessToken(user)).build();
+    return RefreshTokenResponseDto.builder()
+        .accessToken(generateAccessToken(user))
+        .refreshTokenId(newRefreshToken.getId().toString())
+        .build();
   }
 
   private AuthResponseDto buildAuthDto(final User user) {
@@ -85,7 +105,8 @@ public class JwtAuthService implements AuthService {
     if (optionalRefreshToken.isEmpty()) {
       refreshToken = createRefreshToken(user.getId());
     } else if (optionalRefreshToken.get().getExpiresAt().isBefore(LocalDateTime.now())) {
-      refreshToken = updateRefreshToken(user.getId());
+      refreshTokenRepository.deleteById(optionalRefreshToken.get().getId());
+      refreshToken = createRefreshToken(user.getId());
     } else {
       refreshToken = optionalRefreshToken.get();
     }
@@ -109,15 +130,6 @@ public class JwtAuthService implements AuthService {
             .build();
     refreshTokenRepository.save(refreshToken);
     return refreshToken;
-  }
-
-  private RefreshToken updateRefreshToken(UUID userId) {
-    final String refreshTokenPlain = UUID.randomUUID().toString();
-    final String refreshTokenEncoded = passwordEncoder.encode(refreshTokenPlain);
-    LocalDateTime expiresAt =
-        LocalDateTime.now()
-            .plus(jwtConfigProperties.getRefreshToken().getValidity(), ChronoUnit.MONTHS);
-    return refreshTokenRepository.updateRefreshToken(refreshTokenEncoded, expiresAt, userId);
   }
 
   private String generateAccessToken(User user) {
