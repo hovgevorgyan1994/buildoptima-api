@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.service;
+package com.vecondev.buildoptima.service.impl;
 
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import lombok.RequiredArgsConstructor;

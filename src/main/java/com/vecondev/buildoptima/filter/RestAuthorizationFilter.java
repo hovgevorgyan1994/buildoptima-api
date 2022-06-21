@@ -67,10 +67,7 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    return (request.getRequestURI().equals("/user")
-        || request.getRequestURI().equals("/user/refreshToken")
-        || request.getRequestURI().equals("/registration")
-        || request.getRequestURI().equals("/registration/activate"));
+    return (request.getRequestURI().startsWith("/user"));
   }
 
   @Override

@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.mapper.user;
 
 import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.UserRegistrationResponseDto;
+import com.vecondev.buildoptima.dto.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,7 +28,7 @@ public class UserMapperDecorator implements UserMapper {
     }
 
     @Override
-    public UserRegistrationResponseDto mapToRegistrationResponseDto(User user) {
-        return mapper.mapToRegistrationResponseDto(user);
+    public UserResponseDto mapToResponseDto(User user) {
+        return mapper.mapToResponseDto(user);
     }
 }
