@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationToken, UUID> {
 
-    Optional<ConfirmationToken> findByToken(String token);
+  Optional<ConfirmationToken> findByToken(String token);
 
-    void deleteByUserId(UUID userId);
+  void deleteByUserId(UUID userId);
 
-    void deleteByExpiresAtBefore(LocalDateTime now);
+  void deleteByExpiresAtBefore(LocalDateTime now);
 }

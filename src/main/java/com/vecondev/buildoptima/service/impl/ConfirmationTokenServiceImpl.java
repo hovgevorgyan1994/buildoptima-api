@@ -1,11 +1,10 @@
 package com.vecondev.buildoptima.service.impl;
 
-import com.vecondev.buildoptima.error.AuthErrorCode;
-import com.vecondev.buildoptima.exception.AuthException;
+import com.vecondev.buildoptima.error.ApiErrorCode;
+import com.vecondev.buildoptima.exception.ApiException;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.ConfirmationTokenRepository;
-
 import com.vecondev.buildoptima.service.ConfirmationTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,7 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
   public ConfirmationToken getByToken(String token) {
     return confirmationTokenRepository
         .findByToken(token)
-        .orElseThrow(() -> new AuthException(AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND, AuthErrorCode.AUTH_CONFIRM_TOKEN_NOT_FOUND.getMessage()));
+        .orElseThrow(() -> new ApiException(ApiErrorCode.CONFIRM_TOKEN_NOT_FOUND.getMessage()));
   }
 
   @Override

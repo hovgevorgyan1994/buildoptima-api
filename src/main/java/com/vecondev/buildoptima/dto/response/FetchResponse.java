@@ -11,13 +11,13 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsersViewResponse {
+public class FetchResponse {
 
-    private List<UserResponseDto> content;
+    private List<?> content;
 
-    private int pageNo;
+    private int page;
 
-    private int pageSize;
+    private int size;
 
     private long totalElements;
 

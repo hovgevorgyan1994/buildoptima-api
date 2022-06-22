@@ -5,17 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.vecondev.buildoptima.util.AppConstants.*;
+import static com.vecondev.buildoptima.constant.FetchConstants.*;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsersViewRequest {
+public class FetchRequest {
 
-  private int pageNo = DEFAULT_PAGE_NUMBER;
+  private int page = DEFAULT_PAGE_NUMBER;
 
-  private int pageSize = DEFAULT_PAGE_SIZE;
+  private int size = DEFAULT_PAGE_SIZE;
 
   private String sortBy = DEFAULT_SORT_BY;
 

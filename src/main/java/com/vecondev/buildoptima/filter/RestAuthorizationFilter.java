@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.filter;
 
-import com.vecondev.buildoptima.error.AuthErrorCode;
-import com.vecondev.buildoptima.exception.AuthException;
+import com.vecondev.buildoptima.error.ApiErrorCode;
+import com.vecondev.buildoptima.exception.ApiException;
 import com.vecondev.buildoptima.security.JwtConfigProperties;
 import com.vecondev.buildoptima.security.JwtTokenManager;
 import com.vecondev.buildoptima.security.SecurityContextService;
@@ -43,7 +43,7 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
     final String accessToken = getAccessToken(request);
 
     if (jwtTokenManager.isTokenExpired(accessToken)) {
-      throw new AuthException(AuthErrorCode.AUTH_ACCESS_TOKEN_EXPIRED,AuthErrorCode.AUTH_ACCESS_TOKEN_EXPIRED.getMessage());
+      throw new ApiException(ApiErrorCode.ACCESS_TOKEN_EXPIRED.getMessage());
     }
     String username = jwtTokenManager.getUsernameFromToken(accessToken);
 
@@ -67,7 +67,11 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    return (request.getRequestURI().startsWith("/user"));
+    return request.getRequestURI().equals("/user/registration")
+        || request.getRequestURI().equals("/user/activate")
+        || request.getRequestURI().equals("/user/login")
+        || request.getRequestURI().startsWith("/swagger-ui/index.html")
+        || request.getRequestURI().startsWith("/api-docs");
   }
 
   @Override
