@@ -22,7 +22,7 @@ public class MailService {
   @Async
   public void send(Locale locale, ConfirmationToken token) throws MessagingException {
     String subject = "WELCOME TO OUR WEBSITE";
-    String link = "https://localhost:443/registration/activate?token=" + token.getToken();
+    String link = "https://3.95.166.178:443/user/activate?token=" + token.getToken();
     final Context context = new Context(locale);
     context.setVariable("name", token.getUser().getFirstName());
     context.setVariable("surname", token.getUser().getLastName());

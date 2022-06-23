@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Locale;
+import java.util.UUID;
 
 public interface UserApi {
 
@@ -71,7 +72,7 @@ public interface UserApi {
       })
   ResponseEntity<AuthResponseDto> login(AuthRequestDto authRequestDto);
 
-  @Operation(summary = "Refresh user token")
+  @Operation(summary = "Refresh test user token")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -125,4 +126,15 @@ public interface UserApi {
             content = @Content(schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<Void> changePassword(ChangePasswordRequest request, AppUserDetails userDetails);
+
+  @Operation(summary = "Get user profile")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Fetched a user from DB"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+      })
+  ResponseEntity<UserResponseDto> getUser(UUID userId);
 }

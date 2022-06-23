@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Locale;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,5 +66,11 @@ public class UserController implements UserApi {
       @AuthenticationPrincipal AppUserDetails userDetails) {
     userService.changePassword(request, userDetails);
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @GetMapping("/{id}")
+  public ResponseEntity<UserResponseDto> getUser(@PathVariable("id") UUID userId) {
+    return ResponseEntity.ok(userService.getUser(userId));
   }
 }

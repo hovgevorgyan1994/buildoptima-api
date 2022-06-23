@@ -8,6 +8,7 @@ import com.vecondev.buildoptima.dto.response.FetchResponse;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 
 import java.util.Locale;
+import java.util.UUID;
 
 public interface UserService {
 
@@ -22,4 +23,6 @@ public interface UserService {
   FetchResponse fetchUsers(FetchRequest viewRequest);
 
   void changePassword(ChangePasswordRequest request, AppUserDetails userDetails);
+
+  UserResponseDto getUser(UUID userId);
 }

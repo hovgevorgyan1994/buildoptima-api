@@ -166,6 +166,17 @@ public class UserServiceImpl implements UserService {
     log.info("User {} password was successfully changed", user.getEmail());
   }
 
+  @Override
+  public UserResponseDto getUser(UUID userId) {
+    log.info("Request to get user profile by id");
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_FOUND.getMessage()));
+    log.info("Fetched user {} profile",user.getEmail());
+    return userMapper.mapToResponseDto(user);
+  }
+
   private boolean isValidRequest(ChangePasswordRequest request, User user) {
     return passwordEncoder.matches(request.getOldPassword(), user.getPassword());
   }
