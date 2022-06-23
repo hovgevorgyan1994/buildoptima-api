@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FetchResponse {
+@Schema(name = "Fetch Response DTO")
+public class FetchResponseDto {
 
     private List<?> content;
 

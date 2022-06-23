@@ -3,7 +3,7 @@ package com.vecondev.buildoptima.controller.impl;
 import com.vecondev.buildoptima.controller.UserApi;
 import com.vecondev.buildoptima.dto.request.*;
 import com.vecondev.buildoptima.dto.response.AuthResponseDto;
-import com.vecondev.buildoptima.dto.response.FetchResponse;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.UserResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
@@ -34,7 +34,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @GetMapping("/activate")
+  @PutMapping("/activate")
   public ResponseEntity<UserResponseDto> activate(@RequestParam("token") String token) {
     return ResponseEntity.ok(userService.activate(token));
   }
@@ -54,7 +54,7 @@ public class UserController implements UserApi {
 
   @Override
   @PostMapping("/fetch")
-  public ResponseEntity<FetchResponse> fetchUsers(@RequestBody FetchRequest fetchRequest) {
+  public ResponseEntity<FetchResponseDto> fetchUsers(@RequestBody FetchRequestDto fetchRequest) {
 
     return ResponseEntity.ok(userService.fetchUsers(fetchRequest));
   }
@@ -62,15 +62,30 @@ public class UserController implements UserApi {
   @Override
   @PutMapping("/password/change")
   public ResponseEntity<Void> changePassword(
-      @RequestBody @Valid ChangePasswordRequest request,
+      @RequestBody @Valid ChangePasswordRequestDto request,
       @AuthenticationPrincipal AppUserDetails userDetails) {
     userService.changePassword(request, userDetails);
     return ResponseEntity.ok().build();
   }
 
   @Override
-  @GetMapping("/{id}")
+  @GetMapping("fetch/{id}")
   public ResponseEntity<UserResponseDto> getUser(@PathVariable("id") UUID userId) {
     return ResponseEntity.ok(userService.getUser(userId));
+  }
+
+  @Override
+  @PostMapping("/password/verify")
+  public ResponseEntity<Void> forgotPassword(@RequestParam("email") String email, Locale locale) {
+    userService.verifyUserAndSendEmail(email, locale);
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @PutMapping("/password/restore")
+  public ResponseEntity<Void> restorePassword(
+      @RequestBody @Valid RestorePasswordRequestDto restorePasswordRequestDto) {
+    userService.restorePassword(restorePasswordRequestDto);
+    return ResponseEntity.ok().build();
   }
 }

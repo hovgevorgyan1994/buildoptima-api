@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Schema(name = "User registration request DTO")
+@Schema(name = "User Registration Request DTO")
 public class UserRegistrationRequestDto {
 
   @Name

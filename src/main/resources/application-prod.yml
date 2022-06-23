@@ -63,5 +63,4 @@ platform:
         validity: 6 #months
 
 host:
-  ip: localhost
-
+  ip: 3.95.166.178

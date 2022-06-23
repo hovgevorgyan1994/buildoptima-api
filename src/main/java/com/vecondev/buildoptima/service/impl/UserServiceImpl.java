@@ -2,10 +2,9 @@ package com.vecondev.buildoptima.service.impl;
 
 import com.vecondev.buildoptima.dto.request.*;
 import com.vecondev.buildoptima.dto.response.AuthResponseDto;
-import com.vecondev.buildoptima.dto.response.FetchResponse;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.UserResponseDto;
-import com.vecondev.buildoptima.error.ApiErrorCode;
 import com.vecondev.buildoptima.exception.ApiException;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
@@ -39,6 +38,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.error.ApiErrorCode.*;
+
 @Slf4j
 @Service
 @Transactional
@@ -63,9 +64,9 @@ public class UserServiceImpl implements UserService {
     ConfirmationToken confirmationToken = confirmationTokenService.create(user);
     log.info("New user registered.");
     try {
-      mailService.send(locale, confirmationToken);
+      mailService.sendConfirm(locale, confirmationToken);
     } catch (MessagingException e) {
-      throw new ApiException(ApiErrorCode.SEND_EMAIL_FAILED.getMessage());
+      throw new ApiException(SEND_EMAIL_FAILED);
     }
     log.info("Verification email was sent to user {}", user.getEmail());
     return userMapper.mapToResponseDto(user);
@@ -74,9 +75,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponseDto activate(String token) {
     ConfirmationToken confirmationToken = confirmationTokenService.getByToken(token);
-    if (!isValid(confirmationToken)) {
+    if (isNotValid(confirmationToken)) {
       log.warn("The email confirmation token is not valid");
-      throw new ApiException(ApiErrorCode.CONFIRM_TOKEN_NOT_FOUND.getMessage());
+      throw new ApiException(CONFIRM_TOKEN_NOT_FOUND);
     }
     return activateUserAccount(confirmationToken);
   }
@@ -87,11 +88,11 @@ public class UserServiceImpl implements UserService {
     final User user =
         userRepository
             .findByEmail(authRequestDto.getUsername())
-            .orElseThrow(() -> new ApiException(ApiErrorCode.BAD_CREDENTIALS.getMessage()));
+            .orElseThrow(() -> new ApiException(BAD_CREDENTIALS));
 
     if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
       log.warn("User {} provided wrong credentials", authRequestDto.getUsername());
-      throw new ApiException(ApiErrorCode.BAD_CREDENTIALS.getMessage());
+      throw new ApiException(BAD_CREDENTIALS);
     }
     return buildAuthDto(user);
   }
@@ -103,17 +104,17 @@ public class UserServiceImpl implements UserService {
     final RefreshToken refreshToken =
         refreshTokenRepository
             .findById(UUID.fromString(request.getRefreshTokenId()))
-            .orElseThrow(() -> new ApiException(ApiErrorCode.REFRESH_TOKEN_INVALID.getMessage()));
+            .orElseThrow(() -> new ApiException(REFRESH_TOKEN_INVALID));
 
     if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
       log.warn("Refresh token is expired");
-      throw new ApiException(ApiErrorCode.REFRESH_TOKEN_EXPIRED.getMessage());
+      throw new ApiException(REFRESH_TOKEN_EXPIRED);
     }
 
     User user =
         userRepository
             .findById(refreshToken.getUserId())
-            .orElseThrow(() -> new ApiException(ApiErrorCode.CREDENTIALS_NOT_FOUND.getMessage()));
+            .orElseThrow(() -> new ApiException(CREDENTIALS_NOT_FOUND));
 
     refreshTokenRepository.deleteById(refreshToken.getId());
     final RefreshToken newRefreshToken = createRefreshToken(user.getId());
@@ -125,7 +126,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public FetchResponse fetchUsers(FetchRequest viewRequest) {
+  public FetchResponseDto fetchUsers(FetchRequestDto viewRequest) {
+    log.info("Request to fetch users from DB");
     Sort sort =
         Sort.Direction.ASC.name().equalsIgnoreCase(viewRequest.getSortDir())
             ? Sort.by(viewRequest.getSortBy()).ascending()
@@ -137,7 +139,9 @@ public class UserServiceImpl implements UserService {
 
     List<UserResponseDto> content = userMapper.mapToResponseList(users);
 
-    return FetchResponse.builder()
+    log.info(
+        "Response with {} users, sorted by {} was sent", content.size(), viewRequest.getSortBy());
+    return FetchResponseDto.builder()
         .content(content)
         .page(users.getNumber())
         .size(users.getSize())
@@ -148,19 +152,19 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void changePassword(ChangePasswordRequest request, AppUserDetails userDetails) {
+  public void changePassword(ChangePasswordRequestDto request, AppUserDetails userDetails) {
     log.info("Request from user {} to change the password", userDetails.getUsername());
     User user =
         userRepository
             .findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_FOUND.getMessage()));
+            .orElseThrow(() -> new ApiException(USER_NOT_FOUND));
     if (!isValidRequest(request, user)) {
       log.warn("User {} had provided wrong credentials to change the password", user.getEmail());
-      throw new ApiException(ApiErrorCode.PROVIDED_WRONG_PASSWORD.getMessage());
+      throw new ApiException(PROVIDED_WRONG_PASSWORD);
     }
     if (request.getOldPassword().equals(request.getNewPassword())) {
       log.warn("In change password request user {} provided the same password", user.getEmail());
-      throw new ApiException(ApiErrorCode.PROVIDED_SAME_PASSWORD.getMessage());
+      throw new ApiException(PROVIDED_SAME_PASSWORD);
     }
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
     log.info("User {} password was successfully changed", user.getEmail());
@@ -169,15 +173,43 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponseDto getUser(UUID userId) {
     log.info("Request to get user profile by id");
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new ApiException(ApiErrorCode.USER_NOT_FOUND.getMessage()));
-    log.info("Fetched user {} profile",user.getEmail());
+    User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(USER_NOT_FOUND));
+    log.info("Fetched user {} profile", user.getEmail());
     return userMapper.mapToResponseDto(user);
   }
 
-  private boolean isValidRequest(ChangePasswordRequest request, User user) {
+  @Override
+  public void verifyUserAndSendEmail(String email, Locale locale) {
+    log.info("Request from optional user {} to get a password restoring email", email);
+    User user =
+        userRepository.findByEmail(email).orElseThrow(() -> new ApiException(USER_NOT_FOUND));
+
+    ConfirmationToken token = confirmationTokenService.create(user);
+    try {
+      log.info("Sending a password restoring email to user {}", user.getEmail());
+      mailService.sendVerify(locale, token);
+      log.info("Password restoring email was sent to user {}", user.getEmail());
+    } catch (MessagingException e) {
+      log.error("Something went wrong while sending email to user {}", user.getEmail());
+      throw new ApiException(SEND_EMAIL_FAILED);
+    }
+  }
+
+  @Override
+  public void restorePassword(RestorePasswordRequestDto restorePasswordRequestDto) {
+    log.info("Request to restore a forgotten password");
+    ConfirmationToken confirmationToken =
+        confirmationTokenService.getByToken(restorePasswordRequestDto.getConfirmationToken());
+    if (isNotValid(confirmationToken)) {
+      log.warn("The confirmation token was not found");
+      throw new ApiException(CONFIRM_TOKEN_NOT_FOUND);
+    }
+    User user = confirmationToken.getUser();
+    user.setPassword(passwordEncoder.encode(restorePasswordRequestDto.getNewPassword()));
+    log.info("User {} has successfully changed the password", user.getEmail());
+  }
+
+  private boolean isValidRequest(ChangePasswordRequestDto request, User user) {
     return passwordEncoder.matches(request.getOldPassword(), user.getPassword());
   }
 
@@ -189,9 +221,9 @@ public class UserServiceImpl implements UserService {
     return userMapper.mapToResponseDto(user);
   }
 
-  private boolean isValid(ConfirmationToken confirmationToken) {
+  private boolean isNotValid(ConfirmationToken confirmationToken) {
     Optional<User> user = userRepository.findById(confirmationToken.getUser().getId());
-    return user.isPresent() && user.get().getEnabled().equals(false);
+    return user.isEmpty();
   }
 
   private AuthResponseDto buildAuthDto(final User user) {

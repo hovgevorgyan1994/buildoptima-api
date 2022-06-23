@@ -1,6 +1,5 @@
 package com.vecondev.buildoptima.service.impl;
 
-import com.vecondev.buildoptima.error.ApiErrorCode;
 import com.vecondev.buildoptima.exception.ApiException;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
@@ -15,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.error.ApiErrorCode.*;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
 
   private final ConfirmationTokenRepository confirmationTokenRepository;
@@ -38,7 +39,7 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
   public ConfirmationToken getByToken(String token) {
     return confirmationTokenRepository
         .findByToken(token)
-        .orElseThrow(() -> new ApiException(ApiErrorCode.CONFIRM_TOKEN_NOT_FOUND.getMessage()));
+        .orElseThrow(() -> new ApiException(CONFIRM_TOKEN_NOT_FOUND));
   }
 
   @Override

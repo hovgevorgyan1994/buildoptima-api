@@ -4,7 +4,7 @@ import com.vecondev.buildoptima.dto.request.*;
 import com.vecondev.buildoptima.dto.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.UserResponseDto;
-import com.vecondev.buildoptima.dto.response.FetchResponse;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 
 import java.util.Locale;
@@ -20,9 +20,13 @@ public interface UserService {
 
   RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 
-  FetchResponse fetchUsers(FetchRequest viewRequest);
+  FetchResponseDto fetchUsers(FetchRequestDto viewRequest);
 
-  void changePassword(ChangePasswordRequest request, AppUserDetails userDetails);
+  void changePassword(ChangePasswordRequestDto request, AppUserDetails userDetails);
 
   UserResponseDto getUser(UUID userId);
+
+  void verifyUserAndSendEmail(String email, Locale locale);
+
+  void restorePassword(RestorePasswordRequestDto restorePasswordRequestDto);
 }

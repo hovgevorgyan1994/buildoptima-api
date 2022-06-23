@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.exception;
 
+import com.vecondev.buildoptima.error.ApiError;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({ApiException.class})
   public ResponseEntity<ApiError> handle(ApiException ex) {
-    ApiError error = new ApiError(BAD_REQUEST, LocalDateTime.now(), ex.getMessage());
-    return ResponseEntity.badRequest().body(error);
+    ApiError error =
+        new ApiError(
+            ex.getErrorCode().getHttpStatus(), LocalDateTime.now(), ex.getErrorCode().getMessage());
+    return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(error);
   }
 }

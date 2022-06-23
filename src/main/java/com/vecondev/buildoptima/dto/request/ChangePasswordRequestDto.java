@@ -11,7 +11,8 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangePasswordRequest {
+@Schema(name = "Change Password Request DTO")
+public class ChangePasswordRequestDto {
 
   @NotNull private String oldPassword;
 

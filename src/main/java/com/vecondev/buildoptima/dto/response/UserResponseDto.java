@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Schema(name = "User response DTO")
+@Schema(name = "User Response DTO")
 public class UserResponseDto {
 
   private UUID id;

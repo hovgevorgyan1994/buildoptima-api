@@ -1,11 +1,11 @@
 package com.vecondev.buildoptima.security;
 
 import com.vecondev.buildoptima.manager.CertificateManager;
+import com.vecondev.buildoptima.model.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -26,10 +26,10 @@ public class JwtAuthenticationUtil {
     return getClaimFromToken(token, Claims::getSubject);
   }
 
-  public String generateAccessToken(Authentication authResult) {
+  public String generateAccessToken(User user) {
     return Jwts.builder()
-        .setSubject(authResult.getName())
-        .claim("authorities", authResult.getAuthorities())
+        .setSubject(user.getEmail())
+        .claim("authorities", user.getRole().getAuthorities())
         .claim("issuer", jwtConfigProperties.getIssuer())
         .setExpiration(accessTokenExpiration())
         .signWith(SignatureAlgorithm.HS512, String.valueOf(certificateManager.privateKey()))

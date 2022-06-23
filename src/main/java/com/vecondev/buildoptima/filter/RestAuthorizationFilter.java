@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static com.vecondev.buildoptima.error.ApiErrorCode.ACCESS_TOKEN_EXPIRED;
+
 @Slf4j
 @RequiredArgsConstructor
 public class RestAuthorizationFilter extends OncePerRequestFilter {
@@ -43,7 +45,7 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
     final String accessToken = getAccessToken(request);
 
     if (jwtTokenManager.isTokenExpired(accessToken)) {
-      throw new ApiException(ApiErrorCode.ACCESS_TOKEN_EXPIRED.getMessage());
+      throw new ApiException(ACCESS_TOKEN_EXPIRED);
     }
     String username = jwtTokenManager.getUsernameFromToken(accessToken);
 
@@ -70,6 +72,8 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
     return request.getRequestURI().equals("/user/registration")
         || request.getRequestURI().equals("/user/activate")
         || request.getRequestURI().equals("/user/login")
+        || request.getRequestURI().equals("/user/password/verify")
+        || request.getRequestURI().equals("/user/password/restore")
         || request.getRequestURI().startsWith("/swagger-ui/index.html")
         || request.getRequestURI().startsWith("/api-docs");
   }
