@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class RefreshTokenResponseDto {
 
   private String accessToken;
-  private String refreshTokenId;
+  private String refreshToken;
 }

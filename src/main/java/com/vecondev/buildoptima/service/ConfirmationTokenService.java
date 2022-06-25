@@ -13,5 +13,9 @@ public interface ConfirmationTokenService {
 
     void remove(UUID id);
 
-    void removeExpiredTokens();
+    void deleteExpiredOnes();
+
+    boolean isNotValid(ConfirmationToken confirmationToken);
+
+    void deleteByUserId(UUID id);
 }

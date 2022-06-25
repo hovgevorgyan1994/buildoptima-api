@@ -1,9 +1,10 @@
 package com.vecondev.buildoptima.service.impl;
 
-import com.vecondev.buildoptima.exception.ApiException;
+import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.ConfirmationTokenRepository;
+import com.vecondev.buildoptima.repository.UserRepository;
 import com.vecondev.buildoptima.service.ConfirmationTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.error.ApiErrorCode.*;
+import static com.vecondev.buildoptima.error.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -23,6 +25,7 @@ import static com.vecondev.buildoptima.error.ApiErrorCode.*;
 public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
 
   private final ConfirmationTokenRepository confirmationTokenRepository;
+  private final UserRepository userRepository;
 
   @Override
   public ConfirmationToken create(User user) {
@@ -39,7 +42,7 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
   public ConfirmationToken getByToken(String token) {
     return confirmationTokenRepository
         .findByToken(token)
-        .orElseThrow(() -> new ApiException(CONFIRM_TOKEN_NOT_FOUND));
+        .orElseThrow(() -> new AuthenticationException(CONFIRM_TOKEN_NOT_FOUND));
   }
 
   @Override
@@ -50,8 +53,19 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
 
   @Override
   @Scheduled(cron = "0 */12 * * * *")
-  public void removeExpiredTokens() {
+  public void deleteExpiredOnes() {
     confirmationTokenRepository.deleteByExpiresAtBefore(LocalDateTime.now());
     log.info("Expired confirmation tokens have been removed");
+  }
+
+  @Override
+  public boolean isNotValid(ConfirmationToken confirmationToken) {
+    Optional<User> user = userRepository.findById(confirmationToken.getUser().getId());
+    return user.isEmpty();
+  }
+
+  @Override
+  public void deleteByUserId(UUID userId) {
+    confirmationTokenRepository.deleteByUserId(userId);
   }
 }

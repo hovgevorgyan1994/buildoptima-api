@@ -1,0 +1,33 @@
+{
+  "skip": 0,
+  "take": 10,
+  "sort": [
+    {
+      "field": "firstName",
+      "order": "asc"
+    }
+  ],
+  "filter": {
+    "and": [
+      {
+        "operation": "eq",
+        "name": "firstName",
+        "value": "John"
+      },
+      {
+        "or": [
+          {
+            "operation": "like",
+            "name": "lastName",
+            "value": "terson"
+          },
+          {
+            "operation": "gt",
+            "name": "creationDate",
+            "value": "2018-11-30T18:35:24.00Z"
+          }
+        ]
+      }
+    ]
+  }
+}

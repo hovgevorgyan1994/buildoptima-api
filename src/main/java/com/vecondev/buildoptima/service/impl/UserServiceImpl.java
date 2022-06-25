@@ -1,44 +1,64 @@
 package com.vecondev.buildoptima.service.impl;
 
-import com.vecondev.buildoptima.dto.request.*;
+import com.vecondev.buildoptima.dto.request.AuthRequestDto;
+import com.vecondev.buildoptima.dto.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.request.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.UserResponseDto;
-import com.vecondev.buildoptima.exception.ApiException;
+import com.vecondev.buildoptima.exception.AuthenticationException;
+import com.vecondev.buildoptima.filter.converter.PageableConverter;
+import com.vecondev.buildoptima.filter.model.SortDto;
+import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.UserRepository;
-import com.vecondev.buildoptima.security.JwtConfigProperties;
-import com.vecondev.buildoptima.security.JwtTokenManager;
+import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.ConfirmationTokenService;
+import com.vecondev.buildoptima.service.ImageService;
+import com.vecondev.buildoptima.service.RefreshTokenService;
 import com.vecondev.buildoptima.service.UserService;
 import com.vecondev.buildoptima.validation.UserValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.error.ApiErrorCode.*;
+import static com.vecondev.buildoptima.error.ErrorCode.CONFIRM_TOKEN_NOT_FOUND;
+import static com.vecondev.buildoptima.error.ErrorCode.CREDENTIALS_NOT_FOUND;
+import static com.vecondev.buildoptima.error.ErrorCode.PROVIDED_SAME_PASSWORD;
+import static com.vecondev.buildoptima.error.ErrorCode.PROVIDED_WRONG_PASSWORD;
+import static com.vecondev.buildoptima.error.ErrorCode.REFRESH_TOKEN_EXPIRED;
+import static com.vecondev.buildoptima.error.ErrorCode.SEND_EMAIL_FAILED;
+import static com.vecondev.buildoptima.error.ErrorCode.USER_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
+import static com.vecondev.buildoptima.util.RestPreconditions.checkNotNull;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 @Service
@@ -47,26 +67,30 @@ import static com.vecondev.buildoptima.error.ApiErrorCode.*;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
-  private final RefreshTokenRepository refreshTokenRepository;
-  private final PasswordEncoder passwordEncoder;
-  private final JwtTokenManager jwtAuthenticationUtil;
-  private final JwtConfigProperties jwtConfigProperties;
   private final UserMapper userMapper;
   private final UserValidator userValidator;
+
+  private final PasswordEncoder passwordEncoder;
+  private final JwtTokenManager jwtAuthenticationUtil;
   private final ConfirmationTokenService confirmationTokenService;
+  private final RefreshTokenService refreshTokenService;
+  private final AuthenticationManager authenticationManager;
+
+  private final ImageService imageService;
   private final MailService mailService;
+  private final PageableConverter pageableConverter;
 
   @Override
   public UserResponseDto register(UserRegistrationRequestDto dto, Locale locale) {
     User user = userMapper.mapToEntity(dto);
     userValidator.validateUserRegistration(user);
-    user = userRepository.save(user);
+    user = userRepository.saveAndFlush(user);
     ConfirmationToken confirmationToken = confirmationTokenService.create(user);
     log.info("New user registered.");
     try {
       mailService.sendConfirm(locale, confirmationToken);
     } catch (MessagingException e) {
-      throw new ApiException(SEND_EMAIL_FAILED);
+      throw new AuthenticationException(SEND_EMAIL_FAILED);
     }
     log.info("Verification email was sent to user {}", user.getEmail());
     return userMapper.mapToResponseDto(user);
@@ -75,9 +99,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponseDto activate(String token) {
     ConfirmationToken confirmationToken = confirmationTokenService.getByToken(token);
-    if (isNotValid(confirmationToken)) {
+    if (confirmationTokenService.isNotValid(confirmationToken)) {
       log.warn("The email confirmation token is not valid");
-      throw new ApiException(CONFIRM_TOKEN_NOT_FOUND);
+      throw new AuthenticationException(CONFIRM_TOKEN_NOT_FOUND);
     }
     return activateUserAccount(confirmationToken);
   }
@@ -85,16 +109,13 @@ public class UserServiceImpl implements UserService {
   @Override
   public AuthResponseDto authenticate(final AuthRequestDto authRequestDto) {
     log.info("Request from user {} to get authenticated", authRequestDto.getUsername());
-    final User user =
-        userRepository
-            .findByEmail(authRequestDto.getUsername())
-            .orElseThrow(() -> new ApiException(BAD_CREDENTIALS));
-
-    if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
-      log.warn("User {} provided wrong credentials", authRequestDto.getUsername());
-      throw new ApiException(BAD_CREDENTIALS);
-    }
-    return buildAuthDto(user);
+    final Authentication authentication =
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                authRequestDto.getUsername(), authRequestDto.getPassword()));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    AppUserDetails appUser = (AppUserDetails) authentication.getPrincipal();
+    return buildAuthDto(appUser);
   }
 
   @Override
@@ -102,52 +123,47 @@ public class UserServiceImpl implements UserService {
     log.info("Request to refresh the access token");
 
     final RefreshToken refreshToken =
-        refreshTokenRepository
-            .findById(UUID.fromString(request.getRefreshTokenId()))
-            .orElseThrow(() -> new ApiException(REFRESH_TOKEN_INVALID));
+        refreshTokenService.findByRefreshToken(request.getRefreshToken());
 
     if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-      log.warn("Refresh token is expired");
-      throw new ApiException(REFRESH_TOKEN_EXPIRED);
+      log.warn("403 FORBIDDEN response was sent because of an expired refresh token");
+      throw new AuthenticationException(REFRESH_TOKEN_EXPIRED);
     }
 
     User user =
         userRepository
             .findById(refreshToken.getUserId())
-            .orElseThrow(() -> new ApiException(CREDENTIALS_NOT_FOUND));
-
-    refreshTokenRepository.deleteById(refreshToken.getId());
-    final RefreshToken newRefreshToken = createRefreshToken(user.getId());
-    log.info("New access token is created for user {}", user.getEmail());
+            .orElseThrow(() -> new AuthenticationException(CREDENTIALS_NOT_FOUND));
+    log.info("Access token is refreshed for user {}", user.getEmail());
     return RefreshTokenResponseDto.builder()
-        .accessToken(generateAccessToken(user))
-        .refreshTokenId(newRefreshToken.getId().toString())
+        .accessToken(jwtAuthenticationUtil.generateAccessToken(user))
+        .refreshToken(refreshToken.getRefreshToken())
         .build();
   }
 
   @Override
-  public FetchResponseDto fetchUsers(FetchRequestDto viewRequest) {
+  public FetchResponseDto fetchUsers(FetchRequestDto fetchRequest) {
     log.info("Request to fetch users from DB");
-    Sort sort =
-        Sort.Direction.ASC.name().equalsIgnoreCase(viewRequest.getSortDir())
-            ? Sort.by(viewRequest.getSortBy()).ascending()
-            : Sort.by(viewRequest.getSortBy()).descending();
+    validateFieldNames(userPageSortingFieldsMap, fetchRequest.getSort());
+    if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
+      SortDto sortDto = new SortDto("firstName", SortDto.Direction.ASC);
+      fetchRequest.setSort(List.of(sortDto));
+    }
+    Pageable pageable = pageableConverter.convert(fetchRequest);
+    Specification<User> specification =
+        new GenericSpecification<>(userPageSortingFieldsMap, fetchRequest.getFilter());
 
-    Pageable pageable = PageRequest.of(viewRequest.getPage(), viewRequest.getSize(), sort);
+    assert pageable != null;
+    Page<User> result = userRepository.findAll(specification, pageable);
 
-    Page<User> users = userRepository.findAll(pageable);
-
-    List<UserResponseDto> content = userMapper.mapToResponseList(users);
-
-    log.info(
-        "Response with {} users, sorted by {} was sent", content.size(), viewRequest.getSortBy());
+    List<UserResponseDto> content = userMapper.mapToResponseList(result);
+    log.info("Response was sent. {} results where found", content.size());
     return FetchResponseDto.builder()
         .content(content)
-        .page(users.getNumber())
-        .size(users.getSize())
-        .totalElements(users.getTotalElements())
-        .totalPages(users.getTotalPages())
-        .last(users.isLast())
+        .page(result.getNumber())
+        .size(result.getSize())
+        .totalElements(result.getTotalElements())
+        .last(result.isLast())
         .build();
   }
 
@@ -157,14 +173,14 @@ public class UserServiceImpl implements UserService {
     User user =
         userRepository
             .findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new ApiException(USER_NOT_FOUND));
-    if (!isValidRequest(request, user)) {
+            .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
+    if (!isValidPassword(request, user)) {
       log.warn("User {} had provided wrong credentials to change the password", user.getEmail());
-      throw new ApiException(PROVIDED_WRONG_PASSWORD);
+      throw new AuthenticationException(PROVIDED_WRONG_PASSWORD);
     }
     if (request.getOldPassword().equals(request.getNewPassword())) {
       log.warn("In change password request user {} provided the same password", user.getEmail());
-      throw new ApiException(PROVIDED_SAME_PASSWORD);
+      throw new AuthenticationException(PROVIDED_SAME_PASSWORD);
     }
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
     log.info("User {} password was successfully changed", user.getEmail());
@@ -173,16 +189,21 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponseDto getUser(UUID userId) {
     log.info("Request to get user profile by id");
-    User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(USER_NOT_FOUND));
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
     log.info("Fetched user {} profile", user.getEmail());
     return userMapper.mapToResponseDto(user);
   }
 
   @Override
-  public void verifyUserAndSendEmail(String email, Locale locale) {
+  public void verifyUserAndSendEmail(ConfirmEmailRequestDto email, Locale locale) {
     log.info("Request from optional user {} to get a password restoring email", email);
     User user =
-        userRepository.findByEmail(email).orElseThrow(() -> new ApiException(USER_NOT_FOUND));
+        userRepository
+            .findByEmail(email.getEmail())
+            .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
 
     ConfirmationToken token = confirmationTokenService.create(user);
     try {
@@ -191,7 +212,7 @@ public class UserServiceImpl implements UserService {
       log.info("Password restoring email was sent to user {}", user.getEmail());
     } catch (MessagingException e) {
       log.error("Something went wrong while sending email to user {}", user.getEmail());
-      throw new ApiException(SEND_EMAIL_FAILED);
+      throw new AuthenticationException(SEND_EMAIL_FAILED);
     }
   }
 
@@ -200,16 +221,63 @@ public class UserServiceImpl implements UserService {
     log.info("Request to restore a forgotten password");
     ConfirmationToken confirmationToken =
         confirmationTokenService.getByToken(restorePasswordRequestDto.getConfirmationToken());
-    if (isNotValid(confirmationToken)) {
+    if (confirmationTokenService.isNotValid(confirmationToken)) {
       log.warn("The confirmation token was not found");
-      throw new ApiException(CONFIRM_TOKEN_NOT_FOUND);
+      throw new AuthenticationException(CONFIRM_TOKEN_NOT_FOUND);
     }
     User user = confirmationToken.getUser();
     user.setPassword(passwordEncoder.encode(restorePasswordRequestDto.getNewPassword()));
+    confirmationTokenService.deleteByUserId(confirmationToken.getUser().getId());
     log.info("User {} has successfully changed the password", user.getEmail());
   }
 
-  private boolean isValidRequest(ChangePasswordRequestDto request, User user) {
+  /**
+   * uploads new image or updates existing one, saves the original one 'and' it's thumbnail version
+   * as well
+   *
+   * @param multipartFile file representing the image
+   */
+  @Override
+  public void uploadImage(UUID userId, MultipartFile multipartFile) {
+    checkNotNull(multipartFile, "No image was passed with request!", BAD_REQUEST);
+
+    imageService.uploadUserImagesToS3(userId, multipartFile);
+  }
+
+  /**
+   * downloads image
+   *
+   * @param userId authenticated user that want to download the image
+   * @param ownerId the image owner
+   * @param isOriginal flag that shows if image is original or not (thumbnail)
+   * @return ResponseEntity<byte[]> image as byte array
+   */
+  public ResponseEntity<byte[]> downloadImage(UUID userId, UUID ownerId, boolean isOriginal) {
+    log.info(
+        "User with id: {} trying to download {} image of user with id: {}.",
+        userId,
+        isOriginal ? "original" : "thumbnail",
+        ownerId);
+    byte[] imageAsByteArray = imageService.downloadUserImage(ownerId, isOriginal);
+    String contentType = imageService.getContentTypeOfObject(userId, isOriginal);
+
+    return ResponseEntity.ok()
+        .contentLength(imageAsByteArray.length)
+        //       .header("Content-type", contentType)
+        .header(
+            "Content-disposition",
+            String.format(
+                "attachment; filename=image%s.%s",
+                isOriginal ? "" : "-100X100", contentType.substring(contentType.indexOf("/") + 1)))
+        .body(imageAsByteArray);
+  }
+
+  @Override
+  public void deleteImage(UUID userId) {
+    imageService.deleteUserImagesFromS3(userId);
+  }
+
+  private boolean isValidPassword(ChangePasswordRequestDto request, User user) {
     return passwordEncoder.matches(request.getOldPassword(), user.getPassword());
   }
 
@@ -221,49 +289,18 @@ public class UserServiceImpl implements UserService {
     return userMapper.mapToResponseDto(user);
   }
 
-  private boolean isNotValid(ConfirmationToken confirmationToken) {
-    Optional<User> user = userRepository.findById(confirmationToken.getUser().getId());
-    return user.isEmpty();
-  }
-
-  private AuthResponseDto buildAuthDto(final User user) {
-    log.info("User {} provided credentials to receive an access token", user.getEmail());
-    final String accessToken = generateAccessToken(user);
-    final RefreshToken refreshToken;
-    Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByUserId(user.getId());
-    if (optionalRefreshToken.isEmpty()) {
-      refreshToken = createRefreshToken(user.getId());
-    } else if (optionalRefreshToken.get().getExpiresAt().isBefore(LocalDateTime.now())) {
-      refreshTokenRepository.deleteById(optionalRefreshToken.get().getId());
-      refreshToken = createRefreshToken(user.getId());
-    } else {
-      refreshToken = optionalRefreshToken.get();
+  private AuthResponseDto buildAuthDto(final AppUserDetails appUser) {
+    log.info("User {} provided credentials to receive an access token", appUser.getUsername());
+    User user = userRepository.getReferenceById(appUser.getId());
+    final String accessToken = jwtAuthenticationUtil.generateAccessToken(user);
+    RefreshToken refreshToken = refreshTokenService.findByUserId(user.getId());
+    if (refreshToken == null) {
+      refreshToken = refreshTokenService.create(user.getId());
     }
     log.info("Access token was created for user {}", user.getEmail());
     return AuthResponseDto.builder()
         .accessToken(accessToken)
-        .refreshTokenId(refreshToken.getId().toString())
+        .refreshTokenId(refreshToken.getRefreshToken())
         .build();
-  }
-
-  private RefreshToken createRefreshToken(UUID userId) {
-    final String refreshTokenPlain = UUID.randomUUID().toString();
-    final String refreshTokenEncoded = passwordEncoder.encode(refreshTokenPlain);
-    final RefreshToken refreshToken =
-        RefreshToken.builder()
-            .userId(userId)
-            .refreshToken(refreshTokenEncoded)
-            .expiresAt(
-                LocalDateTime.now()
-                    .plus(jwtConfigProperties.getRefreshToken().getValidity(), ChronoUnit.MONTHS))
-            .build();
-    refreshTokenRepository.save(refreshToken);
-    return refreshToken;
-  }
-
-  private String generateAccessToken(User user) {
-    final Authentication authentication =
-        new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
-    return jwtAuthenticationUtil.generateAccessToken(authentication);
   }
 }

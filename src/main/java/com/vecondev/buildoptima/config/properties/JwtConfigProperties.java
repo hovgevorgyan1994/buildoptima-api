@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.security;
+package com.vecondev.buildoptima.config.properties;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Data;
@@ -29,6 +29,6 @@ public class JwtConfigProperties {
   @Data
   public static class RefreshToken {
 
-    private Integer validity;
+    private Long validity;
   }
 }

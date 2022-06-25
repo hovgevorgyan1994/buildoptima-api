@@ -28,26 +28,27 @@ public class MailService {
   public void sendConfirm(Locale locale, ConfirmationToken token) throws MessagingException {
     String subject = "WELCOME TO OUR WEBSITE";
     String template = "email";
-    send(token, template, subject, locale);
+    String host = "https://" + ip + ":443/user/activate?token=";
+    send(token, template, subject, locale, host);
   }
 
   public void sendVerify(Locale locale, ConfirmationToken token) throws MessagingException {
     String subject = "CREATE NEW PASSWORD";
     String template = "createPwdEmail";
-    send(token, template, subject, locale);
+    String host = "http://localhost:3000/recover?confirmationToken=";
+    send(token, template, subject, locale, host);
   }
 
   @Async
-  protected void send(ConfirmationToken token, String template, String subject, Locale locale)
+  protected void send(
+      ConfirmationToken token, String template, String subject, Locale locale, String host)
       throws MessagingException {
-    String link = "https://" + ip + ":443/user/activate?token=" + token.getToken();
+    String link = host + token.getToken();
     final Context context = new Context(locale);
     context.setVariable("name", token.getUser().getFirstName());
     context.setVariable("surname", token.getUser().getLastName());
     context.setVariable("url", link);
-
     final String htmlContent = templateEngine.process(template, context);
-
     final MimeMessage mimeMessage = javaMailSender.createMimeMessage();
     final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
     message.setSubject(subject);

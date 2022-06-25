@@ -1,6 +1,7 @@
 package com.vecondev.buildoptima.manager;
 
-import com.vecondev.buildoptima.security.JwtConfigProperties;
+import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
+import com.vecondev.buildoptima.exception.KeypairException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 import lombok.Data;
@@ -40,12 +41,12 @@ public class CertificateManager {
             try {
               return keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
             } catch (InvalidKeySpecException e) {
-              throw new RuntimeException("InvalidKeySpecException", e);
+              throw new KeypairException("InvalidKeySpecException", e);
             }
           }));
 
     } catch (Exception e) {
-      throw new RuntimeException("Exception occurred when retrieving public key", e);
+      throw new KeypairException("Exception occurred when retrieving public key", e);
     }
   }
 
@@ -63,11 +64,11 @@ public class CertificateManager {
             try {
               return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
             } catch (InvalidKeySpecException ex) {
-              throw new RuntimeException("InvalidKeySpecException", ex);
+              throw new KeypairException("InvalidKeySpecException", ex);
             }
           }));
     } catch (Exception ex) {
-      throw new RuntimeException("Exception occurred when retrieving private key", ex);
+      throw new KeypairException("Exception occurred when retrieving private key", ex);
     }
   }
 

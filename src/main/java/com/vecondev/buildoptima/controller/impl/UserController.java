@@ -1,7 +1,13 @@
 package com.vecondev.buildoptima.controller.impl;
 
 import com.vecondev.buildoptima.controller.UserApi;
-import com.vecondev.buildoptima.dto.request.*;
+import com.vecondev.buildoptima.dto.request.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.request.AuthRequestDto;
+import com.vecondev.buildoptima.dto.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.request.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
@@ -9,15 +15,27 @@ import com.vecondev.buildoptima.dto.response.UserResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.Locale;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -26,26 +44,28 @@ public class UserController implements UserApi {
   private final UserService userService;
 
   @Override
-  @PostMapping("/registration")
+  @PostMapping("/auth/registration")
   public ResponseEntity<UserResponseDto> register(
       @Valid @RequestBody UserRegistrationRequestDto userRegistrationRequestDto, Locale locale) {
+    log.info("Attempt to register user with email: {}", userRegistrationRequestDto.getEmail());
+
     return new ResponseEntity<>(
         userService.register(userRegistrationRequestDto, locale), HttpStatus.CREATED);
   }
 
   @Override
-  @PutMapping("/activate")
+  @PutMapping("/auth/activate")
   public ResponseEntity<UserResponseDto> activate(@RequestParam("token") String token) {
     return ResponseEntity.ok(userService.activate(token));
   }
 
-  @PostMapping("/login")
+  @PostMapping("/auth/login")
   public ResponseEntity<AuthResponseDto> login(@RequestBody @Valid AuthRequestDto authRequestDto) {
     final AuthResponseDto response = userService.authenticate(authRequestDto);
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/refreshToken")
+  @PostMapping("/auth/refreshToken")
   public ResponseEntity<RefreshTokenResponseDto> refreshToken(
       @RequestBody @Valid RefreshTokenRequestDto refreshTokenRequestDto) {
     final RefreshTokenResponseDto response = userService.refreshToken(refreshTokenRequestDto);
@@ -54,6 +74,7 @@ public class UserController implements UserApi {
 
   @Override
   @PostMapping("/fetch")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<FetchResponseDto> fetchUsers(@RequestBody FetchRequestDto fetchRequest) {
 
     return ResponseEntity.ok(userService.fetchUsers(fetchRequest));
@@ -75,17 +96,58 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @PostMapping("/password/verify")
-  public ResponseEntity<Void> forgotPassword(@RequestParam("email") String email, Locale locale) {
+  @PostMapping("/auth/password/verify")
+  public ResponseEntity<Void> forgotPassword(@RequestBody ConfirmEmailRequestDto email, Locale locale) {
     userService.verifyUserAndSendEmail(email, locale);
     return ResponseEntity.ok().build();
   }
 
   @Override
-  @PutMapping("/password/restore")
+  @PutMapping("/auth/password/restore")
   public ResponseEntity<Void> restorePassword(
       @RequestBody @Valid RestorePasswordRequestDto restorePasswordRequestDto) {
     userService.restorePassword(restorePasswordRequestDto);
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @PostMapping(
+      value = "/{id}/image",
+      consumes = {"multipart/form-data"})
+  @PreAuthorize("#user.id == #id")
+  public ResponseEntity<Void> uploadImage(
+      @PathVariable UUID id,
+      @AuthenticationPrincipal AppUserDetails user,
+      @RequestParam MultipartFile multipartFile) {
+    log.info("Attempt to upload new photo by user with id: {}", id);
+    userService.uploadImage(id, multipartFile);
+
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  @GetMapping(value = "/{id}/image")
+  @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
+  public ResponseEntity<byte[]> downloadOriginalImage(
+      @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
+    return userService.downloadImage(user.getId(), ownerId, true);
+  }
+
+  @Override
+  @GetMapping(value = "/{id}/thumbnail_image")
+  @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
+  public ResponseEntity<byte[]> downloadThumbnailImage(
+      @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
+    return userService.downloadImage(user.getId(), ownerId, false);
+  }
+
+  @Override
+  @DeleteMapping(value = "/{id}/image")
+  @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
+  public ResponseEntity<Void> deleteImage(
+      @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
+    userService.deleteImage(ownerId);
+
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

@@ -23,8 +23,6 @@ public class FetchResponseDto {
 
     private long totalElements;
 
-    private long totalPages;
-
     private boolean last;
 
 

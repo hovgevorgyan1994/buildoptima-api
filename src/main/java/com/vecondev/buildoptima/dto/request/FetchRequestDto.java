@@ -1,23 +1,26 @@
 package com.vecondev.buildoptima.dto.request;
 
+import com.vecondev.buildoptima.filter.model.SortDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.vecondev.buildoptima.constant.FetchConstants.*;
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Fetch Request DTO")
+@Schema(name = "FetchRequest")
 public class FetchRequestDto {
 
-  private int page = DEFAULT_PAGE_NUMBER;
+  private Integer skip;
 
-  private int size = DEFAULT_PAGE_SIZE;
+  private Integer take;
 
-  private String sortBy = DEFAULT_SORT_BY;
+  private List<@Valid SortDto> sort;
 
-  private String sortDir = DEFAULT_SORT_DIRECTION;
+  Map<String, Object> filter;
 }

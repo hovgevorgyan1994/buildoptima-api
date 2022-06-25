@@ -15,5 +15,5 @@ import javax.validation.constraints.NotBlank;
 @Schema(name = "Refresh Token Request DTO")
 public class RefreshTokenRequestDto {
 
-  @NotBlank private String refreshTokenId;
+  @NotBlank private String refreshToken;
 }

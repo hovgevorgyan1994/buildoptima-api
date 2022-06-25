@@ -47,6 +47,8 @@ server:
     key-store-password: 123456
     key-alias: tomcat
     enabled: true
+  servlet:
+    context-path: /api/v1
 
 platform:
   security:
