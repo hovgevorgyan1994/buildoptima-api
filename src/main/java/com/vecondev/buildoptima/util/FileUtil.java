@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -21,10 +22,9 @@ public final class FileUtil {
 
   private static final Integer THUMBNAIL_WIDTH = 100;
   private static final Integer THUMBNAIL_HEIGHT = 100;
-  private static final String IMAGES_PATH = "src/main/resources/images/";
 
   public static File convertMultipartFileToFile(MultipartFile multipartFile) {
-    File file = new File(IMAGES_PATH + multipartFile.getOriginalFilename());
+    File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
 
     try (FileOutputStream fos = new FileOutputStream(file)) {
       fos.write(multipartFile.getBytes());
@@ -75,6 +75,7 @@ public final class FileUtil {
       throw new UnexpectedTypeException();
     }
   }
+
 
   /**
    * deletes file from classpath

@@ -1,0 +1,32 @@
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+config:
+  aws:
+    s3:
+      region: us-east-1
+      url: http://localhost:4566
+      bucketName: ${aws.properties.s3.bucketName}
+      accessKey: localstack
+      secretKey: localstack
+
+aws:
+  properties:
+    s3:
+      bucketName: buildoptima-test

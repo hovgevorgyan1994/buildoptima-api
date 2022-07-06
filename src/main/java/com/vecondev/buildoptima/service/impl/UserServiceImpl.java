@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.service.impl;
 
+
 import com.vecondev.buildoptima.dto.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.ConfirmEmailRequestDto;
@@ -15,12 +16,12 @@ import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.filter.specification.GenericSpecification;
+import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.UserRepository;
-import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.ImageService;
@@ -198,11 +199,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void verifyUserAndSendEmail(ConfirmEmailRequestDto email, Locale locale) {
-    log.info("Request from optional user {} to get a password restoring email", email);
+  public void verifyUserAndSendEmail(ConfirmEmailRequestDto requestDto, Locale locale) {
+    log.info(
+        "Request from optional user {} to get a password restoring email", requestDto.getEmail());
     User user =
         userRepository
-            .findByEmail(email.getEmail())
+            .findByEmail(requestDto.getEmail())
             .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
 
     ConfirmationToken token = confirmationTokenService.create(user);
@@ -231,6 +233,7 @@ public class UserServiceImpl implements UserService {
     log.info("User {} has successfully changed the password", user.getEmail());
   }
 
+
   /**
    * uploads new image or updates existing one, saves the original one 'and' it's thumbnail version
    * as well
@@ -242,7 +245,7 @@ public class UserServiceImpl implements UserService {
     checkNotNull(multipartFile, "No image was passed with request!", BAD_REQUEST);
 
     imageService.uploadUserImagesToS3(userId, multipartFile);
-  }
+    }
 
   /**
    * downloads image
@@ -254,16 +257,16 @@ public class UserServiceImpl implements UserService {
    */
   public ResponseEntity<byte[]> downloadImage(UUID userId, UUID ownerId, boolean isOriginal) {
     log.info(
-        "User with id: {} trying to download {} image of user with id: {}.",
-        userId,
-        isOriginal ? "original" : "thumbnail",
-        ownerId);
+            "User with id: {} trying to download {} image of user with id: {}.",
+            userId,
+            isOriginal ? "original" : "thumbnail",
+            ownerId);
     byte[] imageAsByteArray = imageService.downloadUserImage(ownerId, isOriginal);
     String contentType = imageService.getContentTypeOfObject(userId, isOriginal);
 
     return ResponseEntity.ok()
         .contentLength(imageAsByteArray.length)
-        //       .header("Content-type", contentType)
+        .header("Content-type", contentType)
         .header(
             "Content-disposition",
             String.format(
@@ -300,7 +303,7 @@ public class UserServiceImpl implements UserService {
     log.info("Access token was created for user {}", user.getEmail());
     return AuthResponseDto.builder()
         .accessToken(accessToken)
-        .refreshTokenId(refreshToken.getRefreshToken())
+        .refreshTokenId(refreshToken.getId().toString())
         .build();
   }
 }

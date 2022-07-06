@@ -90,7 +90,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @GetMapping("fetch/{id}")
+  @GetMapping("/fetch/{id}")
   public ResponseEntity<UserResponseDto> getUser(@PathVariable("id") UUID userId) {
     return ResponseEntity.ok(userService.getUser(userId));
   }
@@ -118,7 +118,7 @@ public class UserController implements UserApi {
   public ResponseEntity<Void> uploadImage(
       @PathVariable UUID id,
       @AuthenticationPrincipal AppUserDetails user,
-      @RequestParam MultipartFile multipartFile) {
+      @RequestParam("file") MultipartFile multipartFile) {
     log.info("Attempt to upload new photo by user with id: {}", id);
     userService.uploadImage(id, multipartFile);
 

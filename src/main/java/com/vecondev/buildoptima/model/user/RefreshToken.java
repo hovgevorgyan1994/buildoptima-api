@@ -14,11 +14,11 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(toBuilder = true)
+@Getter
+@Setter
 @Entity
 @Table(name = "refresh_token")
 public class RefreshToken extends AbstractEntity {

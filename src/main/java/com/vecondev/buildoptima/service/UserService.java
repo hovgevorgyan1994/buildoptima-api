@@ -30,7 +30,7 @@ public interface UserService {
 
   RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 
-  FetchResponseDto fetchUsers(FetchRequestDto viewRequest);;
+  FetchResponseDto fetchUsers(FetchRequestDto viewRequest);
 
   void changePassword(ChangePasswordRequestDto request, AppUserDetails userDetails);
 

@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.error.ErrorCode.*;
+import static com.vecondev.buildoptima.error.ErrorCode.CONFIRM_TOKEN_NOT_FOUND;
+
 
 @Slf4j
 @Service

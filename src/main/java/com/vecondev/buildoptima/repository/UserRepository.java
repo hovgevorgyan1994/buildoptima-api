@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.repository;
 
+import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -16,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
   boolean existsByPhone(String phone);
 
   Optional<User> findByEmail(String email);
+
+  Optional<User> findByRole(Role role);
 }

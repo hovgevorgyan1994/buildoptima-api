@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.service.impl;
 
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
@@ -31,7 +31,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class ImageServiceImpl implements ImageService {
 
   private final S3ConfigProperties s3ConfigProperties;
-  private final AmazonS3Client s3Client;
+  private final AmazonS3 amazonS3;
   private final ImageValidator imageValidator;
 
   /**
@@ -45,10 +45,8 @@ public class ImageServiceImpl implements ImageService {
   public void uploadUserImagesToS3(UUID userId, MultipartFile multipartFile) {
     checkExistenceOfBucket();
     imageValidator.validateImage(multipartFile, userId);
-
     File originalFile = convertMultipartFileToFile(multipartFile);
     uploadUserImage(originalFile, userId, true);
-
     File thumbnailFile = resizePhoto(originalFile);
     uploadUserImage(thumbnailFile, userId, false);
 
@@ -68,9 +66,9 @@ public class ImageServiceImpl implements ImageService {
     String imageName = getImagePath(userId, isOriginal);
     chekExistenceOfObject(imageName, userId);
 
-    S3Object object = s3Client.getObject(s3ConfigProperties.getBucketName(), imageName);
+    S3Object object = amazonS3.getObject(s3ConfigProperties.getBucketName(), imageName);
     S3ObjectInputStream inputStream = object.getObjectContent();
-    byte[] objectAsByteArray = null;
+    byte[] objectAsByteArray;
 
     try {
       objectAsByteArray = IOUtils.toByteArray(inputStream);
@@ -86,7 +84,7 @@ public class ImageServiceImpl implements ImageService {
   public String getContentTypeOfObject(UUID userId, boolean isOriginal) {
     String imageName = getImagePath(userId, isOriginal);
 
-    return s3Client
+    return amazonS3
         .getObject(s3ConfigProperties.getBucketName(), imageName)
         .getObjectMetadata()
         .getContentType();
@@ -104,7 +102,7 @@ public class ImageServiceImpl implements ImageService {
   }
 
   private void checkExistenceOfBucket() {
-    if (!s3Client.doesBucketExist(s3ConfigProperties.getBucketName())) {
+    if (!amazonS3.doesBucketExistV2(s3ConfigProperties.getBucketName())) {
       log.error("The 'buildoptima' bucket doesn't exist!");
       throw new UnexpectedTypeException();
     }
@@ -116,7 +114,7 @@ public class ImageServiceImpl implements ImageService {
    * @throws ResourceNotFoundException when no image found by given image name
    */
   private void chekExistenceOfObject(String imageName, UUID userId) {
-    if (!s3Client.doesObjectExist(s3ConfigProperties.getBucketName(), imageName)) {
+    if (!amazonS3.doesObjectExist(s3ConfigProperties.getBucketName(), imageName)) {
       log.warn("There is no image of user with id: {} to remove.", userId);
       throw new ResourceNotFoundException("There isn't image for the given user.", NOT_FOUND);
     }
@@ -131,20 +129,19 @@ public class ImageServiceImpl implements ImageService {
     String imageType =
         imageVersion.substring(imageVersion.indexOf("/") + 1, imageVersion.length() - 1);
 
-    if (s3Client.doesObjectExist(s3ConfigProperties.getBucketName(), imagePath)) {
+    if (amazonS3.doesObjectExist(s3ConfigProperties.getBucketName(), imagePath)) {
       log.info("The old {} image of user: {} is deleted.", imageType, userId);
-      s3Client.deleteObject(s3ConfigProperties.getBucketName(), imagePath);
     }
 
     log.info("The user with id: {} uploaded new {} photo.", userId, imageType);
-    s3Client.putObject(s3ConfigProperties.getBucketName(), imagePath, file);
+    amazonS3.putObject(s3ConfigProperties.getBucketName(), imagePath, file);
   }
 
   private void deleteUserPhoto(UUID userId, boolean isOriginal) {
     String imageName = getImagePath(userId, isOriginal);
     chekExistenceOfObject(imageName, userId);
 
-    s3Client.deleteObject(s3ConfigProperties.getBucketName(), imageName);
+    amazonS3.deleteObject(s3ConfigProperties.getBucketName(), imageName);
     log.info(
         "The user's(id: {}) {} image is successfully deleted.",
         userId, isOriginal ? "original" : "thumbnail");

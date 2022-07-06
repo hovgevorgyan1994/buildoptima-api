@@ -34,8 +34,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             .expiresAt(
                 LocalDateTime.now().plusDays(jwtConfigProperties.getRefreshToken().getValidity()))
             .build();
-    refreshTokenRepository.save(refreshToken);
-    return refreshToken;
+    return refreshTokenRepository.saveAndFlush(refreshToken);
   }
 
   @Override

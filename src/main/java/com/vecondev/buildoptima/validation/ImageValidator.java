@@ -34,7 +34,6 @@ public class ImageValidator {
    * validates if the image provided by user has valid image format or not. e.g. actually can't be
    * represented as image despite its valid extension(.jpg, .png)
    *
-   * @throws IllegalArgumentException
    */
   private void validateImageFormat(BufferedImage image, UUID userId) {
     if (image == null) {
@@ -46,8 +45,7 @@ public class ImageValidator {
   /**
    * validates if the image provided by user has minimum required width and height or not. the width
    * should be greater than or equal 600px, and height 600px
-   *0
-   * @throws IllegalArgumentException
+   *
    */
   private void validateImageWidthAndHeight(BufferedImage image, UUID userId) {
     if (image.getWidth() < 600 || image.getHeight() < 600) {
@@ -60,13 +58,12 @@ public class ImageValidator {
    * validates if the image provided by user has required size (70KB-30MB) or not
    *
    * @param file representing the image
-   * @throws IllegalArgumentException
    */
   private void validateFileSize(MultipartFile file, UUID userId) {
     long size = file.getSize();
     if (size < 71680 || size > 31457280) {
       log.warn("User with id: {} provided image with invalid data size.", userId);
-      throw new IllegalArgumentException("Image's size should be between 3MB and 30MB.");
+      throw new IllegalArgumentException("Image's size should be between 70KB and 30MB.");
     }
   }
 
@@ -74,7 +71,6 @@ public class ImageValidator {
    * validates if the file passed by user has valid extension (.jpg, .jpeg or .png) or not
    *
    * @param file representing the image
-   * @throws IllegalArgumentException
    */
   private void validateFileExtension(MultipartFile file, UUID userID) {
     String extension = file.getContentType();

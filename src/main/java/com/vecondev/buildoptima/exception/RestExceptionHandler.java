@@ -42,7 +42,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         .forEach(fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
     body.put("errors", errors);
 
-    return ResponseEntity.badRequest().body(errors);
+    return ResponseEntity.badRequest().body(body);
   }
 
   @ExceptionHandler({IllegalArgumentException.class})
@@ -86,7 +86,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    */
   public <T extends Exception> ResponseEntity<ApiError> handleAsApiError(T ex, HttpStatus status) {
     ApiError error = new ApiError(status, LocalDateTime.now(), ex.getMessage());
-    return ResponseEntity.badRequest().body(error);
+    return new ResponseEntity<>(error, status);
   }
 
   @ExceptionHandler({WrongFieldException.class})

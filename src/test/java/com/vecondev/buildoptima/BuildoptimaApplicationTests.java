@@ -8,6 +8,7 @@ class BuildoptimaApplicationTests {
 
 	@Test
 	void contextLoads() {
+    BuildoptimaApplication.main(new String[] {});
 	}
 
 }

@@ -1,10 +1,8 @@
-
 spring:
   datasource:
     username: postgres
     password: root
     url: jdbc:postgresql://localhost:5432/buildoptima?currentSchema=buildoptima
-
 
   jpa:
     hibernate:
@@ -15,12 +13,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    url: jdbc:postgresql://localhost:5432/buildoptima
-    user: postgres
-    password: root
-    schemas: buildoptima
-    locations: classpath:db/migration
-    baseline-on-migrate: true
+    locations:
+      - classpath:db/migration
 
   mail:
     host: smtp.gmail.com
@@ -58,9 +52,6 @@ cloud:
       use-default-aws-region-chain: true
     stack:
       auto: false
-    credentials:
-      access-key:
-      secret-key:
 
 platform:
   security:
@@ -93,7 +84,7 @@ logging:
           EC2MetadataUtils: error
 
 host:
-  ip: 3.95.166.178
+  ip: localhost
 
 page:
   skip: 0
