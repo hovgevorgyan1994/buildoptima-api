@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.validation;
 
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.UserRepository;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

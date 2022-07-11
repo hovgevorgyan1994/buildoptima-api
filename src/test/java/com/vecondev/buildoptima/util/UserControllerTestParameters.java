@@ -12,9 +12,9 @@ import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.ConfirmationTokenRepository;
-import com.vecondev.buildoptima.repository.RefreshTokenRepository;
-import com.vecondev.buildoptima.repository.UserRepository;
+import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
+import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

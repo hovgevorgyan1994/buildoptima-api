@@ -4,7 +4,7 @@ import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
 import com.vecondev.buildoptima.error.ErrorCode;
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.model.user.RefreshToken;
-import com.vecondev.buildoptima.repository.RefreshTokenRepository;
+import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

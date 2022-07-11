@@ -2,7 +2,7 @@ package com.vecondev.buildoptima.security.user;
 
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.UserRepository;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.repository;
+package com.vecondev.buildoptima.repository.user;
 
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import org.springframework.data.jpa.repository.JpaRepository;

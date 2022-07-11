@@ -21,7 +21,7 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.UserRepository;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.ImageService;
