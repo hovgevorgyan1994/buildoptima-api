@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.vecondev.buildoptima.error.ErrorCode.INVALID_FILTER_STRUCTURE;
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FILTER_STRUCTURE;
 import static com.vecondev.buildoptima.filter.model.Criteria.*;
 
 @Data

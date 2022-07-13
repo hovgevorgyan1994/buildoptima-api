@@ -1,17 +1,20 @@
 package com.vecondev.buildoptima.model.user;
 
-import com.vecondev.buildoptima.model.AbstractEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +23,12 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "confirmation_token")
-public class ConfirmationToken extends AbstractEntity {
+public class ConfirmationToken {
+
+  @Id
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+  private UUID id;
 
   @Column(name = "token", nullable = false)
   private String token;
@@ -29,4 +37,10 @@ public class ConfirmationToken extends AbstractEntity {
   private LocalDateTime expiresAt;
 
   @ManyToOne private User user;
+
+  public ConfirmationToken(String token, LocalDateTime expiresAt, User user) {
+    this.token = token;
+    this.expiresAt = expiresAt;
+    this.user = user;
+  }
 }

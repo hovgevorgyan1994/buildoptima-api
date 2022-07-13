@@ -1,10 +1,11 @@
 create table news
 (
-    id           uuid primary key,
-    title        varchar(255) not null unique,
-    summary      text         not null unique,
-    published_at timestamp    not null,
-    modified_by  varchar(255) not null
+    id          uuid primary key,
+    title       varchar(255) not null unique,
+    summary     text         not null unique,
+    created_at  timestamp    not null,
+    updated_at  timestamp    not null,
+    modified_by varchar(255) not null
 );
 
 create table news_keywords

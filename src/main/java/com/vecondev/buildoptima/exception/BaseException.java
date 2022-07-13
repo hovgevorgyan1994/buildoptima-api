@@ -1,25 +1,13 @@
 package com.vecondev.buildoptima.exception;
 
-import com.vecondev.buildoptima.error.AuthErrorCode;
-import com.vecondev.buildoptima.error.ErrorCode;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class BaseException extends RuntimeException {
 
-  private final AuthErrorCode errorCode;
+  protected final ErrorCode errorCode;
 
-  private final Integer statusCode;
-
-  private final String message;
-
-  public BaseException(AuthErrorCode errorCode, String message) {
-    this(errorCode, null, message);
-  }
-
-  public BaseException(AuthErrorCode errorCode, Integer statusCode, String message) {
+  public BaseException(ErrorCode errorCode) {
     this.errorCode = errorCode;
-    this.statusCode = statusCode;
-    this.message = message;
   }
 }

@@ -14,8 +14,11 @@ import java.time.LocalDateTime;
 @Schema(name = "Error response")
 public class ApiError {
 
-  @Schema(description = "Http response status", example = "BAD_REQUEST")
+  @Schema(description = "Http response status", example = "CONFLICT")
   private HttpStatus status;
+
+  @Schema(description = "The exception description", example = "USER_ALREADY_EXIST_WITH_EMAIL")
+  private ErrorCode errorCode;
 
   @Schema(description = "Timestamp showing when the error occurred")
   private LocalDateTime timestamp;

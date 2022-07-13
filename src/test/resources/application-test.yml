@@ -17,6 +17,12 @@ spring:
       enabled: true
       path: /h2
 
+  mail:
+    host: 127.0.0.1
+    port: 3025
+    password: buildoptima
+    username: managementstaffing09@gmail.com
+
 config:
   aws:
     s3:
@@ -25,6 +31,11 @@ config:
       bucketName: ${aws.properties.s3.bucketName}
       accessKey: localstack
       secretKey: localstack
+
+  mail:
+    credentials:
+      username: ${spring.mail.username}
+      password: ${spring.mail.password}
 
 aws:
   properties:

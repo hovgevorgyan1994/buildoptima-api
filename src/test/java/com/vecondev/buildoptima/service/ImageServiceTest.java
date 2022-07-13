@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.service;
 
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
-import com.vecondev.buildoptima.service.impl.ImageServiceImpl;
+import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.util.FileUtil;
 import com.vecondev.buildoptima.validation.ImageValidator;
 import org.assertj.core.util.Files;
@@ -16,7 +16,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.validation.UnexpectedTypeException;
 import java.io.File;
 import java.util.UUID;
 
@@ -31,10 +30,11 @@ class ImageServiceTest {
 
   private static final String ORIGINAL_IMAGES_PATH = "user/original/";
   private static final String THUMBNAIL_IMAGES_PATH = "user/thumbnail/";
-  @InjectMocks private ImageServiceImpl imageService;
+  @InjectMocks private ImageService.ImageServiceImpl imageService;
   @Mock private ImageValidator imageValidator;
-  @Mock private AmazonS3Client s3Client;
+  @Mock private AmazonS3 s3Client;
   @Mock private S3ConfigProperties s3ConfigProperties;
+
 
   @Test
   void successfulImageUploading() {
@@ -45,7 +45,7 @@ class ImageServiceTest {
           .when(() -> FileUtil.convertMultipartFileToFile(any()))
           .thenReturn(Files.newTemporaryFile());
       fileUtil.when(() -> FileUtil.resizePhoto(any())).thenReturn(Files.newTemporaryFile());
-      when(s3Client.doesBucketExist(any())).thenReturn(true);
+      when(s3Client.doesBucketExistV2(any())).thenReturn(true);
       when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
       when(s3ConfigProperties.getOriginalImagePath()).thenReturn(ORIGINAL_IMAGES_PATH);
       when(s3ConfigProperties.getThumbnailImagePath()).thenReturn(THUMBNAIL_IMAGES_PATH);
@@ -65,7 +65,7 @@ class ImageServiceTest {
           .when(() -> FileUtil.convertMultipartFileToFile(any()))
           .thenReturn(Files.newTemporaryFile());
       fileUtil.when(() -> FileUtil.resizePhoto(any())).thenReturn(Files.newTemporaryFile());
-      when(s3Client.doesBucketExist(any())).thenReturn(true);
+      when(s3Client.doesBucketExistV2(any())).thenReturn(true);
       when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
       when(s3ConfigProperties.getOriginalImagePath()).thenReturn(ORIGINAL_IMAGES_PATH);
       when(s3ConfigProperties.getThumbnailImagePath()).thenReturn(THUMBNAIL_IMAGES_PATH);
@@ -80,10 +80,10 @@ class ImageServiceTest {
   void failedImageUploading() {
     UUID userId = UUID.randomUUID();
 
-    when(s3Client.doesBucketExist(any())).thenReturn(false);
+    when(s3Client.doesBucketExistV2(any())).thenReturn(false);
 
     assertThrows(
-        UnexpectedTypeException.class, () -> imageService.uploadUserImagesToS3(userId, null));
+        ResourceNotFoundException.class, () -> imageService.uploadUserImagesToS3(userId, null));
   }
 
   @Test

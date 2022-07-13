@@ -7,7 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
-import com.vecondev.buildoptima.error.ErrorCode;
+import com.vecondev.buildoptima.exception.ErrorCode;
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.model.user.User;
 import lombok.RequiredArgsConstructor;

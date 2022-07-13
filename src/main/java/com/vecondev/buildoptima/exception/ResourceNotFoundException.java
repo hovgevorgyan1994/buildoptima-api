@@ -1,15 +1,11 @@
 package com.vecondev.buildoptima.exception;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
-public class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends BaseException {
 
-  private final HttpStatus status;
-
-  public ResourceNotFoundException(String message, HttpStatus status) {
-    super(message);
-    this.status = status;
+  public ResourceNotFoundException(ErrorCode errorCode) {
+    super(errorCode);
   }
 }

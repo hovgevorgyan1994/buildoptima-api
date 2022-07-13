@@ -27,6 +27,7 @@
 		<h2.version>2.1.214</h2.version>
 		<mockito-inline.version>3.8.0</mockito-inline.version>
 		<imgscalr-lib.version>4.2</imgscalr-lib.version>
+		<greenmail.version>1.6.9</greenmail.version>
 	</properties>
 	<dependencies>
 
@@ -140,6 +141,12 @@
 			<artifactId>mockito-inline</artifactId>
 			<version>${mockito-inline.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail-junit5</artifactId>
+			<version>${greenmail.version}</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

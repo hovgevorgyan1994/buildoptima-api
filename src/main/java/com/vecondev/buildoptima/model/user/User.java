@@ -7,16 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import java.time.Instant;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -45,14 +41,6 @@ public class User extends AbstractEntity {
   @Enumerated(EnumType.STRING)
   @Column(name = "role")
   private Role role;
-
-  @CreationTimestamp
-  @Column(name = "creation_date")
-  private Instant creationDate;
-
-  @UpdateTimestamp
-  @Column(name = "update_date")
-  private Instant updateDate;
 
   @Column(name = "enabled")
   @ColumnDefault("false")

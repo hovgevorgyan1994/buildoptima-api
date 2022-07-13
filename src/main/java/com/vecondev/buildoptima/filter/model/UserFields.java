@@ -19,7 +19,8 @@ public class UserFields {
   private static final String EMAIL = "email";
   private static final String PHONE = "phone";
   private static final String ROLE = "role";
-  private static final String CREATION_DATE = "creationDate";
+  private static final String CREATED_AT = "createdAt";
+  private static final String UPDATED_AT = "updatedAt";
 
   static {
     userPageSortingFieldsMap =
@@ -34,7 +35,9 @@ public class UserFields {
             new FieldDefinition<User, String>(PHONE, STRING, PHONE),
             ROLE,
             new FieldDefinition<>(ROLE, STRING, ROLE, new RoleConverter()),
-            CREATION_DATE,
-            new FieldDefinition<>(CREATION_DATE, DATETIME, CREATION_DATE, new InstantConverter()));
+            CREATED_AT,
+            new FieldDefinition<>(CREATED_AT, DATETIME, CREATED_AT, new InstantConverter()),
+            UPDATED_AT,
+            new FieldDefinition<>(UPDATED_AT, DATETIME, UPDATED_AT, new InstantConverter()));
   }
 }

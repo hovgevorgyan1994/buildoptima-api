@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.BAD_CREDENTIALS;
+
 @Service
 @RequiredArgsConstructor
 public class AppUserDetailsService implements UserDetailsService {
@@ -17,7 +19,10 @@ public class AppUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = repository.findByEmail(username).orElseThrow(UserNotFoundException::new);
+    User user =
+        repository
+            .findByEmail(username)
+            .orElseThrow(() -> new UserNotFoundException(BAD_CREDENTIALS));
 
     return new AppUserDetails(user);
   }

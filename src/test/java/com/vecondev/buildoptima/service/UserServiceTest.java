@@ -1,14 +1,14 @@
 package com.vecondev.buildoptima.service;
 
-import com.vecondev.buildoptima.dto.request.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.RefreshTokenRequestDto;
-import com.vecondev.buildoptima.dto.request.RestorePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
-import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
-import com.vecondev.buildoptima.dto.response.UserResponseDto;
+import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.response.user.RefreshTokenResponseDto;
+import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
@@ -16,15 +16,15 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
-import com.vecondev.buildoptima.service.impl.ConfirmationTokenServiceImpl;
-import com.vecondev.buildoptima.service.impl.ImageServiceImpl;
-import com.vecondev.buildoptima.service.impl.MailService;
-import com.vecondev.buildoptima.service.impl.RefreshTokenServiceImpl;
-import com.vecondev.buildoptima.service.impl.UserServiceImpl;
+import com.vecondev.buildoptima.service.image.ImageService;
+import com.vecondev.buildoptima.service.user.impl.ConfirmationTokenServiceImpl;
+import com.vecondev.buildoptima.service.user.impl.MailService;
+import com.vecondev.buildoptima.service.user.impl.RefreshTokenServiceImpl;
+import com.vecondev.buildoptima.service.user.impl.UserServiceImpl;
 import com.vecondev.buildoptima.util.RestPreconditions;
-import com.vecondev.buildoptima.util.UserServiceTestParameters;
 import com.vecondev.buildoptima.validation.UserValidator;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ class UserServiceTest {
 
   @InjectMocks private UserServiceImpl userService;
   @Mock private MailService mailService;
-  @Mock private ImageServiceImpl imageService;
+  @Mock private ImageService.ImageServiceImpl imageService;
   @Mock private ConfirmationTokenServiceImpl confirmationTokenService;
   @Mock private RefreshTokenServiceImpl refreshTokenService;
   @Mock private UserValidator userValidator;
@@ -106,7 +106,7 @@ class UserServiceTest {
 
     UserResponseDto registrationResponseDto = userService.register(requestDto, new Locale("en"));
     assertEquals(requestDto.getEmail(), registrationResponseDto.getEmail());
-    assertEquals(savedUser.getCreationDate(), registrationResponseDto.getCreationDate());
+    assertEquals(savedUser.getCreatedAt(), registrationResponseDto.getCreatedAt());
     verify(mailService).sendConfirm(any(), any());
     verify(confirmationTokenService).create(savedUser);
     verify(userValidator).validateUserRegistration(user);
@@ -294,7 +294,7 @@ class UserServiceTest {
 
     UserResponseDto responseDto = userService.getUser(user.getId());
     assertEquals(user.getId(), responseDto.getId());
-    assertEquals(user.getUpdateDate(), responseDto.getUpdateDate());
+    assertEquals(user.getUpdatedAt(), responseDto.getUpdatedAt());
   }
 
   @Test
@@ -372,8 +372,8 @@ class UserServiceTest {
     try (MockedStatic<RestPreconditions> restPreconditions =
                  Mockito.mockStatic(RestPreconditions.class)) {
       restPreconditions
-              .when(() -> RestPreconditions.checkNotNull(any(), any(), any()))
-              .thenAnswer((Answer<Void>) invocation -> null);
+          .when(() -> RestPreconditions.checkNotNull(any(), any()))
+          .thenAnswer((Answer<Void>) invocation -> null);
       userService.uploadImage(userId, null);
     }
 

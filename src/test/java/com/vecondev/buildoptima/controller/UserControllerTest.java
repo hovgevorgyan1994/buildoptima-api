@@ -2,33 +2,40 @@ package com.vecondev.buildoptima.controller;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.icegreen.greenmail.configuration.GreenMailConfiguration;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.ServerSetupTest;
+import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
-import com.vecondev.buildoptima.dto.request.AuthRequestDto;
-import com.vecondev.buildoptima.dto.request.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.RefreshTokenRequestDto;
-import com.vecondev.buildoptima.dto.request.RestorePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
+import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.util.UserControllerTestParameters;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,6 +43,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -43,6 +51,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.USER_NOT_FOUND;
 import static com.vecondev.buildoptima.model.user.Role.ADMIN;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
@@ -65,11 +74,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
+@Import(AmazonS3Config.class)
 class UserControllerTest {
+
+  @RegisterExtension
+  private static GreenMailExtension greenMail =
+      new GreenMailExtension(ServerSetupTest.SMTP)
+          .withConfiguration(
+              GreenMailConfiguration.aConfig()
+                  .withUser("managementstaffing09@gmail.com", "buildoptima"))
+          .withPerMethodLifecycle(true);
 
   @Autowired private MockMvc mvc;
   @Autowired private AmazonS3 amazonS3;
@@ -82,6 +101,7 @@ class UserControllerTest {
   @Autowired private PasswordEncoder encoder;
   @Autowired private JwtConfigProperties jwtConfigProperties;
   @Autowired private S3ConfigProperties s3ConfigProperties;
+  ;
 
   private UserControllerTestParameters userControllerTestParameters;
 
@@ -110,6 +130,7 @@ class UserControllerTest {
   void successfulRegistration() throws Exception {
     UserRegistrationRequestDto requestDto = userControllerTestParameters
             .getUserToSave();
+
     mvc.perform(
             post("/user/auth/registration")
                 .content(asJsonString(requestDto))
@@ -117,6 +138,10 @@ class UserControllerTest {
                 .accept(APPLICATION_JSON_VALUE))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.firstName").exists());
+
+    MimeMessage[] messages = greenMail.getReceivedMessages();
+    assertEquals(1, messages.length);
+    assertEquals(requestDto.getEmail(), messages[0].getAllRecipients()[0].toString());
   }
 
   @Test
@@ -160,7 +185,11 @@ class UserControllerTest {
         .andExpect(jsonPath("$.id").value(userId.toString()));
 
     assertEquals(
-        true, userRepository.findById(userId).orElseThrow(UserNotFoundException::new).getEnabled());
+        true,
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND))
+            .getEnabled());
   }
 
   @Test
@@ -349,6 +378,10 @@ class UserControllerTest {
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON))
         .andExpect(status().isOk());
+
+    MimeMessage[] messages = greenMail.getReceivedMessages();
+    assertEquals(1, messages.length);
+    assertEquals(user.getEmail(), messages[0].getAllRecipients()[0].toString());
   }
 
   @Test
@@ -389,7 +422,6 @@ class UserControllerTest {
         encoder.matches(
             userWithoutEncodedPassword.getPassword() + ".a",
             userControllerTestParameters
-
                 .getSavedUserWithId(confirmationToken.getUser().getId())
                 .getPassword()));
   }
@@ -457,7 +489,7 @@ class UserControllerTest {
                           + tokenManager.generateAccessToken(user))
                   .contentType(MULTIPART_FORM_DATA)
                   .accept("*/*"))
-          .andExpect(status().isBadRequest());
+          .andExpect(status().isPreconditionFailed());
 
       assertFalse(
           amazonS3.doesObjectExist(

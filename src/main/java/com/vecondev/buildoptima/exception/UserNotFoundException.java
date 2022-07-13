@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.exception;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends BaseException {
 
-  public UserNotFoundException() {
-    super("There is no user registered with such id!");
+  public UserNotFoundException(ErrorCode errorCode) {
+    super(errorCode);
   }
 }

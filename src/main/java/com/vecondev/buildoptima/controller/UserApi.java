@@ -1,16 +1,16 @@
 package com.vecondev.buildoptima.controller;
 
-import com.vecondev.buildoptima.dto.request.AuthRequestDto;
-import com.vecondev.buildoptima.dto.request.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.RefreshTokenRequestDto;
-import com.vecondev.buildoptima.dto.request.RestorePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.AuthResponseDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
-import com.vecondev.buildoptima.dto.response.RefreshTokenResponseDto;
-import com.vecondev.buildoptima.dto.response.UserResponseDto;
+import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
+import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.response.user.AuthResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.response.user.RefreshTokenResponseDto;
+import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
@@ -317,21 +317,21 @@ public interface UserApi {
             responseCode = "204",
             description = "The image is successfully uploaded/updated"),
         @ApiResponse(
-            responseCode = "400",
-            description =
-                "Image is not provided or the provided image  doesn't fit the requirements",
-            content =
-                @Content(
-                    mediaType = APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class))),
-        @ApiResponse(
             responseCode = "403",
             description =
                 "The access token is either not provided or invalid, or authenticated user hasn't permission to perform this action",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class)))
+                    schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(
+            responseCode = "412",
+            description =
+                "Image is not provided or the provided image  doesn't fit the requirements",
+            content =
+                @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class))),
       })
   ResponseEntity<Void> uploadImage(
       @Parameter(description = "The user's id whom photo should be uploaded") UUID id,

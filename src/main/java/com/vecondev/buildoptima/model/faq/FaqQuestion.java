@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +15,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -40,14 +37,7 @@ public class FaqQuestion extends AbstractEntity {
 
   @ManyToOne private FaqCategory category;
 
-  @ManyToOne
-  private User updatedBy;
+  @ManyToOne private User createdBy;
 
-  @CreationTimestamp
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @UpdateTimestamp
-  @Column(name = "updated_at")
-  private Instant updatedAt;
+  @ManyToOne private User updatedBy;
 }

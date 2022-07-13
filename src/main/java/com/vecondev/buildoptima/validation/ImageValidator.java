@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.validation;
 
+import com.vecondev.buildoptima.exception.InvalidImageException;
 import com.vecondev.buildoptima.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FILE_SIZE;
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_IMAGE_EXTENSION;
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_IMAGE_FORMAT;
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_IMAGE_SIZE;
 import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
 
 @Slf4j
@@ -38,7 +43,7 @@ public class ImageValidator {
   private void validateImageFormat(BufferedImage image, UUID userId) {
     if (image == null) {
       log.warn("User with id: {} provided image with wrong format.", userId);
-      throw new IllegalArgumentException("Can't upload the image.");
+      throw new InvalidImageException(INVALID_IMAGE_FORMAT);
     }
   }
 
@@ -50,7 +55,7 @@ public class ImageValidator {
   private void validateImageWidthAndHeight(BufferedImage image, UUID userId) {
     if (image.getWidth() < 600 || image.getHeight() < 600) {
       log.warn("User with id: {} provided image with smaller size than it's required.", userId);
-      throw new IllegalArgumentException("Image has smaller size than it's required (600x600).");
+      throw new InvalidImageException(INVALID_IMAGE_SIZE);
     }
   }
 
@@ -63,7 +68,7 @@ public class ImageValidator {
     long size = file.getSize();
     if (size < 71680 || size > 31457280) {
       log.warn("User with id: {} provided image with invalid data size.", userId);
-      throw new IllegalArgumentException("Image's size should be between 70KB and 30MB.");
+      throw new InvalidImageException(INVALID_FILE_SIZE);
     }
   }
 
@@ -78,8 +83,7 @@ public class ImageValidator {
     if (!JPEG_CONTENT_TYPE.equals(extension) && !PNG_CONTENT_TYPE.equals(extension)) {
       log.info(extension);
       log.warn("The image uploaded by user with id: {} has wrong extension.", userID);
-      throw new IllegalArgumentException(
-          "The extension of the image should be either 'jpg/jpeg' or 'png'.");
+      throw new InvalidImageException(INVALID_IMAGE_EXTENSION);
     }
   }
 }

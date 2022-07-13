@@ -1,15 +1,17 @@
 package com.vecondev.buildoptima.model.user;
 
 
-import com.vecondev.buildoptima.model.AbstractEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,14 +23,25 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "refresh_token")
-public class RefreshToken extends AbstractEntity {
+public class RefreshToken {
 
-    @Column(name = "refresh_token")
-    private String refreshToken;
+  @Id
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+  private UUID id;
 
-    @Column(name = "user_id")
-    private UUID userId;
+  @Column(name = "refresh_token")
+  private String refreshToken;
 
-    @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+  @Column(name = "user_id")
+  private UUID userId;
+
+  @Column(name = "expires_at")
+  private LocalDateTime expiresAt;
+
+  public RefreshToken(String refreshToken, UUID userId, LocalDateTime expiresAt) {
+    this.refreshToken = refreshToken;
+    this.userId = userId;
+    this.expiresAt = expiresAt;
+  }
 }

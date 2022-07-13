@@ -3,6 +3,7 @@ version: '3.8'
 services:
   localstack:
     image: localstack/localstack:0.10.6
+    container_name: localstack
     ports:
       - "4566:4566"
       - "8082:8082"
@@ -14,5 +15,3 @@ services:
       - AWS_DEFAULT_REGION=eu-west-1
       - AWS_ACCESS_KEY_ID=localstack
       - AWS_SECRET_ACCESS_KEY=localstack
-    volumes:
-      - .:/docker-entrypoint-initaws.d

@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.util;
 
+import com.vecondev.buildoptima.exception.FailedFileConvertionException;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
@@ -14,6 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.FAILED_IMAGE_CONVERTION;
+import static com.vecondev.buildoptima.exception.ErrorCode.FAILED_MULTIPART_CONVERTION;
 import static lombok.AccessLevel.PRIVATE;
 
 @Slf4j
@@ -30,7 +33,7 @@ public final class FileUtil {
       fos.write(multipartFile.getBytes());
     } catch (IOException e) {
       log.error("Error occurred while converting multipart file to file.");
-      throw new UnexpectedTypeException();
+      throw new FailedFileConvertionException(FAILED_MULTIPART_CONVERTION);
     }
 
     return file;
@@ -63,7 +66,7 @@ public final class FileUtil {
       return thumbnailFile;
     } catch (IOException ex) {
       log.error("Failed to resize the original photo to get thumbnail version.");
-      throw new UnexpectedTypeException();
+      throw new FailedFileConvertionException(FAILED_IMAGE_CONVERTION);
     }
   }
 
