@@ -40,7 +40,7 @@ public interface UserService {
 
   void restorePassword(RestorePasswordRequestDto restorePasswordRequestDto);
 
-  void uploadImage(UUID userId, MultipartFile multipartFile);
+  void uploadImage(UUID userId, MultipartFile multipartFile,AppUserDetails userDetails);
 
   ResponseEntity<byte[]> downloadImage(UUID userId, UUID ownerId, boolean isOriginal);
 

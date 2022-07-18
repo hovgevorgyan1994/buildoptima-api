@@ -23,7 +23,7 @@ public class FaqCategoryServiceTestParameters {
     User user = getUserById(userId);
     FaqCategory faqCategory =
         new FaqCategory(
-            getFaqCategoryRequestDto().getName(), user, user, Instant.now(), Instant.now());
+            getFaqCategoryRequestDto().getName(), user, user);
     faqCategory.setId(UUID.fromString("57ebd52d-6924-4b33-9e48-ce2c68eb9f28"));
 
     return faqCategory;

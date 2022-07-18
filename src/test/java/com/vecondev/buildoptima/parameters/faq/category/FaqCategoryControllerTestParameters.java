@@ -50,9 +50,7 @@ public class FaqCategoryControllerTestParameters {
             userRepository.findAll().stream()
                 .filter(user -> user.getRole() == MODERATOR)
                 .findFirst()
-                .orElse(null),
-            Instant.now(),
-            Instant.now()),
+                .orElse(null)),
         new FaqCategory(
             "Registration",
             userRepository.findAll().stream()
@@ -62,9 +60,7 @@ public class FaqCategoryControllerTestParameters {
             userRepository.findAll().stream()
                 .filter(user -> user.getRole() == MODERATOR)
                 .findFirst()
-                .orElse(null),
-            Instant.now(),
-            Instant.now()));
+                .orElse(null)));
     }
 
     public FaqCategoryRequestDto getFaqCategoryToSave() {

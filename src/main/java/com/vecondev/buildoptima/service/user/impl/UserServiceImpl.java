@@ -1,15 +1,14 @@
 package com.vecondev.buildoptima.service.user.impl;
 
-
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.user.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.response.user.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.user.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
@@ -24,8 +23,8 @@ import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
-import com.vecondev.buildoptima.service.user.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.image.ImageService;
+import com.vecondev.buildoptima.service.user.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.user.RefreshTokenService;
 import com.vecondev.buildoptima.service.user.UserService;
 import com.vecondev.buildoptima.validation.UserValidator;
@@ -234,7 +233,6 @@ public class UserServiceImpl implements UserService {
     log.info("User {} has successfully changed the password", user.getEmail());
   }
 
-
   /**
    * uploads new image or updates existing one, saves the original one 'and' it's thumbnail version
    * as well
@@ -242,11 +240,15 @@ public class UserServiceImpl implements UserService {
    * @param multipartFile file representing the image
    */
   @Override
-  public void uploadImage(UUID userId, MultipartFile multipartFile) {
+  public void uploadImage(UUID userId, MultipartFile multipartFile, AppUserDetails userDetails) {
     checkNotNull(multipartFile, IMAGE_IS_REQUIRED);
-
-    imageService.uploadUserImagesToS3(userId, multipartFile);
-    }
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
+    String className = user.getClass().getSimpleName().toLowerCase();
+    imageService.uploadImagesToS3(className, userId, multipartFile, userDetails.getId());
+  }
 
   /**
    * downloads image
@@ -258,12 +260,17 @@ public class UserServiceImpl implements UserService {
    */
   public ResponseEntity<byte[]> downloadImage(UUID userId, UUID ownerId, boolean isOriginal) {
     log.info(
-            "User with id: {} trying to download {} image of user with id: {}.",
-            userId,
-            isOriginal ? "original" : "thumbnail",
-            ownerId);
-    byte[] imageAsByteArray = imageService.downloadUserImage(ownerId, isOriginal);
-    String contentType = imageService.getContentTypeOfObject(userId, isOriginal);
+        "User with id: {} trying to download {} image of user with id: {}.",
+        userId,
+        isOriginal ? "original" : "thumbnail",
+        ownerId);
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
+    String className = user.getClass().getSimpleName().toLowerCase();
+    byte[] imageAsByteArray = imageService.downloadImage(className, ownerId, isOriginal);
+    String contentType = imageService.getContentTypeOfObject(className, userId, isOriginal);
 
     return ResponseEntity.ok()
         .contentLength(imageAsByteArray.length)
@@ -278,7 +285,12 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void deleteImage(UUID userId) {
-    imageService.deleteUserImagesFromS3(userId);
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
+    String className = user.getClass().getSimpleName().toLowerCase();
+    imageService.deleteImagesFromS3(className, userId);
   }
 
   public User getUserById(UUID userId) {

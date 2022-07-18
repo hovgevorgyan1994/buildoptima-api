@@ -2,7 +2,7 @@ package com.vecondev.buildoptima.filter.converter;
 
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.WrongFieldException;
-import com.vecondev.buildoptima.filter.ConfigProperties;
+import com.vecondev.buildoptima.config.properties.FilterConfigProperties;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -20,7 +20,7 @@ import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_PAGEABLE;
 @RequiredArgsConstructor
 public class PageableConverter implements Converter<FetchRequestDto, Pageable> {
 
-  private final ConfigProperties configProperties;
+  private final FilterConfigProperties configProperties;
 
   @Nullable
   @Override

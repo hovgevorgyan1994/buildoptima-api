@@ -1,15 +1,15 @@
 package com.vecondev.buildoptima.controller.impl;
 
 import com.vecondev.buildoptima.controller.UserApi;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.user.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.response.user.AuthResponseDto;
 import com.vecondev.buildoptima.dto.response.user.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
@@ -97,7 +97,8 @@ public class UserController implements UserApi {
 
   @Override
   @PostMapping("/auth/password/verify")
-  public ResponseEntity<Void> forgotPassword(@RequestBody ConfirmEmailRequestDto email, Locale locale) {
+  public ResponseEntity<Void> forgotPassword(
+      @RequestBody ConfirmEmailRequestDto email, Locale locale) {
     userService.verifyUserAndSendEmail(email, locale);
     return ResponseEntity.ok().build();
   }
@@ -117,10 +118,10 @@ public class UserController implements UserApi {
   @PreAuthorize("#user.id == #id")
   public ResponseEntity<Void> uploadImage(
       @PathVariable UUID id,
-      @AuthenticationPrincipal AppUserDetails user,
+      @AuthenticationPrincipal AppUserDetails userDetails,
       @RequestParam("file") MultipartFile multipartFile) {
     log.info("Attempt to upload new photo by user with id: {}", id);
-    userService.uploadImage(id, multipartFile);
+    userService.uploadImage(id, multipartFile, userDetails);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }

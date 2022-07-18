@@ -108,3 +108,23 @@ object. The predicate object has the following structure
 - `email`
 - `creationDate`
 
+
+### News Entity
+
+#### Filtering Fields
+
+| Field         | Type     | Operations             | Notes                                                                      |
+|:--------------|:---------|:-----------------------|:---------------------------------------------------------------------------|
+| `title`       | String   | `eq`, `like`           | Must be provided with `value` field                                        |
+| `category`    | String   | `eq`                   | Must be provided with `value` field                                        |
+| `publishedAt` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
+| `modifiedBy`  | String   | `eq`, `like`           | Must be provided with `value` field                                        |
+
+
+#### Sorting Fields
+
+- `title`
+- `category`
+- `publishedAt`
+- `modifiedBy`
+

@@ -3,12 +3,10 @@ package com.vecondev.buildoptima.exception;
 import lombok.Getter;
 
 @Getter
-public class AuthenticationException extends RuntimeException {
-
-  private final ErrorCode errorCode;
+public class AuthenticationException extends BaseException {
 
   public AuthenticationException(ErrorCode errorCode) {
-    this.errorCode = errorCode;
+    super(errorCode);
   }
 
 }

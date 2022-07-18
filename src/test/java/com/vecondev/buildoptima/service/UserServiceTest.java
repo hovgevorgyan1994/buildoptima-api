@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.service;
 
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
@@ -68,7 +68,7 @@ class UserServiceTest {
 
   @InjectMocks private UserServiceImpl userService;
   @Mock private MailService mailService;
-  @Mock private ImageService.ImageServiceImpl imageService;
+  @Mock private ImageService imageService;
   @Mock private ConfirmationTokenServiceImpl confirmationTokenService;
   @Mock private RefreshTokenServiceImpl refreshTokenService;
   @Mock private UserValidator userValidator;
@@ -337,7 +337,8 @@ class UserServiceTest {
   void successfulPasswordRestoring() {
     UUID token = UUID.randomUUID();
     User savedUser = userServiceTestParameters.getSavedUser();
-    RestorePasswordRequestDto requestDto = new RestorePasswordRequestDto(token.toString(), "newPassword");
+    RestorePasswordRequestDto requestDto =
+        new RestorePasswordRequestDto(token.toString(), "newPassword");
     ConfirmationToken confirmationToken =
         userServiceTestParameters.getSavedConfirmationToken(savedUser, token);
 
@@ -351,10 +352,11 @@ class UserServiceTest {
   }
 
   @Test
-  void failedRestoringPassword(){
+  void failedRestoringPassword() {
     UUID token = UUID.randomUUID();
     User savedUser = userServiceTestParameters.getSavedUser();
-    RestorePasswordRequestDto requestDto = new RestorePasswordRequestDto(token.toString(), "newPassword");
+    RestorePasswordRequestDto requestDto =
+        new RestorePasswordRequestDto(token.toString(), "newPassword");
     ConfirmationToken confirmationToken =
         userServiceTestParameters.getSavedConfirmationToken(savedUser, token);
 
@@ -362,22 +364,22 @@ class UserServiceTest {
         .thenReturn(confirmationToken);
     when(confirmationTokenService.isNotValid(confirmationToken)).thenReturn(true);
 
-    assertThrows(AuthenticationException.class,() -> userService.restorePassword(requestDto));
+    assertThrows(AuthenticationException.class, () -> userService.restorePassword(requestDto));
   }
 
   @Test
   void successfulImageUploading() {
     UUID userId = UUID.randomUUID();
-
+    User savedUser = userServiceTestParameters.getSavedUser();
     try (MockedStatic<RestPreconditions> restPreconditions =
-                 Mockito.mockStatic(RestPreconditions.class)) {
+        Mockito.mockStatic(RestPreconditions.class)) {
       restPreconditions
           .when(() -> RestPreconditions.checkNotNull(any(), any()))
           .thenAnswer((Answer<Void>) invocation -> null);
-      userService.uploadImage(userId, null);
+      userService.uploadImage(userId, null, new AppUserDetails(savedUser));
     }
 
-    verify(imageService).uploadUserImagesToS3(userId, null);
+    verify(imageService).uploadImagesToS3(savedUser.getClass().getSimpleName().toLowerCase(), userId, null,UUID.randomUUID());
   }
 
   @Test
@@ -387,12 +389,13 @@ class UserServiceTest {
     String contentType = IMAGE_JPEG_VALUE;
     boolean isOriginal = true;
 
-    when(imageService.downloadUserImage(ownerId, isOriginal)).thenReturn(new byte[] {});
-    when(imageService.getContentTypeOfObject(userId, isOriginal)).thenReturn(contentType);
+    when(imageService.downloadImage(any(), ownerId, isOriginal)).thenReturn(new byte[] {});
+    when(imageService.getContentTypeOfObject(any(), userId, isOriginal)).thenReturn(contentType);
     ResponseEntity<byte[]> response = userService.downloadImage(userId, ownerId, isOriginal);
 
-    assertEquals(contentType, Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
-    verify(imageService).downloadUserImage(ownerId, isOriginal);
+    assertEquals(
+        contentType, Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
+    verify(imageService).downloadImage(any(), ownerId, isOriginal);
   }
 
   @Test
@@ -401,6 +404,6 @@ class UserServiceTest {
 
     userService.deleteImage(userId);
 
-    verify(imageService).deleteUserImagesFromS3(userId);
+    verify(imageService).deleteImagesFromS3(any(), userId);
   }
 }

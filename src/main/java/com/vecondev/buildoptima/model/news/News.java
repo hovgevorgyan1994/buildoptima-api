@@ -1,21 +1,25 @@
 package com.vecondev.buildoptima.model.news;
 
 import com.vecondev.buildoptima.model.AbstractEntity;
+import com.vecondev.buildoptima.model.Status;
+import com.vecondev.buildoptima.model.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Set;
 
-@Data
-@Builder
+@Getter
+@Setter
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -28,11 +32,21 @@ public class News extends AbstractEntity {
   @Column(name = "summary")
   private String summary;
 
-  @ElementCollection(targetClass = String.class)
-  @CollectionTable(name = "news_keywords", joinColumns = @JoinColumn(name = "news_id"))
-  @Column(name = "keyword")
-  private Set<String> keywords;
+  @Column(name = "description")
+  private String description;
 
-  @Column(name = "modified_by")
-  private String modifiedBy;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status")
+  private Status status;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "news_category")
+  private NewsCategory category;
+
+  @Column(name = "keywords")
+  private String keywords;
+
+  @ManyToOne private User createdBy;
+
+  @ManyToOne private User updatedBy;
 }

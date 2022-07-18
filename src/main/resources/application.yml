@@ -71,8 +71,8 @@ aws:
   properties:
     s3:
       bucketName: buildoptima
-      originalImagePath: user/original/
-      thumbnailImagePath: user/thumbnail/
+
+
 
 logging:
   level:

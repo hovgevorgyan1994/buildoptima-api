@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
 public class AbstractEntity implements Serializable {
@@ -36,9 +38,4 @@ public class AbstractEntity implements Serializable {
   @UpdateTimestamp
   @Column(name = "updated_at")
   protected Instant updatedAt;
-
-  public AbstractEntity(Instant createdAt, Instant updatedAt) {
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-  }
 }

@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.filter;
+package com.vecondev.buildoptima.config.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @Component
 @Validated
 @ConfigurationProperties(prefix = "page")
-public class ConfigProperties {
+public class FilterConfigProperties {
 
   @NotNull private int skip;
   @NotNull private int take;

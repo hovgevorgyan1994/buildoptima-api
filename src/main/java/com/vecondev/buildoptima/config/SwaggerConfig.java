@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static com.vecondev.buildoptima.util.FileReader.fetchRequestExample;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 
 @OpenAPIDefinition(
@@ -50,7 +50,7 @@ public class SwaggerConfig {
                                                 .addProperties("errors", new MapSchema()
                                                         .addProperties("name", new StringSchema().example("The length should be between 2 and 20 characters!"))
                                                         .addProperties("password", new StringSchema().example( """
-                                                                                                                    Invalid password! The password should have 8 up to 32 characters at least 
+                                                                                                                    Invalid password! The password should have 8 up to 32 characters at least
                                                                                                                     one uppercase character, one lowercase character, one digit, one special 
                                                                                                                     symbol and no whitespaces!""")))))))
                 .addRequestBodies(
@@ -61,6 +61,15 @@ public class SwaggerConfig {
                                                 .addMediaType(
                                                         APPLICATION_JSON_VALUE,
                                                         new io.swagger.v3.oas.models.media.MediaType()
-                                                                .schema(new MapSchema().example(fetchRequestExample("docs/filter-sorting-example.json")))))));
+                                                                .schema(new MapSchema().example(fetchRequestExample("docs/user-filter-sorting-example.json"))))))
+                .addRequestBodies(
+                        "fetchNewsRequestExample",
+                        new RequestBody()
+                                .content(
+                                        new Content()
+                                                .addMediaType(
+                                                        APPLICATION_JSON_VALUE,
+                                                        new io.swagger.v3.oas.models.media.MediaType()
+                                                                .schema(new MapSchema().example(fetchRequestExample("docs/news-filter-sorting-example.json")))))));
   }
 }

@@ -12,7 +12,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,12 +28,4 @@ public class FaqCategory extends AbstractEntity {
   @ManyToOne private User createdBy;
 
   @ManyToOne private User updatedBy;
-
-  public FaqCategory(
-      String name, User createdBy, User updatedBy, Instant createdAt, Instant updatedAt) {
-    super(createdAt, updatedAt);
-    this.name = name;
-    this.createdBy = createdBy;
-    this.updatedBy = updatedBy;
-  }
 }
