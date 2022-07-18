@@ -23,12 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -37,8 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class NewsControllerTest {
 
-  @Autowired
-  private MockMvc mvc;
+  @Autowired private MockMvc mvc;
   @Autowired private UserRepository userRepository;
   @Autowired private NewsRepository newsRepository;
   @Autowired private JwtTokenManager tokenManager;
@@ -50,23 +48,16 @@ class NewsControllerTest {
   private User admin;
   private User client;
   private News news;
-  private NewsCreateRequestDto createNewsRequestDto;
-  private NewsCreateRequestDto invalidCreateRequest;
-  private NewsUpdateRequestDto updateNewsRequestDto;
-  private NewsUpdateRequestDto invalidUpdateRequest;
 
   @BeforeEach
   void init() {
     admin = newsControllerTestParameters.getRightUser();
     client = newsControllerTestParameters.getWrongUser();
-    userRepository.saveAll(Set.of(admin, client));
-    createNewsRequestDto = newsControllerTestParameters.getRequestToSave();
-    invalidCreateRequest = newsControllerTestParameters.getRequestToSaveWithInvalidFields();
-    updateNewsRequestDto = newsControllerTestParameters.getRequestToUpdate();
-    invalidUpdateRequest = newsControllerTestParameters.getRequestToUpdateWithInvalidFields();
-    news =
-        newsRepository.saveAndFlush(
-            newsControllerTestParameters.getSavedNewsItem(createNewsRequestDto));
+    userRepository.saveAllAndFlush(Set.of(admin, client));
+    NewsCreateRequestDto createNewsRequestDto = newsControllerTestParameters.getRequestToSave();
+    News newsToSave = newsControllerTestParameters.getSavedNewsItem(createNewsRequestDto);
+    newsToSave.setCreatedBy(admin.getId());
+    news = newsRepository.saveAndFlush(newsToSave);
   }
 
   @AfterEach
@@ -77,102 +68,157 @@ class NewsControllerTest {
 
   @Test
   void createNewsSuccess() throws Exception {
+    NewsCreateRequestDto createRequestDto = newsControllerTestParameters.createRequestDto();
+    String header = jwtConfigProperties.getAuthorizationHeader();
+    String token =
+        jwtConfigProperties.getAuthorizationHeaderPrefix()
+            + tokenManager.generateAccessToken(admin);
     mvc.perform(
             post("/news")
-                .header(
-                    jwtConfigProperties.getAuthorizationHeader(),
-                    jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(admin))
-                .content(asJsonString(createNewsRequestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+                .header(header, token)
+                .content(createRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", createRequestDto.getTitle())
+                .param("summary", createRequestDto.getSummary())
+                .param("description", createRequestDto.getDescription())
+                .param("category", createRequestDto.getCategory())
+                .param("keywords", " "))
         .andExpect(status().isCreated());
   }
 
   @Test
   void failedCreateNewsAsContainsInvalidFields() throws Exception {
+    NewsCreateRequestDto createRequestDto =
+        newsControllerTestParameters.createRequestDtoWithInvalidFields();
+    String header = jwtConfigProperties.getAuthorizationHeader();
+    String token =
+        jwtConfigProperties.getAuthorizationHeaderPrefix()
+            + tokenManager.generateAccessToken(admin);
     mvc.perform(
             post("/news")
-                .header(
-                    jwtConfigProperties.getAuthorizationHeader(),
-                    jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(client))
-                .content(asJsonString(invalidCreateRequest))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+                .header(header, token)
+                .content(createRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", createRequestDto.getTitle())
+                .param("summary", createRequestDto.getSummary())
+                .param("description", createRequestDto.getDescription())
+                .param("category", createRequestDto.getCategory())
+                .param("keywords", " "))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void failedCreateNewsAsPermissionDenied() throws Exception {
+    NewsCreateRequestDto createRequestDto = newsControllerTestParameters.createRequestDto();
+    String header = jwtConfigProperties.getAuthorizationHeader();
+    String token =
+        jwtConfigProperties.getAuthorizationHeaderPrefix()
+            + tokenManager.generateAccessToken(client);
     mvc.perform(
             post("/news")
-                .header(
-                    jwtConfigProperties.getAuthorizationHeader(),
-                    jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(client))
-                .content(asJsonString(createNewsRequestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+                .header(header, token)
+                .content(createRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", createRequestDto.getTitle())
+                .param("summary", createRequestDto.getSummary())
+                .param("description", createRequestDto.getDescription())
+                .param("category", createRequestDto.getCategory())
+                .param("keywords", " "))
         .andExpect(status().isForbidden());
   }
 
+
   @Test
   void failedCreateNewsAsAccessTokenIsMissing() throws Exception {
+    NewsCreateRequestDto createRequestDto = newsControllerTestParameters.createRequestDto();
     mvc.perform(
             post("/news")
-                .content(asJsonString(createNewsRequestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+                .content(createRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", createRequestDto.getTitle())
+                .param("summary", createRequestDto.getSummary())
+                .param("description", createRequestDto.getDescription())
+                .param("category", createRequestDto.getCategory())
+                .param("keywords", " "))
         .andExpect(status().isUnauthorized());
   }
 
   @Test
   void updateNewsSuccess() throws Exception {
+    NewsUpdateRequestDto updateRequestDto = newsControllerTestParameters.updateRequestDto();
+    String header = jwtConfigProperties.getAuthorizationHeader();
+    String token =
+        jwtConfigProperties.getAuthorizationHeaderPrefix()
+            + tokenManager.generateAccessToken(admin);
     mvc.perform(
-            put("/news/{id}/update", news.getId())
-                .header(
-                    jwtConfigProperties.getAuthorizationHeader(),
-                    jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(admin))
-                .content(asJsonString(updateNewsRequestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+            patch("/news/{id}", news.getId())
+                .header(header, token)
+                .content(updateRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", updateRequestDto.getTitle())
+                .param("summary", updateRequestDto.getSummary())
+                .param("description", updateRequestDto.getDescription())
+                .param("category", updateRequestDto.getCategory())
+                .param("keywords", " "))
         .andExpect(status().isOk());
   }
 
   @Test
   void failedUpdateAsInvalidFields() throws Exception {
+    NewsUpdateRequestDto updateRequestDto =
+        newsControllerTestParameters.updateRequestDtoWithInvalidFields();
+    String header = jwtConfigProperties.getAuthorizationHeader();
+    String token =
+        jwtConfigProperties.getAuthorizationHeaderPrefix()
+            + tokenManager.generateAccessToken(admin);
     mvc.perform(
-            put("/news/{id}/update", news.getId())
-                .header(
-                    jwtConfigProperties.getAuthorizationHeader(),
-                    jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(admin))
-                .content(asJsonString(invalidUpdateRequest))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+            patch("/news/{id}", news.getId())
+                .header(header, token)
+                .content(updateRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", updateRequestDto.getTitle())
+                .param("summary", updateRequestDto.getSummary())
+                .param("description", updateRequestDto.getDescription())
+                .param("category", updateRequestDto.getCategory())
+                .param("keywords", " "))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void failedUpdateAsNewsItemNotFound() throws Exception {
+    NewsUpdateRequestDto updateRequestDto = newsControllerTestParameters.updateRequestDto();
+    String header = jwtConfigProperties.getAuthorizationHeader();
+    String token =
+        jwtConfigProperties.getAuthorizationHeaderPrefix()
+            + tokenManager.generateAccessToken(admin);
     mvc.perform(
-            put("/news/{id}/update", UUID.randomUUID())
+            patch("/news/{id}", UUID.randomUUID())
+                .header(header, token)
+                .content(updateRequestDto.getImage().getBytes())
+                .contentType(MULTIPART_FORM_DATA_VALUE)
+                .param("title", updateRequestDto.getTitle())
+                .param("summary", updateRequestDto.getSummary())
+                .param("description", updateRequestDto.getDescription())
+                .param("category", updateRequestDto.getCategory())
+                .param("keywords", " "))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void deleteAsNewsItemSuccess() throws Exception {
+    mvc.perform(
+            delete("/news/{id}", news.getId())
                 .header(
                     jwtConfigProperties.getAuthorizationHeader(),
                     jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(admin))
-                .content(asJsonString(updateNewsRequestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isNotFound());
+                        + tokenManager.generateAccessToken(admin)))
+        .andExpect(status().isOk());
   }
 
   @Test
   void failedDeleteAsNewsItemNotFound() throws Exception {
     mvc.perform(
-            delete("/news/{id}/delete", UUID.randomUUID())
+            delete("/news/{id}", UUID.randomUUID())
                 .header(
                     jwtConfigProperties.getAuthorizationHeader(),
                     jwtConfigProperties.getAuthorizationHeaderPrefix()
@@ -183,7 +229,7 @@ class NewsControllerTest {
   @Test
   void failedDeleteAsAccessDenied() throws Exception {
     mvc.perform(
-            delete("/news/{id}/delete", UUID.randomUUID())
+            delete("/news/{id}", UUID.randomUUID())
                 .header(
                     jwtConfigProperties.getAuthorizationHeader(),
                     jwtConfigProperties.getAuthorizationHeaderPrefix()
@@ -193,8 +239,39 @@ class NewsControllerTest {
 
   @Test
   void failedDeleteAsAccessTokenMissing() throws Exception {
+    mvc.perform(delete("/news/{id}", UUID.randomUUID())).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void getByIdSuccess() throws Exception {
     mvc.perform(
-            delete("/news/{id}/delete", UUID.randomUUID()))
-        .andExpect(status().isUnauthorized());
+            get("/news/{id}", news.getId())
+                .header(
+                    jwtConfigProperties.getAuthorizationHeader(),
+                    jwtConfigProperties.getAuthorizationHeaderPrefix()
+                        + tokenManager.generateAccessToken(admin)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void failedGetByIdAsNotFound() throws Exception {
+    mvc.perform(
+            get("/news/{id}", UUID.randomUUID())
+                .header(
+                    jwtConfigProperties.getAuthorizationHeader(),
+                    jwtConfigProperties.getAuthorizationHeaderPrefix()
+                        + tokenManager.generateAccessToken(admin)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getMetadataSuccess() throws Exception {
+    mvc.perform(
+            get("/news/metadata")
+                .header(
+                    jwtConfigProperties.getAuthorizationHeader(),
+                    jwtConfigProperties.getAuthorizationHeaderPrefix()
+                        + tokenManager.generateAccessToken(admin)))
+        .andExpect(status().isOk());
   }
 }

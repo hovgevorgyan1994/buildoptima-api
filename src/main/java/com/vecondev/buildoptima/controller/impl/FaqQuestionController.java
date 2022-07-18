@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.controller.impl;
 
 import com.vecondev.buildoptima.controller.FaqQuestionApi;
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.faq.FaqQuestionService;
 import lombok.RequiredArgsConstructor;

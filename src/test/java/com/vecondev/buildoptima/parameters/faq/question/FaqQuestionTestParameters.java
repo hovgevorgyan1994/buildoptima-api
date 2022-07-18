@@ -1,13 +1,13 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
+
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
 

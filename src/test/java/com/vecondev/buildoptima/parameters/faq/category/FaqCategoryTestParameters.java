@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
 

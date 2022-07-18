@@ -92,14 +92,15 @@ object. The predicate object has the following structure
 
 #### Filtering Fields
 
-| Field          | Type     | Operations             | Notes                                                                      |
-|:---------------|:---------|:-----------------------|:---------------------------------------------------------------------------|
-| `firstName`    | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
-| `lastName`     | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
-| `email`        | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
-| `phone`        | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
-| `role`         | String   | `eq`                   | Must be provided with `value` field, possible values `CLIENT`, `ADMIN`     |
-| `creationDate` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
+| Field       | Type     | Operations             | Notes                                                                      |
+|:------------|:---------|:-----------------------|:---------------------------------------------------------------------------|
+| `firstName` | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
+| `lastName`  | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
+| `email`     | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
+| `phone`     | String   | `eq`, `like`, `in`     | Must be provided with `value` field                                        |
+| `role`      | String   | `eq`                   | Must be provided with `value` field, possible values `CLIENT`, `ADMIN`     |
+| `createdAt` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
+| `updatedAt` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
 
 #### Sorting Fields
 
@@ -107,4 +108,30 @@ object. The predicate object has the following structure
 - `lastName`
 - `email`
 - `phone`
-- `creationDate`
+- `createdAt`
+- `updatedAt`
+
+
+### News Entity
+
+#### Filtering Fields
+
+| Field       | Type     | Operations             | Notes                                                                      |
+|:------------|:---------|:-----------------------|:---------------------------------------------------------------------------|
+| `title`     | String   | `eq`, `like`           | Must be provided with `value` field                                        |
+| `category`  | String   | `eq`                   | Must be provided with `value` field                                        |
+| `createdAt` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
+| `updatedAt` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
+| `createdBy` | String   | `eq`                   | Must be provided with `value` field (UUID userId)                          |
+| `updatedBy` | String   | `eq`                   | Must be provided with `value` field (UUID userId)                          |
+
+
+#### Sorting Fields
+
+- `title`
+- `category`
+- `createdAt`
+- `updatedAt`
+- `createdBy`
+- `updatedBy`
+

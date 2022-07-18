@@ -52,7 +52,7 @@ public class GenericSpecification<T> implements Specification<T> {
       if (!filter.containsKey(NAME)
           || !filter.containsKey(OPERATION)
               && (!filter.containsKey(VALUE) || !filter.containsKey(VALUES))) {
-        throw new WrongFieldException(INVALID_FILTER_STRUCTURE.getMessage());
+        throw new WrongFieldException(INVALID_FILTER_STRUCTURE);
       }
 
       Criteria criteria = new Criteria();
@@ -68,7 +68,7 @@ public class GenericSpecification<T> implements Specification<T> {
       }
 
       if (!fieldDefinitionMap.containsKey(criteria.getName())) {
-        throw new WrongFieldException(String.format("Invalid `%s` field", criteria.getName()));
+        throw new WrongFieldException(INVALID_FILTER_STRUCTURE);
       }
 
       return SingleCriteriaConverter.toPredicate(
@@ -86,7 +86,7 @@ public class GenericSpecification<T> implements Specification<T> {
               .map(stringObjectHashMap -> convertTree(root, builder, stringObjectHashMap))
               .toArray(Predicate[]::new));
     } else {
-      throw new WrongFieldException(INVALID_FILTER_STRUCTURE.getMessage());
+      throw new WrongFieldException(INVALID_FILTER_STRUCTURE);
     }
   }
 }

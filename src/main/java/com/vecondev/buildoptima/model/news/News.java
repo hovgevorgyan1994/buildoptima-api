@@ -2,10 +2,8 @@ package com.vecondev.buildoptima.model.news;
 
 import com.vecondev.buildoptima.model.AbstractEntity;
 import com.vecondev.buildoptima.model.Status;
-import com.vecondev.buildoptima.model.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,8 +12,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -46,7 +44,7 @@ public class News extends AbstractEntity {
   @Column(name = "keywords")
   private String keywords;
 
-  @ManyToOne private User createdBy;
+  private UUID createdBy;
 
-  @ManyToOne private User updatedBy;
+  private UUID updatedBy;
 }

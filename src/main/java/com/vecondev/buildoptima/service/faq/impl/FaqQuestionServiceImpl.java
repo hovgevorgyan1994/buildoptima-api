@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.filter.model.SortDto;
@@ -80,7 +80,8 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
             .orElseThrow(() -> new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND));
     faqQuestionValidator.validateQuestion(requestDto.getQuestion());
 
-    question = question.toBuilder()
+    question =
+        question.toBuilder()
             .question(requestDto.getQuestion())
             .answer(requestDto.getAnswer())
             .status(requestDto.getStatus())

@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.controller;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.security.user.AppUserDetails;

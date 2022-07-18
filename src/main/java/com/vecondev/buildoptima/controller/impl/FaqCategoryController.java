@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.controller.impl;
 
 import com.vecondev.buildoptima.controller.FaqCategoryApi;
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.faq.FaqCategoryService;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +107,8 @@ public class FaqCategoryController implements FaqCategoryApi {
   @Override
   @PostMapping("/fetch")
   @PreAuthorize("hasAuthority('resource_read')")
-  public ResponseEntity<FetchResponseDto> fetchCategories(@RequestBody FetchRequestDto fetchRequest) {
+  public ResponseEntity<FetchResponseDto> fetchCategories(
+      @RequestBody FetchRequestDto fetchRequest) {
 
     return ResponseEntity.ok(faqCategoryService.fetchCategories(fetchRequest));
   }

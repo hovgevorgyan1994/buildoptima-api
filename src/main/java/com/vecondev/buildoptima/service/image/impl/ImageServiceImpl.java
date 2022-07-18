@@ -138,7 +138,6 @@ public class ImageServiceImpl implements ImageService {
 
   private void deleteImage(String className, UUID objectId, boolean isOriginal) {
     String imageName = getImagePath(className, objectId, isOriginal);
-    checkExistenceOfObject(imageName, objectId);
 
     amazonS3.deleteObject(s3ConfigProperties.getBucketName(), imageName);
     log.info(

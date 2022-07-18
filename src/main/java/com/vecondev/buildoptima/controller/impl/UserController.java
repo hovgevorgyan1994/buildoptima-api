@@ -65,7 +65,7 @@ public class UserController implements UserApi {
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/auth/refreshToken")
+  @PostMapping("/auth/refresh-token")
   public ResponseEntity<RefreshTokenResponseDto> refreshToken(
       @RequestBody @Valid RefreshTokenRequestDto refreshTokenRequestDto) {
     final RefreshTokenResponseDto response = userService.refreshToken(refreshTokenRequestDto);
@@ -96,8 +96,8 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @PostMapping("/auth/password/verify")
-  public ResponseEntity<Void> forgotPassword(
+  @PostMapping("/auth/password/receive-email")
+  public ResponseEntity<Void> verifyEmail (
       @RequestBody ConfirmEmailRequestDto email, Locale locale) {
     userService.verifyUserAndSendEmail(email, locale);
     return ResponseEntity.ok().build();
@@ -135,7 +135,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @GetMapping(value = "/{id}/thumbnail_image")
+  @GetMapping(value = "/{id}/thumbnail-image")
   @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
   public ResponseEntity<byte[]> downloadThumbnailImage(
       @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {

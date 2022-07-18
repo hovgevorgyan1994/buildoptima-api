@@ -33,7 +33,7 @@ public class PageableConverter implements Converter<FetchRequestDto, Pageable> {
     int page = 0;
     if (take > 0) {
       if (skip % take != 0) {
-        throw new WrongFieldException(INVALID_PAGEABLE.getMessage());
+        throw new WrongFieldException(INVALID_PAGEABLE);
       }
 
       page = skip / take;

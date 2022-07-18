@@ -7,10 +7,10 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 
 public class NullOrNotEmptyListValidator
-    implements ConstraintValidator<NullOrNotEmptyList, List<Object>> {
+    implements ConstraintValidator<NullOrNotEmptyList, List<String>> {
 
   @Override
-  public boolean isValid(List<Object> list, ConstraintValidatorContext context) {
+  public boolean isValid(List<String> list, ConstraintValidatorContext context) {
     return list == null || !list.isEmpty();
   }
 }

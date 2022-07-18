@@ -2,9 +2,11 @@ package com.vecondev.buildoptima.mapper.news;
 
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
+import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.news.NewsCategory;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,9 @@ public abstract class NewsMapperDecorator implements NewsMapper {
   @Autowired
   @Qualifier("delegate")
   private NewsMapper mapper;
+
+  @Autowired private UserMapper userMapper;
+  @Autowired private UserRepository userRepository;
 
   @Override
   public News mapToEntity(NewsCreateRequestDto dto) {
@@ -35,15 +40,15 @@ public abstract class NewsMapperDecorator implements NewsMapper {
   public NewsResponseDto mapToResponseDto(News news) {
     NewsResponseDto responseDto = mapper.mapToResponseDto(news);
     String keywordsAsString = news.getKeywords();
-    List<String> keywords = Arrays.stream(keywordsAsString.split(" ")).toList();
-    responseDto.setKeywords(keywords);
+    if (keywordsAsString != null) {
+      List<String> keywords = Arrays.stream(keywordsAsString.split(" ")).toList();
+      responseDto.setKeywords(keywords);
+    }
     responseDto.setCreatedBy(
-        String.format(
-            "%s %s", news.getCreatedBy().getFirstName(), news.getCreatedBy().getLastName()));
+        userMapper.mapToResponseDto(userRepository.getReferenceById(news.getCreatedBy())));
     if (news.getUpdatedBy() != null) {
       responseDto.setUpdatedBy(
-          String.format(
-              "%s %s", news.getUpdatedBy().getFirstName(), news.getUpdatedBy().getLastName()));
+          userMapper.mapToResponseDto(userRepository.getReferenceById(news.getUpdatedBy())));
     }
     return responseDto;
   }

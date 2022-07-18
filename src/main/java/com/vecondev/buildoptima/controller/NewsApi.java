@@ -4,6 +4,7 @@ import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.response.news.Metadata;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
@@ -220,5 +221,34 @@ public interface NewsApi {
       })
   ResponseEntity<HttpStatus> delete(
       @Parameter(description = "The news item id which should be deleted") UUID id,
+      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+
+  @Operation(summary = "Get news metadata", security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully got news metadata"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Expired access token",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized request",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<Metadata> getMetadata(
       @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
 }

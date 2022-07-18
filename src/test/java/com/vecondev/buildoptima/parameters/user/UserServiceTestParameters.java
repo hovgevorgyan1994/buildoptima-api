@@ -50,13 +50,9 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
         false);
   }
 
-
   public User getSavedUser(User user) {
     User savedUser =
-        user.toBuilder()
-            .password(encoder.encode(user.getPassword()))
-            .enabled(true)
-            .build();
+        user.toBuilder().password(encoder.encode(user.getPassword())).enabled(true).build();
     savedUser.setId(UUID.randomUUID());
 
     return savedUser;
@@ -118,7 +114,7 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
 
     if (take > 0) {
       if (skip % take != 0) {
-        throw new WrongFieldException(INVALID_PAGEABLE.getMessage());
+        throw new WrongFieldException(INVALID_PAGEABLE);
       }
 
       page = skip / take;

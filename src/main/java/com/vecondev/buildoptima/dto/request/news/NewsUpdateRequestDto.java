@@ -2,6 +2,7 @@ package com.vecondev.buildoptima.dto.request.news;
 
 import com.vecondev.buildoptima.validation.constraint.NullOrNotBlank;
 import com.vecondev.buildoptima.validation.constraint.NullOrNotEmptyList;
+import com.vecondev.buildoptima.validation.constraint.ValidImage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +24,5 @@ public class NewsUpdateRequestDto {
   @NullOrNotEmptyList private List<String> keywords;
   @NullOrNotBlank private String description;
   @NullOrNotBlank private String category;
-  @NullOrNotBlank private MultipartFile image;
+  @ValidImage private MultipartFile image;
 }

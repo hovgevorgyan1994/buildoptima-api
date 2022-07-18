@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.service.faq;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 
 import java.util.List;

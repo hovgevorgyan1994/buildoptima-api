@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.service;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.response.FetchResponseDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;

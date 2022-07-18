@@ -282,7 +282,7 @@ public interface UserApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<Void> forgotPassword(ConfirmEmailRequestDto email, Locale locale);
+  ResponseEntity<Void> verifyEmail (ConfirmEmailRequestDto email, Locale locale);
 
   @Operation(summary = "Restore forgotten password")
   @RequestBody(

@@ -7,8 +7,8 @@ create table news
     description   text         not null,
     status        varchar(25)  not null,
     news_category varchar(25)  not null,
-    created_by_id uuid         not null references users (id),
-    updated_by_id uuid references users (id),
+    created_by    uuid         not null,
+    updated_by    uuid,
     created_at    timestamp    not null,
     updated_at    timestamp
 );

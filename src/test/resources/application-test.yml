@@ -35,4 +35,4 @@ config:
 aws:
   properties:
     s3:
-      bucketName: buildoptima-test
+      bucketName: buildoptima
