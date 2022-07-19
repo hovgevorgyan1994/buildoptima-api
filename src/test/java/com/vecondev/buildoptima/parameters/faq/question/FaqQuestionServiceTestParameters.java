@@ -1,9 +1,10 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
+import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
@@ -11,6 +12,7 @@ import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryServiceTestParameters;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,7 +62,7 @@ public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
         question.getUpdatedAt());
   }
 
-  public List<FaqQuestion> getFetchResponse() {
+  public List<FaqQuestion> getFaqQuestionList() {
     return List.of(
         getFaqQuestion(UUID.randomUUID()),
         getFaqQuestion(UUID.randomUUID()).toBuilder()
@@ -81,5 +83,31 @@ public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
     user.setId(userId);
 
     return user;
+  }
+
+  public List<FaqQuestionRecord> getFaqQuestionRecordList() {
+    String createdBy = String.format("John Smith (%s)", UUID.randomUUID());
+    String category = "Properties";
+    return List.of(
+        new FaqQuestionRecord(
+            UUID.randomUUID(),
+            "Question1",
+            "Answer1",
+            ACTIVE,
+            category,
+            createdBy,
+            Instant.now(),
+            createdBy,
+            Instant.now()),
+        new FaqQuestionRecord(
+            UUID.randomUUID(),
+            "Question2",
+            "Answer2",
+            ACTIVE,
+            category,
+            createdBy,
+            Instant.now(),
+            createdBy,
+            Instant.now()));
   }
 }

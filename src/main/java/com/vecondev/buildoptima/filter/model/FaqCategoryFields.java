@@ -19,6 +19,7 @@ public class FaqCategoryFields {
   private static final String UPDATED_AT = "updatedAt";
   private static final String UPDATED_BY = "updatedBy";
   private static final String CREATED_BY = "createdBy";
+
   private static final String USER_ID = "id";
 
   static {

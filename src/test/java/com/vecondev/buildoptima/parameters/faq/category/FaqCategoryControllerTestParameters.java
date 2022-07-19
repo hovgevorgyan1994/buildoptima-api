@@ -1,13 +1,13 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
-import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;

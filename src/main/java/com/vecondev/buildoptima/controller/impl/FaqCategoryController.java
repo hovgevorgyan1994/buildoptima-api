@@ -9,6 +9,7 @@ import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.faq.FaqCategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ import static org.springframework.http.HttpStatus.OK;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/faq/category")
+@RequestMapping("/faq/categories")
 public class FaqCategoryController implements FaqCategoryApi {
 
   private final FaqCategoryService faqCategoryService;
@@ -111,5 +112,16 @@ public class FaqCategoryController implements FaqCategoryApi {
       @RequestBody FetchRequestDto fetchRequest) {
 
     return ResponseEntity.ok(faqCategoryService.fetchCategories(fetchRequest));
+  }
+
+  @Override
+  @GetMapping(value = "/csv")
+  @PreAuthorize("hasAuthority('resource_read')")
+  public ResponseEntity<Resource> exportAllCategoriesInCSV(
+      @AuthenticationPrincipal AppUserDetails authenticatedUser) {
+    log.info(
+        "User with id: {} trying to export all faq categories in '.csv' format.", authenticatedUser.getId());
+
+    return faqCategoryService.exportFaqCategoriesInCsv();
   }
 }

@@ -1,13 +1,18 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
+import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.response.user.UserOverview;
+import com.vecondev.buildoptima.model.faq.FaqCategory;
+import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,10 +54,19 @@ public class FaqCategoryServiceTestParameters extends FaqCategoryTestParameters
     return user;
   }
 
-  public List<FaqCategory> getFetchResponse() {
+  public List<FaqCategory> getFaqCategoryList() {
     return List.of(
         getFaqCategory(UUID.randomUUID()),
         getFaqCategory(UUID.randomUUID()).toBuilder().name("Properties").build());
+  }
+
+  public List<FaqCategoryRecord> getFaqCategoryRecordList() {
+    String createdBy = String.format("John Smith (%s)", UUID.randomUUID());
+    return List.of(
+        new FaqCategoryRecord(
+            UUID.randomUUID(), "Royalties", createdBy, Instant.now(), createdBy, Instant.now()),
+        new FaqCategoryRecord(
+            UUID.randomUUID(), "Properties", createdBy, Instant.now(), createdBy, Instant.now()));
   }
 
   public List<FaqCategoryResponseDto> getFaqCategoryResponseDtoList(List<FaqCategory> categories) {

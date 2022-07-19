@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.mapper.faq.decorator;
 
+import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
@@ -49,5 +50,14 @@ public abstract class FaqQuestionMapperDecorator implements FaqQuestionMapper {
   @Override
   public List<FaqQuestionResponseDto> mapToListDtoFromPage(Page<FaqQuestion> faqQuestions) {
     return faqQuestionMapper.mapToListDtoFromPage(faqQuestions);
+  }
+
+  @Override
+  public FaqQuestionRecord mapToRecord(FaqQuestion faqQuestion) {
+    return faqQuestionMapper.mapToRecord(faqQuestion).toBuilder()
+        .createdBy(faqQuestion.getCreatedBy().getFullName())
+        .updatedBy(faqQuestion.getUpdatedBy().getFullName())
+        .category(faqQuestion.getCategory().getName())
+        .build();
   }
 }

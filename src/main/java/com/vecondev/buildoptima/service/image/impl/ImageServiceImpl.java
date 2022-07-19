@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
+import com.vecondev.buildoptima.exception.FileConvertionFailedException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.validation.ImageValidator;
@@ -14,12 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.UnexpectedTypeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
 import static com.vecondev.buildoptima.exception.ErrorCode.BUCKET_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.ErrorCode.FAILED_IMAGE_CONVERTION;
 import static com.vecondev.buildoptima.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
 import static com.vecondev.buildoptima.util.FileUtil.deleteFile;
@@ -70,7 +71,6 @@ public class ImageServiceImpl implements ImageService {
   public byte[] downloadImage(String className, UUID objectId, Boolean isOriginal) {
     String imageName = getImagePath(className, objectId, isOriginal);
     checkExistenceOfObject(imageName, objectId);
-
     S3Object object = amazonS3.getObject(s3ConfigProperties.getBucketName(), imageName);
     S3ObjectInputStream inputStream = object.getObjectContent();
     byte[] objectAsByteArray;
@@ -78,8 +78,8 @@ public class ImageServiceImpl implements ImageService {
     try {
       objectAsByteArray = IOUtils.toByteArray(inputStream);
     } catch (IOException ex) {
-      log.error("Error while downloading image of with id: {}.", object);
-      throw new UnexpectedTypeException();
+      log.error("Error while downloading photo of {} with id: {}.", className, objectId);
+      throw new FileConvertionFailedException(FAILED_IMAGE_CONVERTION);
     }
 
     return objectAsByteArray;

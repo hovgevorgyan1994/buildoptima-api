@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
-import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
-import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
@@ -15,9 +15,9 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import java.util.List;
 import java.util.Map;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_QUESTION_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
-import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_QUESTION_NOT_FOUND;
 import static com.vecondev.buildoptima.model.Status.ACTIVE;
 import static com.vecondev.buildoptima.model.Status.ARCHIVED;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
@@ -106,7 +106,7 @@ public class FaqQuestionControllerTestParameters extends FaqQuestionTestParamete
     return new FetchRequestDto(
             0,
             10,
-            List.of(new SortDto("name", SortDto.Direction.ASC)),
+            List.of(new SortDto("question", SortDto.Direction.ASC)),
             Map.of(
                     "and",
                     List.of(

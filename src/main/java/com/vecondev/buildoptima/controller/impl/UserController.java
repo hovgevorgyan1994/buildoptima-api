@@ -118,10 +118,10 @@ public class UserController implements UserApi {
   @PreAuthorize("#user.id == #id")
   public ResponseEntity<Void> uploadImage(
       @PathVariable UUID id,
-      @AuthenticationPrincipal AppUserDetails userDetails,
+      @AuthenticationPrincipal AppUserDetails user,
       @RequestParam("file") MultipartFile multipartFile) {
     log.info("Attempt to upload new photo by user with id: {}", id);
-    userService.uploadImage(id, multipartFile, userDetails);
+    userService.uploadImage(id, multipartFile, user);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
@@ -131,7 +131,12 @@ public class UserController implements UserApi {
   @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
   public ResponseEntity<byte[]> downloadOriginalImage(
       @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
-    return userService.downloadImage(user.getId(), ownerId, true);
+    log.info(
+        "User with id: {} trying to download original image of user with id: {}.",
+        user.getId(),
+        ownerId);
+
+    return userService.downloadImage(ownerId, true);
   }
 
   @Override
@@ -139,7 +144,12 @@ public class UserController implements UserApi {
   @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
   public ResponseEntity<byte[]> downloadThumbnailImage(
       @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
-    return userService.downloadImage(user.getId(), ownerId, false);
+    log.info(
+        "User with id: {} trying to download thumbnail image of user with id: {}.",
+        user.getId(),
+        ownerId);
+
+    return userService.downloadImage(ownerId, false);
   }
 
   @Override

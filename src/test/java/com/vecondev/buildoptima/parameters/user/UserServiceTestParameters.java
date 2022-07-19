@@ -1,28 +1,20 @@
 package com.vecondev.buildoptima.parameters.user;
 
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
-import com.vecondev.buildoptima.exception.WrongFieldException;
-import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_PAGEABLE;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 
 public class UserServiceTestParameters extends UserTestParameters implements PageableTest {
@@ -50,9 +42,13 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
         false);
   }
 
+
   public User getSavedUser(User user) {
     User savedUser =
-        user.toBuilder().password(encoder.encode(user.getPassword())).enabled(true).build();
+        user.toBuilder()
+            .password(encoder.encode(user.getPassword()))
+            .enabled(true)
+            .build();
     savedUser.setId(UUID.randomUUID());
 
     return savedUser;
@@ -104,30 +100,6 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
     }
 
     return refreshToken;
-  }
-
-  public Pageable getPageable(FetchRequestDto fetchRequest) {
-    Sort sort = Sort.unsorted();
-    int skip = fetchRequest.getSkip() != null ? fetchRequest.getSkip() : 0;
-    int take = fetchRequest.getTake() != null ? fetchRequest.getTake() : 10;
-    int page = 0;
-
-    if (take > 0) {
-      if (skip % take != 0) {
-        throw new WrongFieldException(INVALID_PAGEABLE);
-      }
-
-      page = skip / take;
-    }
-    if (fetchRequest.getSort() == null) {
-      fetchRequest.setSort(new ArrayList<>());
-    }
-    for (SortDto sortDto : fetchRequest.getSort()) {
-      sort =
-          sort.and(
-              Sort.by(Sort.Direction.fromString(sortDto.getOrder().name()), sortDto.getField()));
-    }
-    return new PageRequest(page, take, sort) {};
   }
 
   public ChangePasswordRequestDto getChangePasswordRequestDto(

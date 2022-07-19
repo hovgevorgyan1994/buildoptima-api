@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.mapper.faq;
 
+import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.mapper.faq.decorator.FaqQuestionMapperDecorator;
@@ -9,6 +10,7 @@ import com.vecondev.buildoptima.model.user.User;
 import org.mapstruct.Context;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.data.domain.Page;
 
@@ -26,4 +28,13 @@ public interface FaqQuestionMapper {
   List<FaqQuestionResponseDto> mapToListDto(List<FaqQuestion> faqQuestions);
 
   List<FaqQuestionResponseDto> mapToListDtoFromPage(Page<FaqQuestion> faqQuestions);
+
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "updatedBy", ignore = true)
+  @Mapping(target = "category", ignore = true)
+  FaqQuestionRecord mapToRecord(FaqQuestion faqQuestion);
+
+  default List<FaqQuestionRecord> mapToRecordList(List<FaqQuestion> faqQuestions) {
+    return faqQuestions.stream().map(this::mapToRecord).toList();
+  }
 }

@@ -2,12 +2,12 @@ package com.vecondev.buildoptima.parameters.endpoints;
 
 public interface EndpointUris {
 
-    String baseUri();
-    String deleteByIdUri();
-    String updateUri();
-    String creationUri();
-    String fetchUri();
-    String getByIdUri();
+    String getDeleteByIdUri();
+    String getUpdateUri();
+    String getCreationUri();
+    String getFetchUri();
+    String getRetrieveByIdUri();
     String getAllUri();
+    String getExportInCsvUri();
 
 }

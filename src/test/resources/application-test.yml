@@ -23,6 +23,11 @@ spring:
     password: buildoptima
     username: managementstaffing09@gmail.com
 
+aws:
+  properties:
+    s3:
+      bucketName: buildoptima-test
+
 config:
   aws:
     s3:
@@ -32,7 +37,32 @@ config:
       accessKey: localstack
       secretKey: localstack
 
-aws:
-  properties:
-    s3:
-      bucketName: buildoptima
+  uris:
+    faq-category:
+      baseUri: /faq/categories
+      deleteByIdUri: /{id}
+      updateUri: /{id}
+      fetchUri: /fetch
+      retrieveByIdUri: /{id}
+      exportInCsvUri: /csv
+    faq-question:
+      baseUri: /faq/questions
+      deleteByIdUri: /{id}
+      updateUri: /{id}
+      fetchUri: /fetch
+      retrieveByIdUri: /{id}
+      exportInCsvUri: /csv
+    user:
+      baseUri: /user
+      fetchUri: /fetch
+      retrieveByIdUri: /{id}
+      deleteImageByIdUri: /{id}/image
+      downloadImageUri: /{id}/
+      uploadImageUri: /{id}/image
+      restorePasswordUri: /auth/password/restore
+      verifyPasswordUri: /auth/password/verify
+      changePasswordUri: /password/change
+      refreshTokenUri: /auth/refreshToken
+      loginUri: /auth/login
+      activationUri: /auth/activate
+      registrationUri: /auth/registration

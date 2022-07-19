@@ -10,6 +10,7 @@ import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.user.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
+import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
@@ -379,31 +380,38 @@ class UserServiceTest {
       userService.uploadImage(userId, null, new AppUserDetails(savedUser));
     }
 
-    verify(imageService).uploadImagesToS3(savedUser.getClass().getSimpleName().toLowerCase(), userId, null,UUID.randomUUID());
+    verify(imageService).uploadImagesToS3(any(), any(), any(), any());
   }
 
   @Test
   void successfulImageDownloading() {
-    UUID userId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
     String contentType = IMAGE_JPEG_VALUE;
     boolean isOriginal = true;
 
-    when(imageService.downloadImage(any(), ownerId, isOriginal)).thenReturn(new byte[] {});
-    when(imageService.getContentTypeOfObject(any(), userId, isOriginal)).thenReturn(contentType);
-    ResponseEntity<byte[]> response = userService.downloadImage(userId, ownerId, isOriginal);
+    when(userRepository.existsById(any())).thenReturn(true);
+    when(imageService.downloadImage("user", ownerId, isOriginal)).thenReturn(new byte[] {});
+    when(imageService.getContentTypeOfObject("user", ownerId, isOriginal)).thenReturn(contentType);
+    ResponseEntity<byte[]> response = userService.downloadImage(ownerId, isOriginal);
 
     assertEquals(
         contentType, Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
-    verify(imageService).downloadImage(any(), ownerId, isOriginal);
+    verify(imageService).downloadImage("user", ownerId, isOriginal);
   }
 
   @Test
   void successfulImageDeleting() {
+    when(userRepository.existsById(any())).thenReturn(true);
+    userService.deleteImage(UUID.randomUUID());
+
+    verify(imageService).deleteImagesFromS3(any(), any());
+  }
+
+  @Test
+  void failedImageDeletingAsObjectDoesntExist() {
     UUID userId = UUID.randomUUID();
+    when(userRepository.existsById(any())).thenReturn(false);
 
-    userService.deleteImage(userId);
-
-    verify(imageService).deleteImagesFromS3(any(), userId);
+    assertThrows(UserNotFoundException.class, () -> userService.deleteImage(userId));
   }
 }

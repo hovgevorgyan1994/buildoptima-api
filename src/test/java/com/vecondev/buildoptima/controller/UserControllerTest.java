@@ -7,15 +7,14 @@ import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
-import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
@@ -41,7 +40,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.internet.MimeMessage;
@@ -71,8 +69,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
-@Import(AmazonS3Config.class)
-class UserControllerTest extends UserResultActions {
+@Import({AmazonS3Config.class, UserEndpointUris.class, UserResultActions.class})
+class UserControllerTest {
 
   @RegisterExtension
   private static final GreenMailExtension greenMail =
@@ -82,22 +80,20 @@ class UserControllerTest extends UserResultActions {
                   .withUser("managementstaffing09@gmail.com", "buildoptima"))
           .withPerMethodLifecycle(true);
 
-  @Autowired private MockMvc mvc;
   @Autowired private AmazonS3 amazonS3;
-
   @Autowired private UserRepository userRepository;
   @Autowired private ConfirmationTokenRepository confirmationTokenRepository;
   @Autowired private RefreshTokenRepository refreshTokenRepository;
-
-  @Autowired private JwtTokenManager tokenManager;
   @Autowired private PasswordEncoder encoder;
   @Autowired private S3ConfigProperties s3ConfigProperties;
+  @Autowired private UserResultActions resultActions;
 
   private UserControllerTestParameters userControllerTestParameters;
 
+
+
   @BeforeEach
   void setUp() {
-    setResultActionsParameters(new UserEndpointUris(), mvc, tokenManager);
     userControllerTestParameters =
         new UserControllerTestParameters(
             userRepository, confirmationTokenRepository, refreshTokenRepository);
@@ -122,9 +118,11 @@ class UserControllerTest extends UserResultActions {
     UserRegistrationRequestDto requestDto = userControllerTestParameters
             .getUserToSave();
 
-    registrationResultActions(requestDto)
+    resultActions
+        .registrationResultActions(requestDto)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.firstName").exists());
+
     MimeMessage[] messages = greenMail.getReceivedMessages();
     assertEquals(1, messages.length);
     assertEquals(requestDto.getEmail(), messages[0].getAllRecipients()[0].toString());
@@ -135,7 +133,8 @@ class UserControllerTest extends UserResultActions {
     UserRegistrationRequestDto requestDto = userControllerTestParameters
             .getUserToSaveWithInvalidFields();
 
-    registrationResultActions(requestDto)
+    resultActions
+        .registrationResultActions(requestDto)
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors").exists());
   }
@@ -145,7 +144,8 @@ class UserControllerTest extends UserResultActions {
     UserRegistrationRequestDto requestDto = userControllerTestParameters
             .getUserToSaveWithDuplicatedEmail();
 
-    registrationResultActions(requestDto)
+    resultActions
+        .registrationResultActions(requestDto)
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.message").value(containsString("email")));
   }
@@ -157,7 +157,8 @@ class UserControllerTest extends UserResultActions {
     UUID userId = confirmationToken.getUser().getId();
     assumeTrue(confirmationToken.getExpiresAt().isAfter(LocalDateTime.now()));
 
-    activationResultActions(confirmationToken.getToken())
+    resultActions
+        .activationResultActions(confirmationToken.getToken())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(userId.toString()));
 
@@ -169,7 +170,7 @@ class UserControllerTest extends UserResultActions {
   void failedActivationAsTokenDoesntExist() throws Exception {
     String token = UUID.randomUUID().toString();
 
-    activationResultActions(token).andExpect(status().isNotFound());
+    resultActions.activationResultActions(token).andExpect(status().isNotFound());
   }
 
   @Test
@@ -177,7 +178,8 @@ class UserControllerTest extends UserResultActions {
     AuthRequestDto requestDto = userControllerTestParameters
             .getUserCredentialsToLogin();
 
-    loginResultActions(requestDto)
+    resultActions
+        .loginResultActions(requestDto)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.accessToken").exists())
         .andExpect(jsonPath("$.refreshTokenId").exists());
@@ -189,7 +191,7 @@ class UserControllerTest extends UserResultActions {
             .getUserInvalidCredentialsToLogin();
     assumeFalse(userRepository.existsByEmailIgnoreCase(requestDto.getUsername()));
 
-    loginResultActions(requestDto).andExpect(status().isUnauthorized());
+    resultActions.loginResultActions(requestDto).andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -197,7 +199,7 @@ class UserControllerTest extends UserResultActions {
     RefreshTokenRequestDto requestDto = userControllerTestParameters
             .getRefreshToken();
 
-    refreshTokenResultActions(requestDto).andExpect(status().isOk());
+    resultActions.refreshTokenResultActions(requestDto).andExpect(status().isOk());
   }
 
   @Test
@@ -205,7 +207,8 @@ class UserControllerTest extends UserResultActions {
     RefreshTokenRequestDto requestDto = userControllerTestParameters
             .getExpiredRefreshToken();
 
-    refreshTokenResultActions(requestDto)
+    resultActions
+        .refreshTokenResultActions(requestDto)
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.message").value(containsString("Expired")));
   }
@@ -217,7 +220,7 @@ class UserControllerTest extends UserResultActions {
     User adminUser = userControllerTestParameters
             .getUser(ADMIN);
 
-    fetchingResultActions(requestDto, adminUser).andExpect(status().isOk());
+    resultActions.fetchingResultActions(requestDto, adminUser).andExpect(status().isOk());
   }
 
   @Test
@@ -227,7 +230,7 @@ class UserControllerTest extends UserResultActions {
     User clientUser = userControllerTestParameters
             .getUser(CLIENT);
 
-    fetchingResultActions(requestDto, clientUser).andExpect(status().isForbidden());
+    resultActions.fetchingResultActions(requestDto, clientUser).andExpect(status().isForbidden());
   }
 
   @Test
@@ -237,7 +240,7 @@ class UserControllerTest extends UserResultActions {
     User adminUser = userControllerTestParameters
             .getUser(Role.ADMIN);
 
-    fetchingResultActions(requestDto, adminUser).andExpect(status().isBadRequest());
+    resultActions.fetchingResultActions(requestDto, adminUser).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -246,7 +249,7 @@ class UserControllerTest extends UserResultActions {
     ChangePasswordRequestDto requestDto = userControllerTestParameters
             .getChangePasswordRequestDto(savedUser);
 
-    passwordChangingResultActions(requestDto, savedUser).andExpect(status().isOk());
+    resultActions.passwordChangingResultActions(requestDto, savedUser).andExpect(status().isOk());
   }
 
   @Test
@@ -255,7 +258,8 @@ class UserControllerTest extends UserResultActions {
             .getSavedUser();
     User adminUser = userControllerTestParameters.getSavedUser(ADMIN);
 
-    getByIdResultActions(user.getId(), adminUser)
+    resultActions
+        .getByIdResultActions(user.getId(), adminUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(user.getId().toString()));
   }
@@ -265,7 +269,7 @@ class UserControllerTest extends UserResultActions {
     User user = userControllerTestParameters
             .getSavedUser();
 
-    getByIdResultActions(UUID.randomUUID(), user).andExpect(status().isNotFound());
+    resultActions.getByIdResultActions(UUID.randomUUID(), user).andExpect(status().isNotFound());
   }
 
   @Test
@@ -273,7 +277,7 @@ class UserControllerTest extends UserResultActions {
     User user = userControllerTestParameters.getSavedUser();
     ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto(user.getEmail());
 
-    passwordVerificationResultActions(requestDto).andExpect(status().isOk());
+    resultActions.passwordVerificationResultActions(requestDto).andExpect(status().isOk());
     MimeMessage[] messages = greenMail.getReceivedMessages();
     assertEquals(1, messages.length);
     assertEquals(user.getEmail(), messages[0].getAllRecipients()[0].toString());
@@ -284,7 +288,7 @@ class UserControllerTest extends UserResultActions {
     ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto("Example@mail.ru");
     assumeFalse(userRepository.existsByEmailIgnoreCase(requestDto.getEmail()));
 
-    passwordVerificationResultActions(requestDto).andExpect(status().isNotFound());
+    resultActions.passwordVerificationResultActions(requestDto).andExpect(status().isNotFound());
   }
 
   @Test
@@ -301,11 +305,12 @@ class UserControllerTest extends UserResultActions {
         new RestorePasswordRequestDto(
             confirmationToken.getToken(), userWithoutEncodedPassword.getPassword() + ".a");
 
-    passwordRestoringResultActions(requestDto).andExpect(status().isOk());
+    resultActions.passwordRestoringResultActions(requestDto).andExpect(status().isOk());
     assertTrue(
         encoder.matches(
             userWithoutEncodedPassword.getPassword() + ".a",
             userControllerTestParameters
+
                 .getSavedUserWithId(confirmationToken.getUser().getId())
                 .getPassword()));
   }
@@ -313,12 +318,13 @@ class UserControllerTest extends UserResultActions {
   @Nested
   class ImageTest {
 
+    private static final String ORIGINAL_IMAGES_PATH = "user/%s/original";
+    private static final String THUMBNAIL_IMAGES_PATH = "user/%s/thumbnail";
     private static final String[] TEST_IMAGES = {"valid_image.jpg", "invalid_image_size.jpg"};
 
     @BeforeEach
     void setUp() {
-      cleanS3Folder(s3ConfigProperties.getOriginalImagePath());
-      cleanS3Folder(s3ConfigProperties.getThumbnailImagePath());
+      cleanS3Folder();
     }
 
     @AfterAll
@@ -335,15 +341,15 @@ class UserControllerTest extends UserResultActions {
       MockMultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
 
-      imageUploadingResultActions(file, userId, user).andExpect(status().isNoContent());
+      resultActions
+          .imageUploadingResultActions(file, userId, user)
+          .andExpect(status().isNoContent());
       assertTrue(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getOriginalImagePath() + userId));
+              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
       assertTrue(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getThumbnailImagePath() + userId));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
     }
 
     @Test
@@ -354,35 +360,38 @@ class UserControllerTest extends UserResultActions {
       MockMultipartFile file =
           userControllerTestParameters.getMultiPartFile(filename, IMAGE_JPEG_VALUE);
 
-      imageUploadingResultActions(file, userId, user).andExpect(status().isPreconditionFailed());
+      resultActions
+          .imageUploadingResultActions(file, userId, user)
+          .andExpect(status().isPreconditionFailed());
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getOriginalImagePath() + userId));
+              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getThumbnailImagePath() + userId));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
       Files.delete(Paths.get(filename));
     }
 
     @Test
     void successfulOriginalImageDownloading() throws Exception {
       User savedUser = userControllerTestParameters.getSavedUser();
+      UUID userId = savedUser.getId();
       MultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          s3ConfigProperties.getOriginalImagePath() + savedUser.getId().toString(),
+          String.format(ORIGINAL_IMAGES_PATH, userId),
           convertMultipartFileToFile(file));
 
-      imageDownloadingResultActions("image", savedUser.getId(), savedUser)
+      resultActions
+          .imageDownloadingResultActions("image", userId, savedUser)
           .andExpect(status().isOk());
     }
 
     @Test
     void failedOriginalImageDownloadingAsPermissionDenied() throws Exception {
-      imageDownloadingResultActions(
+      resultActions
+          .imageDownloadingResultActions(
               "image", UUID.randomUUID(), userControllerTestParameters.getSavedUser())
           .andExpect(status().isForbidden());
     }
@@ -392,66 +401,64 @@ class UserControllerTest extends UserResultActions {
       User savedUser = userControllerTestParameters.getSavedUser();
       MultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
-
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          s3ConfigProperties.getThumbnailImagePath() + savedUser.getId().toString(),
+          String.format(THUMBNAIL_IMAGES_PATH, savedUser.getId()),
           convertMultipartFileToFile(file));
 
-      imageDownloadingResultActions("thumbnail_image", savedUser.getId(), savedUser)
+      resultActions
+          .imageDownloadingResultActions("thumbnail_image", savedUser.getId(), savedUser)
           .andExpect(status().isOk());
     }
 
     @Test
+
     void successfulImageDeletion() throws Exception {
       User savedUser = userControllerTestParameters.getSavedUser();
+      UUID userId = savedUser.getId();
       MultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
 
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          s3ConfigProperties.getOriginalImagePath() + savedUser.getId().toString(),
+          String.format(ORIGINAL_IMAGES_PATH, userId),
           convertMultipartFileToFile(file));
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          s3ConfigProperties.getThumbnailImagePath() + savedUser.getId().toString(),
+          String.format(THUMBNAIL_IMAGES_PATH, userId),
           convertMultipartFileToFile(file));
+
       assumeTrue(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getThumbnailImagePath() + savedUser.getId().toString()));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
 
-      imageDeletionResultActions(savedUser.getId(), savedUser).andExpect(status().isNoContent());
+      resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNoContent());
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getThumbnailImagePath() + savedUser.getId()));
+              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getOriginalImagePath() + savedUser.getId()));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
     }
 
     @Test
     void failedImageDeletingAsImageDoesntExist() throws Exception {
       User savedUser = userControllerTestParameters.getSavedUser();
+      UUID userId = savedUser.getId();
 
       assumeFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getThumbnailImagePath() + savedUser.getId()));
+              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
       assumeFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(),
-              s3ConfigProperties.getOriginalImagePath() + savedUser.getId()));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
 
-      imageDeletionResultActions(savedUser.getId(), savedUser).andExpect(status().isNotFound());
+      resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNotFound());
     }
 
-    private void cleanS3Folder(String folderPath) {
+    private void cleanS3Folder() {
       String bucketName = s3ConfigProperties.getBucketName();
-      for (S3ObjectSummary file :
-          amazonS3.listObjects(bucketName, folderPath).getObjectSummaries()) {
+      for (S3ObjectSummary file : amazonS3.listObjects(bucketName, "user").getObjectSummaries()) {
         amazonS3.deleteObject(bucketName, file.getKey());
       }
     }

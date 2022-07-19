@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.filter.specification;
 
-import com.vecondev.buildoptima.exception.WrongFieldException;
+import com.vecondev.buildoptima.exception.InvalidFieldException;
 import com.vecondev.buildoptima.filter.converter.SingleCriteriaConverter;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.FieldDefinition;
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FIELD;
 import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FILTER_STRUCTURE;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.NAME;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.OPERATION;
@@ -52,7 +53,7 @@ public class GenericSpecification<T> implements Specification<T> {
       if (!filter.containsKey(NAME)
           || !filter.containsKey(OPERATION)
               && (!filter.containsKey(VALUE) || !filter.containsKey(VALUES))) {
-        throw new WrongFieldException(INVALID_FILTER_STRUCTURE);
+        throw new InvalidFieldException(INVALID_FILTER_STRUCTURE);
       }
 
       Criteria criteria = new Criteria();
@@ -68,7 +69,7 @@ public class GenericSpecification<T> implements Specification<T> {
       }
 
       if (!fieldDefinitionMap.containsKey(criteria.getName())) {
-        throw new WrongFieldException(INVALID_FILTER_STRUCTURE);
+        throw new InvalidFieldException(INVALID_FIELD);
       }
 
       return SingleCriteriaConverter.toPredicate(
@@ -86,7 +87,7 @@ public class GenericSpecification<T> implements Specification<T> {
               .map(stringObjectHashMap -> convertTree(root, builder, stringObjectHashMap))
               .toArray(Predicate[]::new));
     } else {
-      throw new WrongFieldException(INVALID_FILTER_STRUCTURE);
+      throw new InvalidFieldException(INVALID_FILTER_STRUCTURE);
     }
   }
 }

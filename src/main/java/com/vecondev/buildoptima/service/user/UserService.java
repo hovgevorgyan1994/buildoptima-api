@@ -42,7 +42,7 @@ public interface UserService {
 
   void uploadImage(UUID userId, MultipartFile multipartFile,AppUserDetails userDetails);
 
-  ResponseEntity<byte[]> downloadImage(UUID userId, UUID ownerId, boolean isOriginal);
+  ResponseEntity<byte[]> downloadImage(UUID ownerId, boolean isOriginal);
 
   void deleteImage(UUID userId);
 

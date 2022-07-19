@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
+import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
@@ -13,15 +14,20 @@ import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.faq.FaqQuestionRepository;
+import com.vecondev.buildoptima.service.csv.CsvService;
 import com.vecondev.buildoptima.service.faq.FaqCategoryService;
 import com.vecondev.buildoptima.service.faq.FaqQuestionService;
 import com.vecondev.buildoptima.service.user.UserService;
 import com.vecondev.buildoptima.validation.faq.FaqQuestionValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +51,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
   private final FaqCategoryService faqCategoryService;
   private final UserService userService;
   private final PageableConverter pageableConverter;
+  private final CsvService<FaqQuestionRecord> csvService;
 
   @Override
   public List<FaqQuestionResponseDto> getAllQuestions() {
@@ -80,8 +87,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
             .orElseThrow(() -> new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND));
     faqQuestionValidator.validateQuestion(requestDto.getQuestion());
 
-    question =
-        question.toBuilder()
+    question = question.toBuilder()
             .question(requestDto.getQuestion())
             .answer(requestDto.getAnswer())
             .status(requestDto.getStatus())
@@ -132,5 +138,18 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
         .totalElements(result.getTotalElements())
         .last(result.isLast())
         .build();
+  }
+
+  /** exports all faq questions in csv file */
+  public ResponseEntity<Resource> exportFaqQuestionsInCsv() {
+    List<FaqQuestion> questions = faqQuestionRepository.findAll();
+    List<FaqQuestionRecord> questionRecords = faqQuestionMapper.mapToRecordList(questions);
+    InputStreamResource questionsResource =
+        new InputStreamResource(csvService.writeToCsv(questionRecords, FaqQuestionRecord.class));
+
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType("application/csv"))
+        .header("Content-disposition", "attachment; filename=FaqQuestions.csv")
+        .body(questionsResource);
   }
 }

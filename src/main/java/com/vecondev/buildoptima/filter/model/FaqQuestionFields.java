@@ -22,9 +22,10 @@ public class FaqQuestionFields {
   private static final String CREATED_AT = "createdAt";
   private static final String UPDATED_AT = "updatedAt";
   private static final String UPDATED_BY = "updatedBy";
-  private static final String USER_ID = "id";
   private static final String CREATED_BY = "createdBy";
   private static final String CATEGORY = "category";
+
+  private static final String USER_ID = "id";
   private static final String CATEGORY_NAME = "name";
 
   static {

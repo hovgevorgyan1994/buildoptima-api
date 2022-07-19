@@ -22,7 +22,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @MappedSuperclass
-public class AbstractEntity implements Serializable {
+public abstract class AbstractEntity implements Serializable {
 
   @Serial private static final long serialVersionUID = -3138146155196509702L;
 
@@ -39,9 +39,4 @@ public class AbstractEntity implements Serializable {
   @UpdateTimestamp
   @Column(name = "updated_at")
   protected Instant updatedAt;
-
-  public AbstractEntity(Instant createdAt, Instant updatedAt) {
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-  }
 }

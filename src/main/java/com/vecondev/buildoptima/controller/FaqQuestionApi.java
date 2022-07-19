@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -234,4 +235,28 @@ public interface FaqQuestionApi {
                     mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<FetchResponseDto> fetchQuestions(FetchRequestDto fetchRequest);
+
+    @Operation(
+            summary = "Exporting all FAQ questions in '.csv' format",
+            security = @SecurityRequirement(name = "api-security"))
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "All faq questions should be exported",
+                            content = {
+                                    @Content(mediaType = "application/csv"),
+                                    @Content(mediaType = APPLICATION_JSON_VALUE)
+                            }),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description =
+                                    "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
+                            content =
+                            @Content(
+                                    schema = @Schema(implementation = ApiError.class),
+                                    mediaType = APPLICATION_JSON_VALUE))
+            })
+    ResponseEntity<Resource> exportAllQuestionsInCSV(
+            @Parameter(hidden = true) AppUserDetails authenticatedUser);
 }

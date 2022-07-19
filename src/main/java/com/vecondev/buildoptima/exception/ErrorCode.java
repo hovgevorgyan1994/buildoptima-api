@@ -24,11 +24,9 @@ public enum ErrorCode {
   CONFIRM_TOKEN_NOT_FOUND(NOT_FOUND, "Confirmation Token Not Found"),
   PROVIDED_SAME_PASSWORD(CONFLICT, "Provided The Same Password In Change Password Request"),
   PROVIDED_WRONG_PASSWORD(BAD_REQUEST, "Provided Wrong Password In Change Password Request"),
-
   SEND_EMAIL_FAILED(INTERNAL_SERVER_ERROR, "Failed To Send An Email"),
   INVALID_PAGEABLE(BAD_REQUEST, "The `skip` Value Should Be Divisible To `take`Value"),
   INVALID_FILTER_STRUCTURE(BAD_REQUEST, "Invalid Filter Structure"),
-
   USER_NOT_FOUND(NOT_FOUND, "There is no user registered with such id!"),
   FAQ_QUESTION_NOT_FOUND(NOT_FOUND, "There is no FAQ question created with such id!"),
   FAQ_CATEGORY_NOT_FOUND(NOT_FOUND, "There is no FAQ category created with such id!"),
@@ -41,8 +39,13 @@ public enum ErrorCode {
       PRECONDITION_FAILED, "The extension of the image should be either 'jpg/jpeg' or 'png'."),
   IMAGE_NOT_FOUND(NOT_FOUND, "There isn't image for the given user."),
   IMAGE_IS_REQUIRED(BAD_REQUEST, "No image was passed with request!"),
-  FAILED_MULTIPART_CONVERSION(INTERNAL_SERVER_ERROR, "Error occurred while converting multipart file to file." ),
-  FAILED_IMAGE_CONVERSION(INTERNAL_SERVER_ERROR, "Error occurred while resizing the image."),
+  FAILED_MULTIPART_CONVERTION(
+      INTERNAL_SERVER_ERROR, "Error occurred while converting multipart file to file."),
+  FAILED_IMAGE_RESIZING(INTERNAL_SERVER_ERROR, "Error occurred while resizing the image."),
+  FAILED_CSV_CONVERTION(
+      INTERNAL_SERVER_ERROR, "Error occurred while converting result to '.csv' format."),
+  FAILED_IMAGE_CONVERTION(
+      INTERNAL_SERVER_ERROR, "Error occurred while processing downloaded image."),
   BUCKET_NOT_FOUND(INTERNAL_SERVER_ERROR, "Cant find bucket in AWS S3."),
   FAQ_CATEGORY_ALREADY_EXIST(CONFLICT, "There is a FAQ Category created with such name!"),
   FAQ_QUESTION_ALREADY_EXIST(CONFLICT, "There is a FAQ Question created with such question content!"),
@@ -50,9 +53,9 @@ public enum ErrorCode {
   INVALID_INSTANT(BAD_REQUEST, "Can't parse String value to Instant." ),
   INVALID_ROLE(BAD_REQUEST, "Can't parse String value to Role enum."),
   INVALID_STATUS(BAD_REQUEST, "Can't parse String value to Status enum."),
-
   INVALID_NEWS_UPDATE_REQUEST(HttpStatus.NOT_ACCEPTABLE,"Update News Item Request Should Have At Least One Property Provided"),
-  NEWS_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "News Item Not Found");
+  NEWS_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "News Item Not Found"),
+  INVALID_FIELD(BAD_REQUEST, "Invalid field in fetch request.");
 
   private final HttpStatus httpStatus;
   private final String message;

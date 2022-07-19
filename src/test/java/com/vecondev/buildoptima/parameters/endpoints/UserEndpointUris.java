@@ -1,35 +1,51 @@
 package com.vecondev.buildoptima.parameters.endpoints;
 
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.test.context.TestConfiguration;
+
+@Setter
+@TestConfiguration
+@ConfigurationProperties(prefix = "config.uris.user")
 public class UserEndpointUris implements EndpointUris {
 
-  @Override
-  public String baseUri() {
-    return "/user";
-  }
+  private String baseUri;
+  private String fetchUri;
+  private String retrieveByIdUri;
+  private String deleteImageByIdUri;
+  private String downloadImageUri;
+  private String uploadImageUri;
+  private String restorePasswordUri;
+  private String verifyPasswordUri;
+  private String changePasswordUri;
+  private String refreshTokenUri;
+  private String activationUri;
+  private String loginUri;
+  private String registrationUri;
 
   @Override
-  public String deleteByIdUri() {
+  public String getDeleteByIdUri() {
     return null;
   }
 
   @Override
-  public String updateUri() {
+  public String getUpdateUri() {
     return null;
   }
 
   @Override
-  public String creationUri() {
+  public String getCreationUri() {
     return null;
   }
 
   @Override
-  public String fetchUri() {
-    return baseUri() + "/fetch";
+  public String getFetchUri() {
+    return baseUri + fetchUri;
   }
 
   @Override
-  public String getByIdUri() {
-    return baseUri() + "/{id}";
+  public String getRetrieveByIdUri() {
+    return baseUri + retrieveByIdUri;
   }
 
   @Override
@@ -37,43 +53,48 @@ public class UserEndpointUris implements EndpointUris {
     return null;
   }
 
-  public String imageDeletionUri() {
-    return baseUri() + "/{id}/image";
+  @Override
+  public String getExportInCsvUri() {
+    return null;
   }
 
-  public String imageDownloadingUri() {
-    return baseUri() + "/{id}/";
+  public String getImageDeletionUri() {
+    return baseUri + deleteImageByIdUri;
   }
 
-  public String imageUploadingUri() {
-    return baseUri() + "/{id}/image";
+  public String getImageDownloadingUri() {
+    return baseUri + downloadImageUri;
   }
 
-  public String passwordRestoringUri() {
-    return baseUri() + "/auth/password/restore";
+  public String getImageUploadingUri() {
+    return baseUri + uploadImageUri;
   }
 
-  public String passwordVerificationUri() {
-    return baseUri() + "/auth/password/verify";
+  public String getPasswordRestoringUri() {
+    return baseUri + restorePasswordUri;
   }
 
-  public String changePasswordUri() {
-    return baseUri() + "/password/change";
+  public String getPasswordVerificationUri() {
+    return baseUri + verifyPasswordUri;
   }
 
-  public String refreshTokenUri() {
-    return baseUri() + "/auth/refreshToken";
+  public String getChangePasswordUri() {
+    return baseUri + changePasswordUri;
   }
 
-  public String loginUri() {
-    return baseUri() + "/auth/login";
+  public String getRefreshTokenUri() {
+    return baseUri + refreshTokenUri;
   }
 
-  public String activationUri() {
-    return baseUri() + "/auth/activate";
+  public String getLoginUri() {
+    return baseUri + loginUri;
   }
 
-  public String registrationUri() {
-    return baseUri() + "/auth/registration";
+  public String getActivationUri() {
+    return baseUri + activationUri;
+  }
+
+  public String getRegistrationUri() {
+    return baseUri + registrationUri;
   }
 }

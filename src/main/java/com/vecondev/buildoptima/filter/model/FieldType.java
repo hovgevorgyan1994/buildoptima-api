@@ -20,8 +20,7 @@ public enum FieldType {
   LONG(Set.of(GT, GE, EQ, LE, LT, IN, NE)),
   BOOLEAN(Set.of(EQ, NE)),
   DATE(Set.of(GT, GE, EQ, LE, LT, IN, NE)),
-  DATETIME(Set.of(GT, GE, EQ, LE, LT, IN, NE)),
-  ENTITY(Set.of(EQ, IN));
+  DATETIME(Set.of(GT, GE, EQ, LE, LT, IN, NE));
 
   private final Set<SearchOperation> operations;
 

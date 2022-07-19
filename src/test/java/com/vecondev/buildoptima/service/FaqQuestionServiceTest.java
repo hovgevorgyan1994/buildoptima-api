@@ -1,10 +1,12 @@
 package com.vecondev.buildoptima.service;
 
+import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
+import com.vecondev.buildoptima.exception.FileConvertionFailedException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
@@ -13,6 +15,7 @@ import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.faq.question.FaqQuestionServiceTestParameters;
 import com.vecondev.buildoptima.repository.faq.FaqQuestionRepository;
+import com.vecondev.buildoptima.service.csv.CsvServiceImpl;
 import com.vecondev.buildoptima.service.faq.FaqCategoryService;
 import com.vecondev.buildoptima.service.faq.impl.FaqQuestionServiceImpl;
 import com.vecondev.buildoptima.service.user.UserService;
@@ -27,11 +30,16 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,6 +64,7 @@ class FaqQuestionServiceTest {
   @Mock private FaqQuestionRepository faqQuestionRepository;
   @Mock private FaqCategoryService faqCategoryService;
   @Mock private UserService userService;
+  @Mock private CsvServiceImpl<FaqQuestionRecord> csvService;
   @Mock private PageableConverter pageableConverter;
 
   @Test
@@ -222,7 +231,7 @@ class FaqQuestionServiceTest {
   void successfulFetchingOfFaqCategories() {
     FetchRequestDto requestDto = testParameters.getFetchRequest();
     Pageable pageable = testParameters.getPageable(requestDto);
-    Page<FaqQuestion> result = new PageImpl<>(testParameters.getFetchResponse());
+    Page<FaqQuestion> result = new PageImpl<>(testParameters.getFaqQuestionList());
 
     try (MockedStatic<FieldNameValidator> validator =
                  Mockito.mockStatic(FieldNameValidator.class)) {
@@ -243,7 +252,7 @@ class FaqQuestionServiceTest {
   void successfulFetchingOfFaqCategoriesWithDefaultSortDirectory() {
     FetchRequestDto requestDto = testParameters.getFetchRequest();
     Pageable pageable = testParameters.getPageable(requestDto);
-    Page<FaqQuestion> result = new PageImpl<>(testParameters.getFetchResponse());
+    Page<FaqQuestion> result = new PageImpl<>(testParameters.getFaqQuestionList());
 
     try (MockedStatic<FieldNameValidator> validator =
                  Mockito.mockStatic(FieldNameValidator.class)) {
@@ -260,4 +269,27 @@ class FaqQuestionServiceTest {
     assertEquals(result.getTotalElements(), responseDto.getTotalElements());
   }
 
+  @Test
+  void successfulExportingOfQuestionsInCsv() {
+    List<FaqQuestionRecord> questionRecords = testParameters.getFaqQuestionRecordList();
+
+    when(faqQuestionMapper.mapToRecordList(any())).thenReturn(questionRecords);
+    when(csvService.writeToCsv(questionRecords, FaqQuestionRecord.class)).thenReturn(new ByteArrayInputStream(new byte[] {}));
+
+    ResponseEntity<Resource> response = faqQuestionService.exportFaqQuestionsInCsv();
+    assertEquals(200, response.getStatusCodeValue());
+    assertEquals("application/csv", Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
+    verify(faqQuestionRepository).findAll();
+  }
+
+  @Test
+  void failedExportingOfQuestionsInCsvAsConvertionToCsvFailed() {
+    List<FaqQuestionRecord> questionRecords = testParameters.getFaqQuestionRecordList();
+
+    when(faqQuestionMapper.mapToRecordList(any())).thenReturn(questionRecords);
+    doThrow(FileConvertionFailedException.class).when(csvService).writeToCsv(questionRecords, FaqQuestionRecord.class);
+
+    assertThrows(FileConvertionFailedException.class, () -> faqQuestionService.exportFaqQuestionsInCsv());
+    verify(faqQuestionRepository).findAll();
+  }
 }

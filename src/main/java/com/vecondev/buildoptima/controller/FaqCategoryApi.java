@@ -225,4 +225,28 @@ public interface FaqCategoryApi {
                     mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<FetchResponseDto> fetchCategories(FetchRequestDto fetchRequest);
+
+  @Operation(
+      summary = "Exporting all FAQ categories in '.csv' format",
+      security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "All faq categories should be exported",
+            content = {
+              @Content(mediaType = "application/csv"),
+              @Content(mediaType = APPLICATION_JSON_VALUE)
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<Resource> exportAllCategoriesInCSV(
+      @Parameter(hidden = true) AppUserDetails authenticatedUser);
 }

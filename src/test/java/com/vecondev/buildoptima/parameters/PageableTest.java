@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.parameters;
 
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.exception.WrongFieldException;
+import com.vecondev.buildoptima.exception.InvalidFieldException;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +21,7 @@ public interface PageableTest {
 
         if (take > 0) {
             if (skip % take != 0) {
-                throw new WrongFieldException(INVALID_PAGEABLE);
+                throw new InvalidFieldException(INVALID_PAGEABLE);
             }
 
             page = skip / take;
