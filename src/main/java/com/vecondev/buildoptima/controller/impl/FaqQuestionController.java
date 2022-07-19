@@ -1,7 +1,9 @@
 package com.vecondev.buildoptima.controller.impl;
 
 import com.vecondev.buildoptima.controller.FaqQuestionApi;
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.faq.FaqQuestionService;
@@ -97,5 +99,13 @@ public class FaqQuestionController implements FaqQuestionApi {
 
     faqQuestionService.deleteQuestion(id, authenticatedUser.getId());
     return new ResponseEntity<>(OK);
+  }
+
+  @Override
+  @PostMapping("/fetch")
+  @PreAuthorize("hasAuthority('resource_read')")
+  public ResponseEntity<FetchResponseDto> fetchQuestions(@RequestBody FetchRequestDto fetchRequest) {
+
+    return ResponseEntity.ok(faqQuestionService.fetchQuestions(fetchRequest));
   }
 }

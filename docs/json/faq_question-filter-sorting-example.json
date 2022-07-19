@@ -3,7 +3,7 @@
   "take": 10,
   "sort": [
     {
-      "field": "firstName",
+      "field": "status",
       "order": "asc"
     }
   ],
@@ -11,19 +11,19 @@
     "and": [
       {
         "operation": "eq",
-        "name": "firstName",
-        "value": "John"
+        "name": "status",
+        "value": "ACTIVE"
       },
       {
         "or": [
           {
             "operation": "like",
-            "name": "lastName",
-            "value": "terson"
+            "name": "question",
+            "value": "how"
           },
           {
             "operation": "gt",
-            "name": "creationDate",
+            "name": "createdAt",
             "value": "2018-11-30T18:35:24.00Z"
           }
         ]

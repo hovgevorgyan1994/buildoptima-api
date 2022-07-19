@@ -8,7 +8,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.stream.Collectors;
 
 public class SingleCriteriaConverter {
 
@@ -35,7 +34,7 @@ public class SingleCriteriaConverter {
             case LE -> builder.lessThanOrEqualTo(
                     path.get(fieldDefinition.getEntityFieldName()), fieldDefinition.convertValue(criteria.getValue()));
             case IN -> builder.in(
-                    path.get(fieldDefinition.getEntityFieldName())).value(criteria.getValues().stream().map(fieldDefinition::convertValue).collect(Collectors.toList()));
+                    path.get(fieldDefinition.getEntityFieldName())).value(criteria.getValues().stream().map(fieldDefinition::convertValue).toList());
 
         };
     }

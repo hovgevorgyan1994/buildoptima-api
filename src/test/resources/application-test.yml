@@ -32,11 +32,6 @@ config:
       accessKey: localstack
       secretKey: localstack
 
-  mail:
-    credentials:
-      username: ${spring.mail.username}
-      password: ${spring.mail.password}
-
 aws:
   properties:
     s3:

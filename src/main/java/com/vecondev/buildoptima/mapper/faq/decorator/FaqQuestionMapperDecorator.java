@@ -10,6 +10,7 @@ import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -43,5 +44,10 @@ public abstract class FaqQuestionMapperDecorator implements FaqQuestionMapper {
   @Override
   public List<FaqQuestionResponseDto> mapToListDto(List<FaqQuestion> faqQuestions) {
     return faqQuestions.stream().map(this::mapToDto).toList();
+  }
+
+  @Override
+  public List<FaqQuestionResponseDto> mapToListDtoFromPage(Page<FaqQuestion> faqQuestions) {
+    return faqQuestionMapper.mapToListDtoFromPage(faqQuestions);
   }
 }

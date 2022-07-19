@@ -7,14 +7,18 @@ import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryServiceTestParameters;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.vecondev.buildoptima.model.Status.ACTIVE;
 
-public class FaqQuestionServiceTestParameters {
+public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
+    implements PageableTest {
 
   private final UserServiceTestParameters userServiceTestParameters =
       new UserServiceTestParameters();
@@ -42,25 +46,36 @@ public class FaqQuestionServiceTestParameters {
     return faqQuestion;
   }
 
-  public FaqQuestionResponseDto getFaqQuestionResponseDto(UUID userId) {
-    FaqQuestion faqQuestion = getFaqQuestion(userId);
-    User user = faqQuestion.getUpdatedBy();
+  public FaqQuestionResponseDto getFaqQuestionResponseDto(FaqQuestion question) {
+    User user = question.getUpdatedBy();
     return new FaqQuestionResponseDto(
-        faqQuestion.getId(),
-        faqQuestion.getQuestion(),
-        faqQuestion.getAnswer(),
-        faqQuestion.getStatus(),
+        question.getId(),
+        question.getQuestion(),
+        question.getAnswer(),
+        question.getStatus(),
         new FaqCategoryOverview(
-            faqQuestion.getCategory().getId(), faqQuestion.getCategory().getName()),
+            question.getCategory().getId(), question.getCategory().getName()),
         new UserOverview(user.getId(), user.getFirstName(), user.getLastName()),
-        faqQuestion.getCreatedAt(),
-        faqQuestion.getUpdatedAt());
+        question.getCreatedAt(),
+        question.getUpdatedAt());
+  }
+
+  public List<FaqQuestion> getFetchResponse() {
+    return List.of(
+        getFaqQuestion(UUID.randomUUID()),
+        getFaqQuestion(UUID.randomUUID()).toBuilder()
+            .question("Question_")
+            .answer("Answer_")
+            .build());
   }
 
   public FaqCategory getFaqCategory(UUID userId) {
     return faqCategoryServiceTestParameters.getFaqCategory(userId);
   }
 
+  public List<FaqQuestionResponseDto> getFaqQuestionResponseDtoList(List<FaqQuestion> faqQuestions) {
+    return faqQuestions.stream().map(this::getFaqQuestionResponseDto).collect(Collectors.toList());
+  }
   public User getUserById(UUID userId) {
     User user = userServiceTestParameters.getSavedUser();
     user.setId(userId);

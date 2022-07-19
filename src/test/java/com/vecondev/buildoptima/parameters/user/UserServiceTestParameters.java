@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.parameters.user;
 
-import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.exception.WrongFieldException;
@@ -9,6 +9,7 @@ import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.PageableTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_PAGEABLE;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 
-public class UserServiceTestParameters extends UserTestParameters {
+public class UserServiceTestParameters extends UserTestParameters implements PageableTest {
   private final PasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
   public List<User> getFetchResponse() {

@@ -1,6 +1,9 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.filter.model.Criteria;
+import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
@@ -10,13 +13,16 @@ import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 
 import java.util.List;
+import java.util.Map;
 
+import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_QUESTION_NOT_FOUND;
 import static com.vecondev.buildoptima.model.Status.ACTIVE;
 import static com.vecondev.buildoptima.model.Status.ARCHIVED;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
 
-public class FaqQuestionControllerTestParameters {
+public class FaqQuestionControllerTestParameters extends FaqQuestionTestParameters{
 
   private final FaqCategoryControllerTestParameters faqCategoryControllerTestParameters;
   private final UserRepository userRepository;
@@ -94,5 +100,21 @@ public class FaqQuestionControllerTestParameters {
             .findAny()
             .orElseThrow(() -> new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND))
             .getId());
+  }
+
+  public FetchRequestDto getInvalidFetchRequest() {
+    return new FetchRequestDto(
+            0,
+            10,
+            List.of(new SortDto("name", SortDto.Direction.ASC)),
+            Map.of(
+                    "and",
+                    List.of(
+                            new Criteria(LIKE, "question", "how"),
+                            Map.of(
+                                    "or",
+                                    List.of(
+                                            new Criteria(LIKE, "answer", "password"),
+                                            new Criteria(GT, "creationDate", "2018-11-30T18:35:24.00Z"))))));
   }
 }

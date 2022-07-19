@@ -1,8 +1,13 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
+import com.vecondev.buildoptima.filter.converter.PageableConverter;
+import com.vecondev.buildoptima.filter.model.SortDto;
+import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
@@ -14,6 +19,9 @@ import com.vecondev.buildoptima.service.user.UserService;
 import com.vecondev.buildoptima.validation.faq.FaqQuestionValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +29,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_QUESTION_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.FaqQuestionFields.faqQuestionPageSortingFieldsMap;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 @Slf4j
 @Service
@@ -34,6 +44,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
 
   private final FaqCategoryService faqCategoryService;
   private final UserService userService;
+  private final PageableConverter pageableConverter;
 
   @Override
   public List<FaqQuestionResponseDto> getAllQuestions() {
@@ -69,10 +80,16 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
             .orElseThrow(() -> new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND));
     faqQuestionValidator.validateQuestion(requestDto.getQuestion());
 
-    question = updateFaqQuestionFields(question, requestDto, userId);
+    question = question.toBuilder()
+            .question(requestDto.getQuestion())
+            .answer(requestDto.getAnswer())
+            .status(requestDto.getStatus())
+            .category(faqCategoryService.findCategoryById(requestDto.getFaqCategoryId()))
+            .updatedBy(userService.getUserById(userId))
+            .build();
     log.info("User with id: {} updated the FAQ Question with id: {}", userId, questionId);
 
-    return faqQuestionMapper.mapToDto(faqQuestionRepository.saveAndFlush(question));
+    return faqQuestionMapper.mapToDto(faqQuestionRepository.save(question));
   }
 
   @Override
@@ -92,14 +109,27 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
         .orElseThrow(() -> new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND));
   }
 
-  private FaqQuestion updateFaqQuestionFields(
-      FaqQuestion targetQuestion, FaqQuestionRequestDto sourceQuestion, UUID userId) {
-    return targetQuestion.toBuilder()
-        .question(sourceQuestion.getQuestion())
-        .answer(sourceQuestion.getAnswer())
-        .status(sourceQuestion.getStatus())
-        .category(faqCategoryService.findCategoryById(sourceQuestion.getFaqCategoryId()))
-        .updatedBy(userService.getUserById(userId))
+  @Override
+  public FetchResponseDto fetchQuestions(FetchRequestDto fetchRequest) {
+    log.info("Request to fetch FAQ questions from DB");
+    validateFieldNames(faqQuestionPageSortingFieldsMap, fetchRequest.getSort());
+    if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
+      SortDto sortDto = new SortDto("questions", SortDto.Direction.ASC);
+      fetchRequest.setSort(List.of(sortDto));
+    }
+    Pageable pageable = pageableConverter.convert(fetchRequest);
+    Specification<FaqQuestion> specification =
+        new GenericSpecification<>(faqQuestionPageSortingFieldsMap, fetchRequest.getFilter());
+    Page<FaqQuestion> result = faqQuestionRepository.findAll(specification, pageable);
+
+    List<FaqQuestionResponseDto> content = faqQuestionMapper.mapToListDtoFromPage(result);
+    log.info("Response was sent. {} results where found", content.size());
+    return FetchResponseDto.builder()
+        .content(content)
+        .page(result.getNumber())
+        .size(result.getSize())
+        .totalElements(result.getTotalElements())
+        .last(result.isLast())
         .build();
   }
 }

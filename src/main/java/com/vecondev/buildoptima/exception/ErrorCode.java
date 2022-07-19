@@ -46,6 +46,10 @@ public enum ErrorCode {
   BUCKET_NOT_FOUND(INTERNAL_SERVER_ERROR, "Cant find bucket in AWS S3."),
   FAQ_CATEGORY_ALREADY_EXIST(CONFLICT, "There is a FAQ Category created with such name!"),
   FAQ_QUESTION_ALREADY_EXIST(CONFLICT, "There is a FAQ Question created with such question content!"),
+  INVALID_UUID(BAD_REQUEST, "Can't parse String value to UUID."),
+  INVALID_INSTANT(BAD_REQUEST, "Can't parse String value to Instant." ),
+  INVALID_ROLE(BAD_REQUEST, "Can't parse String value to Role enum."),
+  INVALID_STATUS(BAD_REQUEST, "Can't parse String value to Status enum."),
 
   INVALID_NEWS_UPDATE_REQUEST(HttpStatus.NOT_ACCEPTABLE,"Update News Item Request Should Have At Least One Property Provided"),
   NEWS_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "News Item Not Found");

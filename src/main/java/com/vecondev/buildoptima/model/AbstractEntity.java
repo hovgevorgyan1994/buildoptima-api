@@ -17,10 +17,10 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @MappedSuperclass
 public class AbstractEntity implements Serializable {
 
@@ -29,6 +29,7 @@ public class AbstractEntity implements Serializable {
   @Id
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+  @Column(name = "id", updatable = false, nullable = false)
   protected UUID id;
 
   @CreationTimestamp
@@ -38,4 +39,9 @@ public class AbstractEntity implements Serializable {
   @UpdateTimestamp
   @Column(name = "updated_at")
   protected Instant updatedAt;
+
+  public AbstractEntity(Instant createdAt, Instant updatedAt) {
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
 }

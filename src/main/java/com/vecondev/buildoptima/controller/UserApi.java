@@ -146,7 +146,7 @@ public interface UserApi {
               description =
                   "Click here to see a detailed explanation of this endpoint requirements",
               url =
-                  "https://github.com/vecondev/buildoptima-api/blob/develop/docs/filter-sorting.md"))
+                  "https://github.com/vecondev/buildoptima-api/blob/develop/docs/user-filter-sorting.md"))
   @RequestBody(ref = "#/components/requestBodies/fetchUsersRequestExample")
   @ApiResponses(
       value = {
@@ -166,7 +166,7 @@ public interface UserApi {
                     mediaType = APPLICATION_JSON_VALUE)),
         @ApiResponse(
             responseCode = "400",
-            description = "Expired access token",
+            description = "Expired access token or there is an invalid value in request body",
             content =
                 @Content(
                     schema = @Schema(implementation = ApiError.class),

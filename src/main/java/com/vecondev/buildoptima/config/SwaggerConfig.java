@@ -61,7 +61,25 @@ public class SwaggerConfig {
                                                 .addMediaType(
                                                         APPLICATION_JSON_VALUE,
                                                         new io.swagger.v3.oas.models.media.MediaType()
-                                                                .schema(new MapSchema().example(fetchRequestExample("docs/user-filter-sorting-example.json"))))))
+                                                                .schema(new MapSchema().example(fetchRequestExample("docs/json/user-filter-sorting-example.json"))))))
+                .addRequestBodies(
+                    "fetchFaqCategoriesRequestExample",
+                    new RequestBody()
+                            .content(
+                                    new Content()
+                                            .addMediaType(
+                                                    APPLICATION_JSON_VALUE,
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new MapSchema().example(fetchRequestExample("docs/json/faq_category-filter-sorting-example.json"))))))
+                .addRequestBodies(
+                        "fetchFaqQuestionsRequestExample",
+                        new RequestBody()
+                                .content(
+                                        new Content()
+                                                .addMediaType(
+                                                        APPLICATION_JSON_VALUE,
+                                                        new io.swagger.v3.oas.models.media.MediaType()
+                                                                .schema(new MapSchema().example(fetchRequestExample("docs/json/faq_question-filter-sorting-example.json"))))))
                 .addRequestBodies(
                         "fetchNewsRequestExample",
                         new RequestBody()
@@ -70,6 +88,6 @@ public class SwaggerConfig {
                                                 .addMediaType(
                                                         APPLICATION_JSON_VALUE,
                                                         new io.swagger.v3.oas.models.media.MediaType()
-                                                                .schema(new MapSchema().example(fetchRequestExample("docs/news-filter-sorting-example.json")))))));
+                                                                .schema(new MapSchema().example(fetchRequestExample("docs/json/news-filter-sorting-example.json")))))));
   }
 }

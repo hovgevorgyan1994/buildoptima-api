@@ -1,23 +1,23 @@
 package com.vecondev.buildoptima.filter.converter;
 
 import com.vecondev.buildoptima.exception.InvalidFieldException;
-import com.vecondev.buildoptima.model.user.Role;
+import com.vecondev.buildoptima.model.Status;
 import lombok.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_ROLE;
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_STATUS;
 
-public class RoleConverter implements Converter<String, Role> {
+public class StatusConverter implements Converter<String, Status> {
 
   @Nullable
   @Override
-  public Role convert(@NonNull String role) {
+  public Status convert(@NonNull String status) {
     try {
-      return Role.valueOf(role);
+      return Status.valueOf(status);
     } catch (InvalidDataAccessApiUsageException ex) {
-      throw new InvalidFieldException(INVALID_ROLE);
+      throw new InvalidFieldException(INVALID_STATUS);
     }
   }
 }

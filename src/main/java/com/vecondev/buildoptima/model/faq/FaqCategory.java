@@ -12,10 +12,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.time.Instant;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
 @Getter
 @Setter
 @Entity
@@ -28,4 +29,13 @@ public class FaqCategory extends AbstractEntity {
   @ManyToOne private User createdBy;
 
   @ManyToOne private User updatedBy;
+
+  @Builder(toBuilder = true)
+  public FaqCategory(
+      UUID id, String name, User createdBy, User updatedBy, Instant createdAt, Instant updatedAt) {
+    super(id, createdAt, updatedAt);
+    this.name = name;
+    this.createdBy = createdBy;
+    this.updatedBy = updatedBy;
+  }
 }

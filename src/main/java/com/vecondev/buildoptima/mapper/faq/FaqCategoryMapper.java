@@ -11,6 +11,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface FaqCategoryMapper {
     FaqCategoryOverview mapToOverview(FaqCategory faqCategory);
 
     List<FaqCategoryResponseDto> mapToListDto(List<FaqCategory> categories);
+
+    List<FaqCategoryResponseDto> mapToListDtoFromPage(Page<FaqCategory> categories);
 }

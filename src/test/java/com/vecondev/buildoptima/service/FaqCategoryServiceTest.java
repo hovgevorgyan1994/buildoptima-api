@@ -1,9 +1,12 @@
 package com.vecondev.buildoptima.service;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
+import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
@@ -12,12 +15,20 @@ import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.service.faq.impl.FaqCategoryServiceImpl;
 import com.vecondev.buildoptima.service.user.impl.UserServiceImpl;
 import com.vecondev.buildoptima.validation.faq.FaqCategoryValidator;
+import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,6 +53,7 @@ class FaqCategoryServiceTest {
   @Mock private FaqCategoryRepository faqCategoryRepository;
   @Mock private FaqCategoryValidator faqCategoryValidator;
   @Mock private UserServiceImpl userService;
+  @Mock private PageableConverter pageableConverter;
 
   @Test
   void successfulRetrievalOfAllCategories() {
@@ -75,7 +87,7 @@ class FaqCategoryServiceTest {
     FaqCategoryRequestDto faqCategoryRequestDto = testParameters.getFaqCategoryRequestDto();
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
     FaqCategoryResponseDto faqCategoryResponseDto =
-        testParameters.getFaqCategoryResponseDto(userId);
+        testParameters.getFaqCategoryResponseDto(faqCategory);
 
     when(userService.getUserById(userId)).thenReturn(user);
     when(faqCategoryMapper.mapToEntity(faqCategoryRequestDto, user)).thenReturn(faqCategory);
@@ -111,14 +123,14 @@ class FaqCategoryServiceTest {
   }
 
   @Test
-  void succesfulCategoryUpdate() {
+  void successfulCategoryUpdate() {
     String newName = "Properties";
     UUID userId = UUID.randomUUID();
     FaqCategoryRequestDto faqCategoryRequestDto = testParameters.getFaqCategoryRequestDto();
     faqCategoryRequestDto.setName(newName);
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
     FaqCategoryResponseDto faqCategoryResponseDto =
-        testParameters.getFaqCategoryResponseDto(userId);
+        testParameters.getFaqCategoryResponseDto(faqCategory);
     faqCategoryResponseDto.setName(newName);
 
     when(faqCategoryRepository.findById(faqCategory.getId())).thenReturn(Optional.of(faqCategory));
@@ -189,5 +201,48 @@ class FaqCategoryServiceTest {
 
     assertThrows(
         FaqCategoryNotFoundException.class, () -> faqCategoryService.findCategoryById(categoryId));
+  }
+
+  @Test
+  void successfulFetchingOfFaqCategories() {
+    FetchRequestDto requestDto = testParameters.getFetchRequest();
+    Pageable pageable = testParameters.getPageable(requestDto);
+    Page<FaqCategory> result = new PageImpl<>(testParameters.getFetchResponse());
+
+    try (MockedStatic<FieldNameValidator> validator =
+                 Mockito.mockStatic(FieldNameValidator.class)) {
+      validator
+              .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
+              .thenAnswer((Answer<Void>) invocation -> null);
+    }
+    when(pageableConverter.convert(requestDto)).thenReturn(pageable);
+    when(faqCategoryRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
+    when(faqCategoryMapper.mapToListDtoFromPage(result))
+            .thenReturn(testParameters.getFaqCategoryResponseDtoList(result.stream().toList()));
+
+    FetchResponseDto responseDto = faqCategoryService.fetchCategories(requestDto);
+    assertEquals(result.getTotalElements(), responseDto.getTotalElements());
+  }
+
+  @Test
+  void successfulFetchingOfFaqCategoriesWithDefaultSortDirectory() {
+    FetchRequestDto requestDto = testParameters.getFetchRequest();
+    requestDto.setSort(null);
+    Pageable pageable = testParameters.getPageable(requestDto);
+    Page<FaqCategory> result = new PageImpl<>(testParameters.getFetchResponse());
+
+    try (MockedStatic<FieldNameValidator> validator =
+                 Mockito.mockStatic(FieldNameValidator.class)) {
+      validator
+              .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
+              .thenAnswer((Answer<Void>) invocation -> null);
+    }
+    when(pageableConverter.convert(requestDto)).thenReturn(pageable);
+    when(faqCategoryRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
+    when(faqCategoryMapper.mapToListDtoFromPage(result))
+            .thenReturn(testParameters.getFaqCategoryResponseDtoList(result.stream().toList()));
+
+    FetchResponseDto responseDto = faqCategoryService.fetchCategories(requestDto);
+    assertEquals(result.getTotalElements(), responseDto.getTotalElements());
   }
 }

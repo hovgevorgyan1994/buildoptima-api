@@ -1,12 +1,15 @@
 package com.vecondev.buildoptima.controller;
 
 import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.endpoints.FaqCategoryEndpointUris;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryControllerTestParameters;
+import com.vecondev.buildoptima.parameters.result_actions.FaqCategoryResultActions;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -26,16 +29,9 @@ import java.util.UUID;
 
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
-import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
-class FaqCategoryControllerTest {
+class FaqCategoryControllerTest extends FaqCategoryResultActions {
 
   @Autowired private MockMvc mvc;
 
@@ -58,6 +54,7 @@ class FaqCategoryControllerTest {
 
   @BeforeEach
   void setUp() {
+    setResultActionsParameters(new FaqCategoryEndpointUris(), mvc, tokenManager);
     testParameters = new FaqCategoryControllerTestParameters(userRepository);
     List<User> users = testParameters.users();
     users.forEach(user -> user.setPassword(encoder.encode(user.getPassword())));
@@ -77,11 +74,7 @@ class FaqCategoryControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    mvc.perform(
-            get("/faq/category")
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+    getAllResultActions(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.*", hasSize(faqCategoryRepository.findAll().size())));
   }
@@ -91,12 +84,7 @@ class FaqCategoryControllerTest {
     User clientUser = getUserByRole(CLIENT);
     assumeFalse(clientUser == null);
 
-    mvc.perform(
-            get("/faq/category")
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(clientUser))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isForbidden());
+    getAllResultActions(clientUser).andExpect(status().isForbidden());
   }
 
   @Test
@@ -106,11 +94,7 @@ class FaqCategoryControllerTest {
     FaqCategory faqCategory = faqCategoryRepository.findAll().stream().findAny().orElse(null);
     assumeFalse(faqCategory == null);
 
-    mvc.perform(
-            get("/faq/category/{id}", faqCategory.getId())
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+    getByIdResultActions(faqCategory.getId(), moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(faqCategory.getId().toString()))
         .andExpect(jsonPath("$.name").value(faqCategory.getName()));
@@ -121,30 +105,16 @@ class FaqCategoryControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    mvc.perform(
-            get("/faq/category/{id}", UUID.randomUUID())
-                .header(
-                    jwtConfigProperties.getAuthorizationHeader(),
-                    jwtConfigProperties.getAuthorizationHeaderPrefix()
-                        + tokenManager.generateAccessToken(moderatorUser))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isNotFound());
+    getByIdResultActions(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
   }
 
   @Test
   void successfulCreationOfFaqCategory() throws Exception {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
-
     FaqCategoryRequestDto requestDto = testParameters.getFaqCategoryToSave();
 
-    mvc.perform(
-            post("/faq/category")
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .content(asJsonString(requestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+    creationResultActions(moderatorUser, requestDto)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty());
   }
@@ -153,48 +123,27 @@ class FaqCategoryControllerTest {
   void failedCreationOfFaqCategoryAsCategoryNameAlreadyExists() throws Exception {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
-
     FaqCategoryRequestDto requestDto = testParameters.getFaqCategoryWithDuplicatedNameToSave();
 
-    mvc.perform(
-                    post("/faq/category")
-                            .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                            .content(asJsonString(requestDto))
-                            .contentType(APPLICATION_JSON)
-                            .accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isConflict());
+    creationResultActions(moderatorUser, requestDto).andExpect(status().isConflict());
   }
 
   @Test
   void failedCreationOfFaqCategoryAsCategoryIsInvalid() throws Exception {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
-
     FaqCategoryRequestDto requestDto = new FaqCategoryRequestDto();
 
-    mvc.perform(
-            post("/faq/category")
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .content(asJsonString(requestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isBadRequest());
+    creationResultActions(moderatorUser, requestDto).andExpect(status().isBadRequest());
   }
 
   @Test
   void failedCreationOfFaqCategoryAsAccessDenied() throws Exception {
     User clientUser = getUserByRole(CLIENT);
     assumeFalse(clientUser == null);
-
     FaqCategoryRequestDto requestDto = testParameters.getFaqCategoryToSave();
 
-    mvc.perform(
-            post("/faq/category")
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(clientUser))
-                .content(asJsonString(requestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isForbidden());
+    creationResultActions(clientUser, requestDto).andExpect(status().isForbidden());
   }
 
   @Test
@@ -206,12 +155,7 @@ class FaqCategoryControllerTest {
     FaqCategoryRequestDto requestDto =
         testParameters.getFaqCategoryToSave().toBuilder().name("Payment").build();
 
-    mvc.perform(
-            put("/faq/category/{id}", faqCategory.getId().toString())
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .content(asJsonString(requestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+    updateResultActions(faqCategory.getId(), moderatorUser, requestDto)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value(requestDto.getName()));
   }
@@ -223,12 +167,8 @@ class FaqCategoryControllerTest {
     FaqCategoryRequestDto requestDto =
         testParameters.getFaqCategoryToSave().toBuilder().name("Payment").build();
 
-    mvc.perform(
-            put("/faq/category/{id}", UUID.randomUUID().toString())
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .content(asJsonString(requestDto))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
+
+    updateResultActions(UUID.randomUUID(), moderatorUser, requestDto)
         .andExpect(status().isNotFound());
   }
 
@@ -239,13 +179,7 @@ class FaqCategoryControllerTest {
     FaqCategory faqCategory = faqCategoryRepository.findAll().stream().findAny().orElse(null);
     assumeFalse(faqCategory == null);
 
-    mvc.perform(
-            delete("/faq/category/{id}", faqCategory.getId().toString())
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isOk());
-
+    deleteByIdResultActions(faqCategory.getId(), moderatorUser).andExpect(status().isOk());
     assertFalse(faqCategoryRepository.existsById(faqCategory.getId()));
   }
 
@@ -254,20 +188,35 @@ class FaqCategoryControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    mvc.perform(
-            delete("/faq/category/{id}", UUID.randomUUID())
-                .header(jwtConfigProperties.getAuthorizationHeader(), getAccessToken(moderatorUser))
-                .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE))
-        .andExpect(status().isNotFound());
+    deleteByIdResultActions(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void successfulFetchingOfCategories() throws Exception {
+    FetchRequestDto requestDto = testParameters.getFetchRequest();
+    User moderatorUser = getUserByRole(MODERATOR);
+    assumeFalse(moderatorUser == null);
+
+    fetchingResultActions(requestDto, moderatorUser).andExpect(status().isOk());
+  }
+
+  @Test
+  void failedFetchingOfCategoriesAsPermissionDenied() throws Exception {
+    FetchRequestDto requestDto = testParameters.getFetchRequest();
+    User clientUser = getUserByRole(CLIENT);
+
+    fetchingResultActions(requestDto, clientUser).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void failedFetchingOfCategoriesAsRequestDtoIsInvalid() throws Exception {
+    FetchRequestDto requestDto = testParameters.getInvalidFetchRequest();
+    User adminUser = getUserByRole(MODERATOR);
+
+    fetchingResultActions(requestDto, adminUser).andExpect(status().isBadRequest());
   }
 
   private User getUserByRole(Role role) {
     return userRepository.findByRole(role).orElse(null);
-  }
-
-  private String getAccessToken(User user) {
-    return jwtConfigProperties.getAuthorizationHeaderPrefix()
-        + tokenManager.generateAccessToken(user);
   }
 }

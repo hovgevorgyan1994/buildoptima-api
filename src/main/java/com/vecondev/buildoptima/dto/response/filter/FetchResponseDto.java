@@ -24,6 +24,4 @@ public class FetchResponseDto {
     private long totalElements;
 
     private boolean last;
-
-
 }

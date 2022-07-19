@@ -10,6 +10,7 @@ import org.mapstruct.Context;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface FaqQuestionMapper {
   FaqQuestionResponseDto mapToDto(FaqQuestion question);
 
   List<FaqQuestionResponseDto> mapToListDto(List<FaqQuestion> faqQuestions);
+
+  List<FaqQuestionResponseDto> mapToListDtoFromPage(Page<FaqQuestion> faqQuestions);
 }

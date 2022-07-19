@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.service.user.impl;
 
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
@@ -17,11 +17,11 @@ import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.service.user.ConfirmationTokenService;
@@ -153,8 +153,6 @@ public class UserServiceImpl implements UserService {
     Pageable pageable = pageableConverter.convert(fetchRequest);
     Specification<User> specification =
         new GenericSpecification<>(userPageSortingFieldsMap, fetchRequest.getFilter());
-
-    assert pageable != null;
     Page<User> result = userRepository.findAll(specification, pageable);
 
     List<UserResponseDto> content = userMapper.mapToResponseList(result);

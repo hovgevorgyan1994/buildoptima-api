@@ -1,10 +1,11 @@
 package com.vecondev.buildoptima.validation.faq;
 
-import com.vecondev.buildoptima.exception.FaqCategoryAlreadyExistException;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import com.vecondev.buildoptima.exception.FaqCategoryAlreadyExistException;
 
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_ALREADY_EXIST;
 

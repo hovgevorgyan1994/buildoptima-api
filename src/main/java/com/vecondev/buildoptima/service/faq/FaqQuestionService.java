@@ -1,6 +1,8 @@
 package com.vecondev.buildoptima.service.faq;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 
@@ -21,4 +23,6 @@ public interface FaqQuestionService {
   void deleteQuestion(UUID questionId, UUID userId);
 
   FaqQuestion findQuestionById(UUID questionId);
+
+  FetchResponseDto fetchQuestions(FetchRequestDto fetchRequest);
 }

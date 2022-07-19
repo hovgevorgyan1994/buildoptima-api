@@ -17,7 +17,7 @@ Below is the sample structure of payload to be sent in search request:
   "take": 10,
   "sort": [
     {
-      "field": "firstName",
+      "field": "name",
       "order": "asc"
     }
   ],
@@ -25,19 +25,19 @@ Below is the sample structure of payload to be sent in search request:
     "and": [
       {
         "operation": "eq",
-        "name": "firstName",
-        "value": "John"
+        "name": "name",
+        "value": "Royalties"
       },
       {
         "or": [
           {
-            "operation": "like",
-            "name": "lastName",
-            "value": "terson"
+            "operation": "gt",
+            "name": "updatedAt",
+            "value": "2018-11-30T18:35:24.00Z"
           },
           {
             "operation": "gt",
-            "name": "creationDate",
+            "name": "createdAt",
             "value": "2018-11-30T18:35:24.00Z"
           }
         ]
@@ -88,43 +88,19 @@ object. The predicate object has the following structure
 
 ## Field Definitions for Architect Portal Entities
 
-### User Entity
+### FAQ Category Entity
 
 #### Filtering Fields
 
-| Field          | Type     | Operations             | Notes                                                                      |
-|:---------------|:---------|:-----------------------|:---------------------------------------------------------------------------|
-| `firstName`    | String   | `eq`, `like`           | Must be provided with `value` field                                        |
-| `lastName`     | String   | `eq`, `like`           | Must be provided with `value` field                                        |
-| `email`        | String   | `eq`, `like`           | Must be provided with `value` field                                        |
-| `phone`        | String   | `eq`, `like`           | Must be provided with `value` field                                        |
-| `role`         | String   | `eq`                   | Must be provided with `value` field, possible values `CLIENT`, `ADMIN`     |
-| `creationDate` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
-
+| Field        | Type      | Operations                         | Notes                                                                                                           |
+|:-------------|:----------|:-----------------------------------|:----------------------------------------------------------------------------------------------------------------|
+| `name`       | String    | `eq`, `like`, `in`                 | Must be provided with `value` field in case of `eq`,`like`, and with `values` for `in`                          |
+| `createdAt`  | DateTime  | `eq`, `in`, `gt`, `ge`, `lt`, `le` | Must be provided with `value` field in case of `eq`,`like`, `gt`, `ge`, `lt`, `le`, and with `values` for `in`  |
+| `updatedAt`  | DateTime  | `eq`, `in`, `gt`, `ge`, `lt`, `le` | Must be provided with `value` field in case of `eq`,`like`, `gt`, `ge`, `lt`, `le`, and with `values` for `in`  |
+| `createdBy`  | UUID      | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                 |
+| `updatedBy`  | UUID      | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                 |
 #### Sorting Fields
 
-- `firstName`
-- `lastName`
-- `email`
-- `creationDate`
-
-
-### News Entity
-
-#### Filtering Fields
-
-| Field         | Type     | Operations             | Notes                                                                      |
-|:--------------|:---------|:-----------------------|:---------------------------------------------------------------------------|
-| `title`       | String   | `eq`, `like`           | Must be provided with `value` field                                        |
-| `category`    | String   | `eq`                   | Must be provided with `value` field                                        |
-| `publishedAt` | DateTime | `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field |
-| `modifiedBy`  | String   | `eq`, `like`           | Must be provided with `value` field                                        |
-
-
-#### Sorting Fields
-
-- `title`
-- `category`
-- `publishedAt`
-- `modifiedBy`
-
+- `name`
+- `createdAt`
+- `updatedAt`

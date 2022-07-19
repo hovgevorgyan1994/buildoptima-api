@@ -1,21 +1,26 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
+import com.vecondev.buildoptima.filter.model.Criteria;
+import com.vecondev.buildoptima.filter.model.SortDto;
+import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
 
 @RequiredArgsConstructor
-public class FaqCategoryControllerTestParameters {
+public class FaqCategoryControllerTestParameters extends FaqCategoryTestParameters{
 
     private final UserRepository userRepository;
 
@@ -73,5 +78,21 @@ public class FaqCategoryControllerTestParameters {
             .findAny()
             .orElseThrow(() -> new FaqCategoryNotFoundException(FAQ_CATEGORY_NOT_FOUND))
             .getName());
+    }
+
+    public FetchRequestDto getInvalidFetchRequest() {
+        return new FetchRequestDto(
+                0,
+                10,
+                List.of(new SortDto("name", SortDto.Direction.ASC)),
+                Map.of(
+                        "and",
+                        List.of(
+                                new Criteria(EQ, "title", "Royalties"),
+                                Map.of(
+                                        "or",
+                                        List.of(
+                                                new Criteria(GT, "created", "2018-11-30T18:35:24.00Z"),
+                                                new Criteria(GT, "updatedAt", "2018-11-30T18:35:24.00Z"))))));
     }
 }

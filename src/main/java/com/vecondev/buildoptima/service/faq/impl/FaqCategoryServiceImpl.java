@@ -1,17 +1,25 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
+import com.vecondev.buildoptima.filter.converter.PageableConverter;
+import com.vecondev.buildoptima.filter.model.SortDto;
+import com.vecondev.buildoptima.filter.specification.GenericSpecification;
+import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.service.faq.FaqCategoryService;
 import com.vecondev.buildoptima.service.user.UserService;
 import com.vecondev.buildoptima.validation.faq.FaqCategoryValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +27,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.FaqCategoryFields.faqCategoryPageSortingFieldsMap;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 @Slf4j
 @Service
@@ -29,6 +39,7 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
   private final FaqCategoryMapper faqCategoryMapper;
   private final FaqCategoryRepository faqCategoryRepository;
   private final FaqCategoryValidator faqCategoryValidator;
+  private final PageableConverter pageableConverter;
 
   private final UserService userService;
 
@@ -66,9 +77,12 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
             .orElseThrow(() -> new FaqCategoryNotFoundException(FAQ_CATEGORY_NOT_FOUND));
     faqCategoryValidator.validateCategoryName(requestDto.getName());
 
-    category = updateFaqCategoryFields(category, requestDto, userId);
+    category =
+        category.toBuilder()
+            .name(requestDto.getName())
+            .createdBy(userService.getUserById(userId))
+            .build();
     log.info("User with id: {} updated the FAQ Category with id: {}", userId, categoryId);
-
     return faqCategoryMapper.mapToDto(faqCategoryRepository.saveAndFlush(category));
   }
 
@@ -89,11 +103,27 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
         .orElseThrow(() -> new FaqCategoryNotFoundException(FAQ_CATEGORY_NOT_FOUND));
   }
 
-  private FaqCategory updateFaqCategoryFields(
-      FaqCategory targetCategory, FaqCategoryRequestDto sourceCategory, UUID userId) {
-    return targetCategory.toBuilder()
-        .name(sourceCategory.getName())
-        .createdBy(userService.getUserById(userId))
+  @Override
+  public FetchResponseDto fetchCategories(FetchRequestDto fetchRequest) {
+    log.info("Request to fetch users from DB");
+    validateFieldNames(faqCategoryPageSortingFieldsMap, fetchRequest.getSort());
+    if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
+      SortDto sortDto = new SortDto("name", SortDto.Direction.ASC);
+      fetchRequest.setSort(List.of(sortDto));
+    }
+    Pageable pageable = pageableConverter.convert(fetchRequest);
+    Specification<FaqCategory> specification =
+        new GenericSpecification<>(faqCategoryPageSortingFieldsMap, fetchRequest.getFilter());
+    Page<FaqCategory> result = faqCategoryRepository.findAll(specification, pageable);
+
+    List<FaqCategoryResponseDto> content = faqCategoryMapper.mapToListDtoFromPage(result);
+    log.info("Response was sent. {} results where found", content.size());
+    return FetchResponseDto.builder()
+        .content(content)
+        .page(result.getNumber())
+        .size(result.getSize())
+        .totalElements(result.getTotalElements())
+        .last(result.isLast())
         .build();
   }
 }

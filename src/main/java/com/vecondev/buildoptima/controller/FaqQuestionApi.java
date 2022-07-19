@@ -1,14 +1,18 @@
 package com.vecondev.buildoptima.controller;
 
+import com.vecondev.buildoptima.dto.request.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.response.FetchResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -39,7 +43,7 @@ public interface FaqQuestionApi {
         @ApiResponse(
             responseCode = "403",
             description =
-                "The access token is either not provided or invalid, or authenticated user hasn't permission to get these resources.",
+                "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
@@ -63,7 +67,7 @@ public interface FaqQuestionApi {
         @ApiResponse(
             responseCode = "403",
             description =
-                "The access token is either not provided or invalid, or authenticated user hasn't permission to get this resource",
+                "Authenticated user hasn't permission to get such resource (Should be either MODERATOR or ADMIN)",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
@@ -97,7 +101,7 @@ public interface FaqQuestionApi {
         @ApiResponse(
             responseCode = "403",
             description =
-                "The access token is either not provided or invalid, or authenticated user hasn't permission to create such resource",
+                "Authenticated user hasn't permission to create such resource (Should be either MODERATOR or ADMIN)",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
@@ -138,7 +142,7 @@ public interface FaqQuestionApi {
         @ApiResponse(
             responseCode = "403",
             description =
-                "The access token is either not provided or invalid, or authenticated user hasn't permission to update this resource",
+                "Authenticated user hasn't permission to update this resource (Should be either MODERATOR or ADMIN)",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
@@ -178,7 +182,7 @@ public interface FaqQuestionApi {
         @ApiResponse(
             responseCode = "403",
             description =
-                "The access token is either not provided or invalid, or authenticated user hasn't permission to delete this resource",
+                "Authenticated user hasn't permission to delete this resource (Should be either MODERATOR or ADMIN)",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
@@ -193,4 +197,41 @@ public interface FaqQuestionApi {
       })
   ResponseEntity<Void> deleteQuestion(
       @PathVariable UUID id, @Parameter(hidden = true) AppUserDetails authenticatedUser);
+
+  @Operation(
+      summary = "Fetch FAQ Questions sorted, filtered and paged",
+      security = @SecurityRequirement(name = "api-security"),
+      externalDocs =
+          @ExternalDocumentation(
+              description =
+                  "Click here to see a detailed explanation of this endpoint requirements",
+              url =
+                  "https://github.com/vecondev/buildoptima-api/blob/develop/docs/faq_question-filter-sorting.md"))
+  @RequestBody(ref = "#/components/requestBodies/fetchFaqQuestionsRequestExample")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The FAQ questions should be retrieved regarding given criteria",
+            content =
+                @Content(
+                    schema = @Schema(implementation = FetchResponseDto.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "400",
+            description = "There is an invalid value in request body",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<FetchResponseDto> fetchQuestions(FetchRequestDto fetchRequest);
 }

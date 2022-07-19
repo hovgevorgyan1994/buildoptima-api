@@ -90,7 +90,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @GetMapping("/fetch/{id}")
+  @GetMapping("/{id}")
   public ResponseEntity<UserResponseDto> getUser(@PathVariable("id") UUID userId) {
     return ResponseEntity.ok(userService.getUser(userId));
   }

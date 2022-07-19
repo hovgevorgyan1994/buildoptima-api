@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.service.user.impl;
 
 import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
-import com.vecondev.buildoptima.exception.ErrorCode;
 import com.vecondev.buildoptima.exception.AuthenticationException;
+import com.vecondev.buildoptima.exception.ErrorCode;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.service.user.RefreshTokenService;
