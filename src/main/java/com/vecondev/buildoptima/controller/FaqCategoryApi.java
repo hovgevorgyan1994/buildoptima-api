@@ -1,9 +1,10 @@
 package com.vecondev.buildoptima.controller;
 
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -184,6 +186,14 @@ public interface FaqCategoryApi {
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description =
+                "There are dependent FAQ questions, so category can only be deleted after deleting that questions.",
+            content =
+                @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<Void> deleteCategory(
@@ -224,7 +234,8 @@ public interface FaqCategoryApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<FetchResponseDto> fetchCategories(FetchRequestDto fetchRequest);
+  ResponseEntity<FetchResponseDto> fetchCategories(
+      FetchRequestDto fetchRequest, @Parameter(hidden = true) AppUserDetails authenticatedUser);
 
   @Operation(
       summary = "Exporting all FAQ categories in '.csv' format",
@@ -249,4 +260,27 @@ public interface FaqCategoryApi {
       })
   ResponseEntity<Resource> exportAllCategoriesInCSV(
       @Parameter(hidden = true) AppUserDetails authenticatedUser);
+
+  @Operation(
+      summary = "Get FAQ Category metadata",
+      security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The metadata should be got",
+            content =
+                @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Metadata.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "Authenticated user hasn't permission to get the metadata (Should be either MODERATOR or ADMIN)",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<Metadata> getMetadata(@Parameter(hidden = true) AppUserDetails authenticatedUser);
 }

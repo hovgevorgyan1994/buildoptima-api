@@ -194,7 +194,7 @@ class UserServiceTest {
   void successfulFetchingOfUsers() {
     FetchRequestDto requestDto = userServiceTestParameters.getFetchRequest();
     Pageable pageable = userServiceTestParameters.getPageable(requestDto);
-    Page<User> result = new PageImpl<>(userServiceTestParameters.getFetchResponse());
+    Page<User> result = new PageImpl<>(userServiceTestParameters.getUserList());
 
     try (MockedStatic<FieldNameValidator> validator =
         Mockito.mockStatic(FieldNameValidator.class)) {
@@ -216,7 +216,7 @@ class UserServiceTest {
     FetchRequestDto requestDto = userServiceTestParameters.getFetchRequest();
     requestDto.setSort(null);
     Pageable pageable = userServiceTestParameters.getPageable(requestDto);
-    Page<User> result = new PageImpl<>(userServiceTestParameters.getFetchResponse());
+    Page<User> result = new PageImpl<>(userServiceTestParameters.getUserList());
 
     try (MockedStatic<FieldNameValidator> validator =
         Mockito.mockStatic(FieldNameValidator.class)) {

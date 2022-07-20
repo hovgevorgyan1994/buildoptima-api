@@ -1,10 +1,14 @@
 package com.vecondev.buildoptima.controller.impl;
 
 import com.vecondev.buildoptima.controller.FaqQuestionApi;
+import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.filter.model.DictionaryField;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.faq.FaqQuestionService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -105,7 +110,10 @@ public class FaqQuestionController implements FaqQuestionApi {
   @Override
   @PostMapping("/fetch")
   @PreAuthorize("hasAuthority('resource_read')")
-  public ResponseEntity<FetchResponseDto> fetchQuestions(@RequestBody FetchRequestDto fetchRequest) {
+  public ResponseEntity<FetchResponseDto> fetchQuestions(
+      @RequestBody FetchRequestDto fetchRequest,
+      @AuthenticationPrincipal AppUserDetails authenticatedUser) {
+    log.info("User with id: {} is fetching faq categories.", authenticatedUser.getId());
 
     return ResponseEntity.ok(faqQuestionService.fetchQuestions(fetchRequest));
   }
@@ -119,5 +127,32 @@ public class FaqQuestionController implements FaqQuestionApi {
             "User with id: {} trying to export all faq questions in '.csv' format.", authenticatedUser.getId());
 
     return faqQuestionService.exportFaqQuestionsInCsv();
+  }
+
+  @Override
+  @GetMapping(value = "/metadata")
+  @PreAuthorize("hasAuthority('resource_read')")
+  public ResponseEntity<Metadata> getMetadata(
+          @AuthenticationPrincipal AppUserDetails authenticatedUser) {
+    log.info(
+            "User with id: {} trying to get the FAQ question metadata.", authenticatedUser.getId());
+
+    return ResponseEntity.ok(faqQuestionService.getMetadata());
+  }
+
+  @Override
+  @GetMapping("/lookup/{status}/{dictionary}")
+  @PreAuthorize("hasAuthority('resource_read')")
+  public ResponseEntity<List<EntityOverview>> lookup(
+      @PathVariable Status status,
+      @PathVariable DictionaryField dictionary,
+      @AuthenticationPrincipal AppUserDetails authenticatedUser) {
+    log.info(
+        "User with id: {} looking for {} that have questions those status is: {}.",
+        authenticatedUser.getId(),
+        dictionary == UPDATED_BY ? "userS" : "categories",
+        status);
+
+    return ResponseEntity.ok(faqQuestionService.lookup(status, dictionary));
   }
 }

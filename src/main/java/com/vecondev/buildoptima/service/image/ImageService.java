@@ -13,4 +13,7 @@ public interface ImageService {
   String getContentTypeOfObject(String className, UUID objectId, boolean isOriginal);
 
   void deleteImagesFromS3(String className, UUID objectId);
+
+  void checkExistenceOfObject(String imageName, UUID userId);
+  String getImagePath(String className, UUID objectId, boolean isOriginal);
 }

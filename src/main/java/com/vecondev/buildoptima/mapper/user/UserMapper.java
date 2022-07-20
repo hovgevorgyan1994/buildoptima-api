@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.mapper.user;
 
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
 import org.mapstruct.DecoratedWith;
@@ -23,6 +23,5 @@ public interface UserMapper {
 
     List<UserResponseDto> mapToResponseList(Page<User> users);
 
-    UserOverview mapToOverview(User user);
-
+  EntityOverview mapToOverview(User user);
 }

@@ -2,6 +2,7 @@ package com.vecondev.buildoptima.service.faq;
 
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
@@ -29,4 +30,6 @@ public interface FaqCategoryService {
   FetchResponseDto fetchCategories(FetchRequestDto fetchRequest);
 
   ResponseEntity<Resource> exportFaqCategoriesInCsv();
+
+  Metadata getMetadata();
 }

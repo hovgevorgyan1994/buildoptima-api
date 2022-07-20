@@ -20,10 +20,10 @@ import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 public class UserServiceTestParameters extends UserTestParameters implements PageableTest {
   private final PasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-  public List<User> getFetchResponse() {
+  public List<User> getUserList() {
     return List.of(
-        User.builder().lastName("Anderson").firstName("John").build(),
-        User.builder().firstName("John").build());
+        User.builder().id(UUID.randomUUID()).firstName("John").lastName("Anderson").build(),
+        User.builder().id(UUID.randomUUID()).firstName("John").lastName("Peterson").build());
   }
 
   public UserRegistrationRequestDto getUserRegistrationRequestDto() {
@@ -94,7 +94,6 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
     RefreshToken refreshToken =
         new RefreshToken(UUID.randomUUID().toString(), userId, LocalDateTime.now().plusMonths(6));
     refreshToken.setId(UUID.fromString(tokenId));
-
     if (isDecoded) {
       refreshToken.setRefreshToken(encoder.encode(refreshToken.getRefreshToken()));
     }

@@ -1,13 +1,12 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
-
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-
-
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.exception.DataIntegrityViolationException;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.filter.model.SortDto;
@@ -35,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.CATEGORY_HAS_QUESTIONS;
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.FaqCategoryFields.faqCategoryPageSortingFieldsMap;
 import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
@@ -99,7 +99,18 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
   @Override
   public void deleteCategory(UUID categoryId, UUID userId) {
     if (!faqCategoryRepository.existsById(categoryId)) {
+      log.warn(
+          "User with id: {} wants to delete FAQ category with id: {} that doesn't exist.",
+          userId,
+          categoryId);
       throw new FaqCategoryNotFoundException(FAQ_CATEGORY_NOT_FOUND);
+    }
+    if (Boolean.TRUE.equals(faqCategoryRepository.hasAnyQuestion(categoryId))) {
+      log.warn(
+          "User with id: {} wants to delete FAQ category with id: {} that has dependent questions.",
+          userId,
+          categoryId);
+      throw new DataIntegrityViolationException(CATEGORY_HAS_QUESTIONS);
     }
 
     faqCategoryRepository.deleteById(categoryId);
@@ -138,6 +149,7 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
   }
 
   /** exports all faq categories in csv file */
+  @Override
   public ResponseEntity<Resource> exportFaqCategoriesInCsv() {
     List<FaqCategory> categories = faqCategoryRepository.findAll();
     List<FaqCategoryRecord> categoryRecords = faqCategoryMapper.mapToRecordList(categories);
@@ -148,5 +160,15 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
         .contentType(MediaType.parseMediaType("application/csv"))
         .header("Content-disposition", "attachment; filename=FaqCategories.csv")
         .body(categoriesResource);
+  }
+
+  @Override
+  public Metadata getMetadata() {
+    FaqCategory category = faqCategoryRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
+    if (category == null) {
+      return new Metadata();
+    }
+
+    return faqCategoryMapper.getMetadata(category, faqCategoryRepository.count(), 0L);
   }
 }

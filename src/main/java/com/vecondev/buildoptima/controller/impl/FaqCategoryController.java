@@ -3,6 +3,7 @@ package com.vecondev.buildoptima.controller.impl;
 import com.vecondev.buildoptima.controller.FaqCategoryApi;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
@@ -109,13 +110,15 @@ public class FaqCategoryController implements FaqCategoryApi {
   @PostMapping("/fetch")
   @PreAuthorize("hasAuthority('resource_read')")
   public ResponseEntity<FetchResponseDto> fetchCategories(
-      @RequestBody FetchRequestDto fetchRequest) {
+      @RequestBody FetchRequestDto fetchRequest,
+      @AuthenticationPrincipal AppUserDetails authenticatedUser) {
+    log.info("User with id: {} is fetching faq questions.", authenticatedUser.getId());
 
     return ResponseEntity.ok(faqCategoryService.fetchCategories(fetchRequest));
   }
 
   @Override
-  @GetMapping(value = "/csv")
+  @GetMapping("/csv")
   @PreAuthorize("hasAuthority('resource_read')")
   public ResponseEntity<Resource> exportAllCategoriesInCSV(
       @AuthenticationPrincipal AppUserDetails authenticatedUser) {
@@ -123,5 +126,16 @@ public class FaqCategoryController implements FaqCategoryApi {
         "User with id: {} trying to export all faq categories in '.csv' format.", authenticatedUser.getId());
 
     return faqCategoryService.exportFaqCategoriesInCsv();
+  }
+
+  @Override
+  @GetMapping("/metadata")
+  @PreAuthorize("hasAuthority('resource_read')")
+  public ResponseEntity<Metadata> getMetadata(
+      @AuthenticationPrincipal AppUserDetails authenticatedUser) {
+    log.info(
+            "User with id: {} trying to get the FAQ category metadata.", authenticatedUser.getId());
+
+    return ResponseEntity.ok(faqCategoryService.getMetadata());
   }
 }

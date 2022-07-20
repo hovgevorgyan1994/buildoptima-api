@@ -1,16 +1,13 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
-import com.vecondev.buildoptima.model.faq.FaqCategory;
-import com.vecondev.buildoptima.model.user.User;
 
 import java.time.Instant;
 import java.util.List;
@@ -39,19 +36,13 @@ public class FaqCategoryServiceTestParameters extends FaqCategoryTestParameters
     return new FaqCategoryResponseDto(
         category.getId(),
         category.getName(),
-        new UserOverview(
+        new EntityOverview(
             category.getUpdatedBy().getId(),
-            category.getUpdatedBy().getFirstName(),
-            category.getUpdatedBy().getLastName()),
+            String.format(
+                "%s %s",
+                category.getUpdatedBy().getFirstName(), category.getUpdatedBy().getLastName())),
         category.getCreatedAt(),
         category.getUpdatedAt());
-  }
-
-  public User getUserById(UUID userId) {
-    User user = userServiceTestParameters.getSavedUser();
-    user.setId(userId);
-
-    return user;
   }
 
   public List<FaqCategory> getFaqCategoryList() {
@@ -71,5 +62,12 @@ public class FaqCategoryServiceTestParameters extends FaqCategoryTestParameters
 
   public List<FaqCategoryResponseDto> getFaqCategoryResponseDtoList(List<FaqCategory> categories) {
     return categories.stream().map(this::getFaqCategoryResponseDto).collect(Collectors.toList());
+  }
+
+  public User getUserById(UUID userId) {
+    User user = userServiceTestParameters.getSavedUser();
+    user.setId(userId);
+
+    return user;
   }
 }

@@ -3,6 +3,8 @@ package com.vecondev.buildoptima.service;
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
@@ -10,6 +12,7 @@ import com.vecondev.buildoptima.exception.FileConvertionFailedException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
@@ -43,11 +46,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -117,7 +125,7 @@ class FaqQuestionServiceTest {
     FaqQuestionResponseDto methodResponse =
         faqQuestionService.createQuestion(faqQuestionRequestDto, userId);
     assertEquals(faqCategory.getId(), methodResponse.getCategory().getId());
-    assertEquals(user.getFirstName(), methodResponse.getUpdatedBy().getFirstName());
+    assertEquals(String.format("%s %s",user.getFirstName(), user.getLastName()), methodResponse.getUpdatedBy().getName());
     verify(faqQuestionValidator).validateQuestion(faqQuestion.getQuestion());
     verify(faqQuestionMapper).mapToDto(faqQuestion);
   }
@@ -291,5 +299,45 @@ class FaqQuestionServiceTest {
 
     assertThrows(FileConvertionFailedException.class, () -> faqQuestionService.exportFaqQuestionsInCsv());
     verify(faqQuestionRepository).findAll();
+  }
+
+  @Test
+  void successfulGettingMetadata() {
+    when(faqQuestionRepository.findTopByOrderByUpdatedAtDesc()).thenReturn(Optional.of(new FaqQuestion()));
+    faqQuestionService.getMetadata();
+
+    verify(faqQuestionMapper).getMetadata(any(), any(), any());
+    verify(faqQuestionRepository, times(2)).countByStatus(any());
+  }
+
+  @Test
+  void successfulGettingMetadataWithZeroCount() {
+    when(faqQuestionRepository.findTopByOrderByUpdatedAtDesc()).thenReturn(Optional.empty());
+    Metadata metadata = faqQuestionService.getMetadata();
+
+    assertNull(metadata.getAllActiveCount());
+    assertNull(metadata.getLastUpdatedBy());
+  }
+
+  @Test
+  void successfulLookupByModifiers() {
+    Status status = ACTIVE;
+    List<User> users = testParameters.getUsers();
+
+    when(faqQuestionRepository.findDistinctModifiers(status)).thenReturn(users);
+    List<EntityOverview> response = faqQuestionService.lookup(status, UPDATED_BY);
+
+    assertEquals(users.size(), response.size());
+  }
+
+  @Test
+  void successfulLookupByCategories() {
+    Status status = ACTIVE;
+    List<FaqCategory> categories = testParameters.getFaqCategories();
+
+    when(faqQuestionRepository.findDistinctCategories(status)).thenReturn(categories);
+    List<EntityOverview> response = faqQuestionService.lookup(status, CATEGORY);
+
+    assertEquals(categories.size(), response.size());
   }
 }

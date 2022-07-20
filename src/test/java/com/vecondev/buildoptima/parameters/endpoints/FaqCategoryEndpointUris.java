@@ -15,6 +15,7 @@ public class FaqCategoryEndpointUris implements EndpointUris {
   private String fetchUri;
   private String retrieveByIdUri;
   private String exportInCsvUri;
+  private String metadataUri;
 
   @Override
   public String getDeleteByIdUri() {
@@ -49,5 +50,10 @@ public class FaqCategoryEndpointUris implements EndpointUris {
   @Override
   public String getExportInCsvUri() {
     return baseUri + exportInCsvUri;
+  }
+
+  @Override
+  public String getMetadataUri() {
+    return baseUri + metadataUri;
   }
 }

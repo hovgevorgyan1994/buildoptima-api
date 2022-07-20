@@ -1,15 +1,20 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
+import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
+import com.vecondev.buildoptima.exception.InvalidFieldException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
+import com.vecondev.buildoptima.filter.model.DictionaryField;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
@@ -31,11 +36,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_QUESTION_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FIELD;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
 import static com.vecondev.buildoptima.filter.model.FaqQuestionFields.faqQuestionPageSortingFieldsMap;
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
+import static com.vecondev.buildoptima.model.Status.ARCHIVED;
 import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 @Slf4j
@@ -151,5 +162,50 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
         .contentType(MediaType.parseMediaType("application/csv"))
         .header("Content-disposition", "attachment; filename=FaqQuestions.csv")
         .body(questionsResource);
+  }
+
+  @Override
+  public Metadata getMetadata() {
+    FaqQuestion question = faqQuestionRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
+    if (question == null) {
+      return new Metadata();
+    }
+
+    return faqQuestionMapper.getMetadata(
+        question,
+        faqQuestionRepository.countByStatus(ACTIVE),
+        faqQuestionRepository.countByStatus(ARCHIVED));
+  }
+
+  @Override
+  public List<EntityOverview> lookup(Status status, DictionaryField dictionary) {
+    List<EntityOverview> response = new ArrayList<>();
+    if (dictionary == UPDATED_BY) {
+      response.addAll(
+          faqQuestionRepository.findDistinctModifiers(status).stream()
+              .map(
+                  user ->
+                      new EntityOverview(
+                          user.getId(),
+                          String.format("%s %s", user.getFirstName(), user.getLastName())))
+              .toList());
+      log.info(
+          "It's found {} results while looking up users who updated {} questions.",
+          response.size(),
+          status);
+      return response;
+    } else if (dictionary == CATEGORY) {
+      response.addAll(
+          faqQuestionRepository.findDistinctCategories(status).stream()
+              .map(category -> new EntityOverview(category.getId(), category.getName()))
+              .toList());
+      log.info(
+          "It's found {} results while looking up categories that have {} questions.",
+          response.size(),
+          status);
+      return response;
+    } else {
+      throw new InvalidFieldException(INVALID_FIELD);
+    }
   }
 }

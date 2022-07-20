@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.dto.response.faq;
 
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.model.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -32,9 +32,9 @@ public class FaqQuestionResponseDto {
   @Schema(example = "ACTIVE")
   private Status status;
 
-  private FaqCategoryOverview category;
+  private EntityOverview category;
 
-  private UserOverview updatedBy;
+  private EntityOverview updatedBy;
 
   @Schema(example = "2022-06-24 13:29:00.887950")
   private Instant createdAt;

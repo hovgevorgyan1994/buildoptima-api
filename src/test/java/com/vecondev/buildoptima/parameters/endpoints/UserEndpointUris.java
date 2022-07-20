@@ -58,6 +58,11 @@ public class UserEndpointUris implements EndpointUris {
     return null;
   }
 
+  @Override
+  public String getMetadataUri() {
+    return null;
+  }
+
   public String getImageDeletionUri() {
     return baseUri + deleteImageByIdUri;
   }

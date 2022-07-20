@@ -2,8 +2,12 @@ package com.vecondev.buildoptima.service.faq;
 
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.filter.model.DictionaryField;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -29,4 +33,8 @@ public interface FaqQuestionService {
   FetchResponseDto fetchQuestions(FetchRequestDto fetchRequest);
 
   ResponseEntity<Resource> exportFaqQuestionsInCsv();
+
+  Metadata getMetadata();
+
+  List<EntityOverview> lookup(Status status, DictionaryField dictionary);
 }

@@ -2,6 +2,7 @@ package com.vecondev.buildoptima.mapper.faq.decorator;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
@@ -59,5 +60,13 @@ public abstract class FaqQuestionMapperDecorator implements FaqQuestionMapper {
         .updatedBy(faqQuestion.getUpdatedBy().getFullName())
         .category(faqQuestion.getCategory().getName())
         .build();
+  }
+
+  @Override
+  public Metadata getMetadata(FaqQuestion question, Long allActiveCount, Long allArchivedCount) {
+    return faqQuestionMapper.getMetadata(question, allActiveCount, allArchivedCount).toBuilder()
+            .lastUpdatedAt(question.getUpdatedAt())
+            .lastUpdatedBy(userMapper.mapToOverview(question.getUpdatedBy()))
+            .build();
   }
 }

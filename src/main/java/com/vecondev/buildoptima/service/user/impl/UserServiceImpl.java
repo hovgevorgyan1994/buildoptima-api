@@ -277,7 +277,10 @@ public class UserServiceImpl implements UserService {
     if (!userRepository.existsById(userId)) {
       throw new UserNotFoundException(USER_NOT_FOUND);
     }
+    String className = User.class.getSimpleName().toLowerCase();
 
+    imageService.checkExistenceOfObject(imageService.getImagePath(className,userId,true), userId );
+    imageService.checkExistenceOfObject(imageService.getImagePath(className,userId,false), userId );
     imageService.deleteImagesFromS3("user", userId);
   }
 

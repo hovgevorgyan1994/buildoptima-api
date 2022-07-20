@@ -2,7 +2,8 @@ package com.vecondev.buildoptima.mapper.faq.decorator;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryOverview;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
@@ -44,8 +45,8 @@ public abstract class FaqCategoryMapperDecorator implements FaqCategoryMapper {
   }
 
   @Override
-  public FaqCategoryOverview mapToOverview(FaqCategory faqCategory) {
-    return faqCategoryMapper.mapToOverview(faqCategory).toBuilder().id(faqCategory.getId()).build();
+  public EntityOverview mapToOverview(FaqCategory faqCategory) {
+    return faqCategoryMapper.mapToOverview(faqCategory);
   }
 
   @Override
@@ -58,6 +59,14 @@ public abstract class FaqCategoryMapperDecorator implements FaqCategoryMapper {
     return faqCategoryMapper.mapToRecord(faqCategory).toBuilder()
         .createdBy(faqCategory.getCreatedBy().getFullName())
         .updatedBy(faqCategory.getUpdatedBy().getFullName())
+        .build();
+  }
+
+  @Override
+  public Metadata getMetadata(FaqCategory category, Long allActiveCount, Long allArchivedCount) {
+    return faqCategoryMapper.getMetadata(category, allActiveCount, allArchivedCount).toBuilder()
+        .lastUpdatedAt(category.getUpdatedAt())
+        .lastUpdatedBy(userMapper.mapToOverview(category.getUpdatedBy()))
         .build();
   }
 }

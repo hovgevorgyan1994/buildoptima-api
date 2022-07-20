@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.dto.response.faq;
 
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +23,7 @@ public class FaqCategoryResponseDto {
   @Schema(example = "Royalties & Statements")
   private String name;
 
-  private UserOverview updatedBy;
+  private EntityOverview updatedBy;
 
   @Schema(example = "2022-06-24 13:29:00.887950")
   private Instant createdAt;

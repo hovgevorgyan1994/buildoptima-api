@@ -3,7 +3,6 @@ package com.vecondev.buildoptima.controller;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
@@ -42,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
 @Import({FaqCategoryEndpointUris.class, FaqCategoryResultActions.class, AmazonS3Config.class})
-class FaqCategoryControllerTest  {
+public class FaqCategoryControllerTest  {
 
   @Autowired private MockMvc mvc;
 
@@ -223,6 +222,18 @@ class FaqCategoryControllerTest  {
     resultActions.getAllInCsvResultActions(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", notNullValue()));
+  }
+
+  @Test
+  void successfulGettingMetadata() throws Exception {
+    User moderatorUser = getUserByRole(MODERATOR);
+    FaqCategory lastUpdatedCategory = faqCategoryRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
+    assumeFalse(lastUpdatedCategory == null);
+
+    resultActions.getMetadataResultActions(moderatorUser)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedCategory.getUpdatedAt().toString()))
+            .andExpect(jsonPath("$.allActiveCount").value(faqCategoryRepository.count()));
   }
 
   private User getUserByRole(Role role) {

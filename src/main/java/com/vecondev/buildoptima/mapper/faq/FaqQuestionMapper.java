@@ -2,6 +2,7 @@ package com.vecondev.buildoptima.mapper.faq;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.mapper.faq.decorator.FaqQuestionMapperDecorator;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
@@ -33,6 +34,8 @@ public interface FaqQuestionMapper {
   @Mapping(target = "updatedBy", ignore = true)
   @Mapping(target = "category", ignore = true)
   FaqQuestionRecord mapToRecord(FaqQuestion faqQuestion);
+
+  Metadata getMetadata(FaqQuestion question, Long allActiveCount, Long allArchivedCount);
 
   default List<FaqQuestionRecord> mapToRecordList(List<FaqQuestion> faqQuestions) {
     return faqQuestions.stream().map(this::mapToRecord).toList();

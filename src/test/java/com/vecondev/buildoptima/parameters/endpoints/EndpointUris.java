@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.parameters.endpoints;
 
+
 public interface EndpointUris {
 
     String getDeleteByIdUri();
@@ -9,5 +10,6 @@ public interface EndpointUris {
     String getRetrieveByIdUri();
     String getAllUri();
     String getExportInCsvUri();
+    String getMetadataUri();
 
 }

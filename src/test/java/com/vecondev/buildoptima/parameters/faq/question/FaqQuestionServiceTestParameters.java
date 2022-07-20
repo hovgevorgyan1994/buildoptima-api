@@ -1,10 +1,9 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
@@ -55,9 +54,9 @@ public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
         question.getQuestion(),
         question.getAnswer(),
         question.getStatus(),
-        new FaqCategoryOverview(
-            question.getCategory().getId(), question.getCategory().getName()),
-        new UserOverview(user.getId(), user.getFirstName(), user.getLastName()),
+        new EntityOverview(question.getCategory().getId(), question.getCategory().getName()),
+        new EntityOverview(
+            user.getId(), String.format("%s %s", user.getFirstName(), user.getLastName())),
         question.getCreatedAt(),
         question.getUpdatedAt());
   }
@@ -71,18 +70,9 @@ public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
             .build());
   }
 
-  public FaqCategory getFaqCategory(UUID userId) {
-    return faqCategoryServiceTestParameters.getFaqCategory(userId);
-  }
-
-  public List<FaqQuestionResponseDto> getFaqQuestionResponseDtoList(List<FaqQuestion> faqQuestions) {
+  public List<FaqQuestionResponseDto> getFaqQuestionResponseDtoList(
+      List<FaqQuestion> faqQuestions) {
     return faqQuestions.stream().map(this::getFaqQuestionResponseDto).collect(Collectors.toList());
-  }
-  public User getUserById(UUID userId) {
-    User user = userServiceTestParameters.getSavedUser();
-    user.setId(userId);
-
-    return user;
   }
 
   public List<FaqQuestionRecord> getFaqQuestionRecordList() {
@@ -109,5 +99,23 @@ public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
             Instant.now(),
             createdBy,
             Instant.now()));
+  }
+
+  public FaqCategory getFaqCategory(UUID userId) {
+    return faqCategoryServiceTestParameters.getFaqCategory(userId);
+  }
+
+  public List<FaqCategory> getFaqCategories() {
+    return faqCategoryServiceTestParameters.getFaqCategoryList();
+  }
+  public User getUserById(UUID userId) {
+    User user = userServiceTestParameters.getSavedUser();
+    user.setId(userId);
+
+    return user;
+  }
+
+  public List<User> getUsers() {
+    return userServiceTestParameters.getUserList();
   }
 }

@@ -4,7 +4,7 @@ import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
-import com.vecondev.buildoptima.dto.response.news.Metadata;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.exception.NewsException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;

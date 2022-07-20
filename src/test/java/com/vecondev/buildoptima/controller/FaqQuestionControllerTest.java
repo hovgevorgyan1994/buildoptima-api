@@ -3,6 +3,7 @@ package com.vecondev.buildoptima.controller;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
@@ -27,6 +28,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
+import static com.vecondev.buildoptima.model.Status.ARCHIVED;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
 import static org.hamcrest.Matchers.hasSize;
@@ -225,6 +230,43 @@ class FaqQuestionControllerTest {
         .getAllInCsvResultActions(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", notNullValue()));
+  }
+
+  @Test
+  void successfulGettingMetadata() throws Exception {
+    User moderatorUser = getUserByRole(MODERATOR);
+    FaqQuestion lastUpdatedQuestion = faqQuestionRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
+    assumeFalse(lastUpdatedQuestion == null);
+
+    resultActions.getMetadataResultActions(moderatorUser)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedQuestion.getUpdatedAt().toString()))
+            .andExpect(jsonPath("$.allActiveCount").value(faqQuestionRepository.countByStatus(ACTIVE)))
+            .andExpect(jsonPath("$.allArchivedCount").value(faqQuestionRepository.countByStatus(ARCHIVED)));
+  }
+
+  @Test
+  void successfulLookupByModifiers() throws Exception {
+    User moderatorUser = getUserByRole(MODERATOR);
+    Status status = ACTIVE;
+
+    resultActions
+        .lookupResultActions(status, UPDATED_BY, moderatorUser)
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$", hasSize(faqQuestionRepository.findDistinctModifiers(status).size())));
+  }
+
+  @Test
+  void successfulLookupByCategories() throws Exception {
+    User moderatorUser = getUserByRole(MODERATOR);
+    Status status = ARCHIVED;
+
+    resultActions
+        .lookupResultActions(status, CATEGORY, moderatorUser)
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$", hasSize(faqQuestionRepository.findDistinctCategories(status).size())));
   }
 
   private User getUserByRole(Role role) {

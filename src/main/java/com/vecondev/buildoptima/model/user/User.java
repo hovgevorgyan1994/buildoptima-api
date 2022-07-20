@@ -13,10 +13,11 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import java.time.Instant;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
 @Getter
 @Setter
 @Entity
@@ -50,4 +51,25 @@ public class User extends AbstractEntity {
     return String.format("%s %s (ID:%s)", firstName, lastName, id);
   }
 
+  @Builder(toBuilder = true)
+  public User(
+      UUID id,
+      Instant createdAt,
+      Instant updatedAt,
+      String firstName,
+      String lastName,
+      String phone,
+      String email,
+      String password,
+      Role role,
+      Boolean enabled) {
+    super(id, createdAt, updatedAt);
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.phone = phone;
+    this.email = email;
+    this.password = password;
+    this.role = role;
+    this.enabled = enabled;
+  }
 }

@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.dto.response.faq;
+package com.vecondev.buildoptima.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -12,8 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Data
-@Schema(name = "FAQ Category Overview")
-public class FaqCategoryOverview {
+@Schema(name = "Entity Overview")
+public class EntityOverview {
 
   @Schema(example = "2635b586-d0d7-4a2d-b4b5-c98377a02322")
   private UUID id;

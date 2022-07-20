@@ -93,7 +93,16 @@ public abstract class EntityResultActions<T extends EndpointUris> {
             get(getEndpointUris().getExportInCsvUri())
                 .header(AUTHORIZATION_HEADER, getAccessToken(user))
                 .contentType(APPLICATION_JSON)
-                .accept(APPLICATION_JSON_VALUE));
+                .accept("application/csv"));
+  }
+
+  public ResultActions getMetadataResultActions(User user) throws Exception {
+    return getMockMvc()
+            .perform(
+                    get(getEndpointUris().getMetadataUri())
+                            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+                            .contentType(APPLICATION_JSON)
+                            .accept(APPLICATION_JSON_VALUE));
   }
 
   public String getAccessToken(User user) {

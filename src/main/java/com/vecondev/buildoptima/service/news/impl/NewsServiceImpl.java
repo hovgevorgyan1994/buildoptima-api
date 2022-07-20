@@ -4,9 +4,8 @@ import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
-import com.vecondev.buildoptima.dto.response.news.Metadata;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
-import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.exception.ErrorCode;
 import com.vecondev.buildoptima.exception.NewsException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
@@ -14,7 +13,6 @@ import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.news.NewsMapper;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
-import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.news.NewsCategory;
 import com.vecondev.buildoptima.model.user.User;
@@ -144,25 +142,26 @@ public class NewsServiceImpl implements NewsService {
 
   @Override
   public Metadata getMetadata(AppUserDetails userDetails) {
-    log.info("User {} is trying to get the news metadata", userDetails.getUsername());
-    News lastUpdated = newsRepository.findTopByOrderByUpdatedAtDesc();
-    long allActiveCount = newsRepository.countByStatus(Status.ACTIVE);
-    long allArchivedCount = newsRepository.countByStatus(Status.ARCHIVED);
-
-    UserResponseDto lastModifier =
-        userMapper.mapToResponseDto(
-            userRepository.getReferenceById(
-                lastUpdated.getUpdatedBy() != null
-                    ? lastUpdated.getUpdatedBy()
-                    : lastUpdated.getCreatedBy()));
-
-    log.info("User {} successfully got the news metadata", userDetails.getUsername());
-    return Metadata.builder()
-        .lastUpdatedAt(lastUpdated.getUpdatedAt())
-        .lastUpdatedBy(lastModifier)
-        .allActiveCount(allActiveCount)
-        .allArchivedCount(allArchivedCount)
-        .build();
+//    log.info("User {} is trying to get the news metadata", userDetails.getUsername());
+//    News lastUpdated = newsRepository.findTopByOrderByUpdatedAtDesc();
+//    long allActiveCount = newsRepository.countByStatus(Status.ACTIVE);
+//    long allArchivedCount = newsRepository.countByStatus(Status.ARCHIVED);
+//
+//    UserResponseDto lastModifier =
+//        userMapper.mapToResponseDto(
+//            userRepository.getReferenceById(
+//                lastUpdated.getUpdatedBy() != null
+//                    ? lastUpdated.getUpdatedBy()
+//                    : lastUpdated.getCreatedBy()));
+//
+//    log.info("User {} successfully got the news metadata", userDetails.getUsername());
+//    return Metadata.builder()
+//        .lastUpdatedAt(lastUpdated.getUpdatedAt())
+//        .lastUpdatedBy(lastUpdated.getUpdatedBy())
+//        .allActiveCount(allActiveCount)
+//        .allArchivedCount(allArchivedCount)
+//        .build();
+    return new Metadata();
   }
 
   private void updateNews(

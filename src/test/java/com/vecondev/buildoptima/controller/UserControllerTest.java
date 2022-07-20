@@ -407,7 +407,7 @@ class UserControllerTest {
           convertMultipartFileToFile(file));
 
       resultActions
-          .imageDownloadingResultActions("thumbnail_image", savedUser.getId(), savedUser)
+          .imageDownloadingResultActions("thumbnail-image", savedUser.getId(), savedUser)
           .andExpect(status().isOk());
     }
 

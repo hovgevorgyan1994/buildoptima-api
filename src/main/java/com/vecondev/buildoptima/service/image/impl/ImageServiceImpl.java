@@ -106,22 +106,34 @@ public class ImageServiceImpl implements ImageService {
     deleteImage(className, objectId, false);
   }
 
-  private void checkExistenceOfBucket() {
-    if (!amazonS3.doesBucketExistV2(s3ConfigProperties.getBucketName())) {
-      log.error("The 'buildoptima' bucket doesn't exist!");
-      throw new ResourceNotFoundException(BUCKET_NOT_FOUND);
-    }
-  }
-
   /**
    * checks if there is an object with given image name in s3 bucket or not
    *
    * @throws ResourceNotFoundException when no image found by given image name
    */
-  private void checkExistenceOfObject(String imageName, UUID userId) {
-    if (!amazonS3.doesObjectExist(s3ConfigProperties.getBucketName(), imageName)) {
+  @Override
+  public void checkExistenceOfObject(String imagePath, UUID userId) {
+    if (!amazonS3.doesObjectExist(s3ConfigProperties.getBucketName(), imagePath)) {
       log.warn("There is no image of user with id: {} to remove.", userId);
       throw new ResourceNotFoundException(IMAGE_NOT_FOUND);
+    }
+  }
+
+  /**
+   * forms the path image should be saved in S3 bucket
+   *
+   * @param isOriginal whether it's original (true) or thumbnail version
+   * @return the image path in S3
+   */
+  @Override
+  public String getImagePath(String className, UUID objectId, boolean isOriginal) {
+    return String.format("%s/%s/%s", className, objectId, isOriginal ? ORIGINAL : THUMBNAIL);
+  }
+
+  private void checkExistenceOfBucket() {
+    if (!amazonS3.doesBucketExistV2(s3ConfigProperties.getBucketName())) {
+      log.error("The 'buildoptima' bucket doesn't exist!");
+      throw new ResourceNotFoundException(BUCKET_NOT_FOUND);
     }
   }
 
@@ -144,15 +156,5 @@ public class ImageServiceImpl implements ImageService {
         "The (id: {}) {} image is successfully deleted.",
         objectId,
         isOriginal ? ORIGINAL : THUMBNAIL);
-  }
-
-  /**
-   * forms the path image should be saved in S3 bucket
-   *
-   * @param isOriginal whether it's original (true) or thumbnail version
-   * @return the image path in S3
-   */
-  private String getImagePath(String className, UUID objectId, boolean isOriginal) {
-    return String.format("%s/%s/%s", className, objectId, isOriginal ? ORIGINAL : THUMBNAIL);
   }
 }

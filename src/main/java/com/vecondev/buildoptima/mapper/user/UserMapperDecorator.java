@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.mapper.user;
 
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.user.UserOverview;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,9 @@ public abstract class UserMapperDecorator implements UserMapper {
   }
 
   @Override
-  public UserOverview mapToOverview(User user) {
-    return mapper.mapToOverview(user);
+  public EntityOverview mapToOverview(User user) {
+    return mapper.mapToOverview(user).toBuilder()
+        .name(String.format("%s %s", user.getFirstName(), user.getLastName()))
+        .build();
   }
 }

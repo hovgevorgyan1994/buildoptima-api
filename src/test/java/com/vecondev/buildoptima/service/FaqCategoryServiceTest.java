@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.service;
 
-
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -108,7 +109,7 @@ class FaqCategoryServiceTest {
     FaqCategoryResponseDto methodResponse =
         faqCategoryService.createCategory(faqCategoryRequestDto, userId);
     assertEquals(faqCategory.getName(), methodResponse.getName());
-    assertEquals(user.getFirstName(), methodResponse.getUpdatedBy().getFirstName());
+    assertEquals(String.format("%s %s", user.getFirstName(), user.getLastName()), methodResponse.getUpdatedBy().getName());
     verify(faqCategoryValidator).validateCategoryName(faqCategory.getName());
     verify(faqCategoryMapper).mapToDto(faqCategory);
   }
@@ -284,5 +285,23 @@ class FaqCategoryServiceTest {
     assertThrows(
         FileConvertionFailedException.class, () -> faqCategoryService.exportFaqCategoriesInCsv());
     verify(faqCategoryRepository).findAll();
+  }
+
+  @Test
+  void successfulGettingMetadata() {
+    when(faqCategoryRepository.findTopByOrderByUpdatedAtDesc()).thenReturn(Optional.of(new FaqCategory()));
+    faqCategoryService.getMetadata();
+
+    verify(faqCategoryMapper).getMetadata(any(), any(), any());
+    verify(faqCategoryRepository).count();
+  }
+
+  @Test
+  void successfulGettingMetadataWithZeroCount() {
+    when(faqCategoryRepository.findTopByOrderByUpdatedAtDesc()).thenReturn(Optional.empty());
+    Metadata metadata = faqCategoryService.getMetadata();
+
+    assertNull(metadata.getAllActiveCount());
+    assertNull(metadata.getLastUpdatedBy());
   }
 }

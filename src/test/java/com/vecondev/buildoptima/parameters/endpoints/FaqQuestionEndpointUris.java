@@ -1,6 +1,5 @@
 package com.vecondev.buildoptima.parameters.endpoints;
 
-import lombok.Data;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -16,7 +15,8 @@ public class FaqQuestionEndpointUris implements EndpointUris {
   private String fetchUri;
   private String retrieveByIdUri;
   private String exportInCsvUri;
-
+  private String metadataUri;
+  private String lookupUri;
 
   @Override
   public String getDeleteByIdUri() {
@@ -51,5 +51,14 @@ public class FaqQuestionEndpointUris implements EndpointUris {
   @Override
   public String getExportInCsvUri() {
     return baseUri + exportInCsvUri;
+  }
+
+  @Override
+  public String getMetadataUri() {
+    return baseUri + metadataUri;
+  }
+
+  public String getLookupUri() {
+    return baseUri + lookupUri;
   }
 }

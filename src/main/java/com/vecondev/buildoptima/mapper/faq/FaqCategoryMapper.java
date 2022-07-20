@@ -2,7 +2,8 @@ package com.vecondev.buildoptima.mapper.faq;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryOverview;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.mapper.faq.decorator.FaqCategoryMapperDecorator;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
@@ -25,7 +26,7 @@ public interface FaqCategoryMapper {
   @Mapping(target = "updatedBy", ignore = true)
   FaqCategoryResponseDto mapToDto(FaqCategory faqCategory);
 
-  FaqCategoryOverview mapToOverview(FaqCategory faqCategory);
+  EntityOverview mapToOverview(FaqCategory faqCategory);
 
   List<FaqCategoryResponseDto> mapToListDto(List<FaqCategory> categories);
 
@@ -34,6 +35,8 @@ public interface FaqCategoryMapper {
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "updatedBy", ignore = true)
   FaqCategoryRecord mapToRecord(FaqCategory faqCategory);
+
+  Metadata getMetadata(FaqCategory category, Long allActiveCount, Long allArchivedCount);
 
   default List<FaqCategoryRecord> mapToRecordList(List<FaqCategory> faqCategories) {
     return faqCategories.stream().map(this::mapToRecord).toList();

@@ -45,6 +45,7 @@ config:
       fetchUri: /fetch
       retrieveByIdUri: /{id}
       exportInCsvUri: /csv
+      metadataUri: /metadata
     faq-question:
       baseUri: /faq/questions
       deleteByIdUri: /{id}
@@ -52,6 +53,8 @@ config:
       fetchUri: /fetch
       retrieveByIdUri: /{id}
       exportInCsvUri: /csv
+      metadataUri: /metadata
+      lookupUri: /lookup/{status}/{dictionary}
     user:
       baseUri: /user
       fetchUri: /fetch
@@ -60,9 +63,9 @@ config:
       downloadImageUri: /{id}/
       uploadImageUri: /{id}/image
       restorePasswordUri: /auth/password/restore
-      verifyPasswordUri: /auth/password/verify
+      verifyPasswordUri: /auth/password/receive-email
       changePasswordUri: /password/change
-      refreshTokenUri: /auth/refreshToken
+      refreshTokenUri: /auth/refresh-token
       loginUri: /auth/login
       activationUri: /auth/activate
       registrationUri: /auth/registration

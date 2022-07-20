@@ -55,7 +55,10 @@ public enum ErrorCode {
   INVALID_STATUS(BAD_REQUEST, "Can't parse String value to Status enum."),
   INVALID_NEWS_UPDATE_REQUEST(HttpStatus.NOT_ACCEPTABLE,"Update News Item Request Should Have At Least One Property Provided"),
   NEWS_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "News Item Not Found"),
-  INVALID_FIELD(BAD_REQUEST, "Invalid field in fetch request.");
+  INVALID_FIELD(BAD_REQUEST, "Invalid field in fetch request."),
+  CATEGORY_HAS_QUESTIONS(
+      CONFLICT,
+      "The category has questions, to delete category it's first need to delete category's questions.");
 
   private final HttpStatus httpStatus;
   private final String message;

@@ -2,10 +2,14 @@ package com.vecondev.buildoptima.controller;
 
 import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
+import com.vecondev.buildoptima.filter.model.DictionaryField;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -234,29 +238,80 @@ public interface FaqQuestionApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<FetchResponseDto> fetchQuestions(FetchRequestDto fetchRequest);
+  ResponseEntity<FetchResponseDto> fetchQuestions(
+      FetchRequestDto fetchRequest, @Parameter(hidden = true) AppUserDetails authenticatedUser);
 
-    @Operation(
-            summary = "Exporting all FAQ questions in '.csv' format",
-            security = @SecurityRequirement(name = "api-security"))
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "All faq questions should be exported",
-                            content = {
-                                    @Content(mediaType = "application/csv"),
-                                    @Content(mediaType = APPLICATION_JSON_VALUE)
-                            }),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description =
-                                    "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
-                            content =
-                            @Content(
-                                    schema = @Schema(implementation = ApiError.class),
-                                    mediaType = APPLICATION_JSON_VALUE))
-            })
-    ResponseEntity<Resource> exportAllQuestionsInCSV(
-            @Parameter(hidden = true) AppUserDetails authenticatedUser);
+  @Operation(
+      summary = "Exporting all FAQ questions in '.csv' format",
+      security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "All faq questions should be exported",
+            content = {
+              @Content(mediaType = "application/csv"),
+              @Content(mediaType = APPLICATION_JSON_VALUE)
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<Resource> exportAllQuestionsInCSV(
+      @Parameter(hidden = true) AppUserDetails authenticatedUser);
+
+  @Operation(
+      summary = "Get FAQ Question metadata",
+      security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The metadata should be got",
+            content =
+                @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Metadata.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "Authenticated user hasn't permission to get the metadata (Should be either MODERATOR or ADMIN)",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<Metadata> getMetadata(@Parameter(hidden = true) AppUserDetails authenticatedUser);
+
+  @Operation(
+      summary =
+          "Find all users who updated questions with given status, or all categories that have questions with such status",
+      security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The result should be successfully got",
+            content =
+                @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = EntityOverview.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "Authenticated user hasn't permission to get these resources (Should be either MODERATOR or ADMIN)",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<List<EntityOverview>> lookup(
+      Status status,
+      DictionaryField dictionary,
+      @Parameter(hidden = true) AppUserDetails authenticatedUser);
 }

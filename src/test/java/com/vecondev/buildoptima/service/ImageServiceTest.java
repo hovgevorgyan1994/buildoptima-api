@@ -92,10 +92,9 @@ class ImageServiceTest {
   }
 
   @Test
-  void succesfulImageDeletion() {
+  void successfulImageDeletion() {
     UUID userId = UUID.randomUUID();
 
-    when(s3Client.doesObjectExist(any(), any())).thenReturn(true);
     imageService.deleteImagesFromS3("user", userId);
 
     verify(s3Client, times(2)).deleteObject(any(), any());
