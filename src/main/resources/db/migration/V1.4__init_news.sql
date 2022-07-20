@@ -8,7 +8,7 @@ create table news
     status        varchar(25)  not null,
     news_category varchar(25)  not null,
     created_by    uuid         not null,
-    updated_by    uuid,
+    updated_by    uuid         not null,
     created_at    timestamp    not null,
     updated_at    timestamp
 );

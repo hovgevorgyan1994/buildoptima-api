@@ -69,3 +69,12 @@ config:
       loginUri: /auth/login
       activationUri: /auth/activate
       registrationUri: /auth/registration
+    news:
+      baseUri: /news
+      deleteUri: /{id}
+      updateUri: /{id}
+      getByIdUri: /{id}
+      getMetadataUri: /metadata
+      exportCsvUri: /csv
+      fetchUri: /fetch
+      archiveUri: /{id}/archive

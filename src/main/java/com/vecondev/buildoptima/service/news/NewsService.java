@@ -7,6 +7,7 @@ import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import org.springframework.core.io.InputStreamResource;
 
 import java.util.UUID;
 
@@ -23,4 +24,8 @@ public interface NewsService {
   FetchResponseDto fetch(FetchRequestDto fetchRequestDto);
 
   Metadata getMetadata(AppUserDetails userDetails);
+
+  InputStreamResource exportCsv(FetchRequestDto fetchRequestDto, String username);
+
+  NewsResponseDto archiveNews(UUID id, AppUserDetails userDetails);
 }

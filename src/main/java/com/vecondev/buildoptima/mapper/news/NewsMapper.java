@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.mapper.news;
 
+import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.model.news.News;
@@ -23,6 +24,12 @@ public interface NewsMapper {
   @Mapping(target = "createdBy", ignore = true)
   NewsResponseDto mapToResponseDto(News news);
 
+  @Mapping(target = "updatedBy", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  NewsRecord mapToRecord(News news);
+
   @Mapping(target = "keywords", ignore = true)
   List<NewsResponseDto> mapToResponseList(Page<News> newsPage);
+
+  List<NewsRecord> mapToNewsRecordList (List<News> news);
 }

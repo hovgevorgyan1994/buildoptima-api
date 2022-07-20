@@ -8,6 +8,4 @@ import java.util.List;
 public interface CsvService<T extends CsvRecord> {
 
   ByteArrayInputStream writeToCsv(List<T> list, Class<T> clazz);
-
-  String[] getHeaders(Class<T> clazz);
 }

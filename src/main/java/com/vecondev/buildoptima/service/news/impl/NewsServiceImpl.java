@@ -1,10 +1,12 @@
 package com.vecondev.buildoptima.service.news.impl;
 
+import com.vecondev.buildoptima.csv.news.NewsRecord;
+import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
-import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.exception.ErrorCode;
 import com.vecondev.buildoptima.exception.NewsException;
@@ -13,25 +15,30 @@ import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.news.NewsMapper;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.news.NewsCategory;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.news.NewsRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.csv.CsvService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.service.news.NewsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
 
+import static com.vecondev.buildoptima.exception.ErrorCode.NEWS_ITEM_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.NewsFields.newsPageSortingFieldsMap;
 import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
@@ -49,6 +56,8 @@ public class NewsServiceImpl implements NewsService {
   private final UserMapper userMapper;
   private final PageableConverter pageableConverter;
 
+  private final CsvService<NewsRecord> csvService;
+
   @Override
   public NewsResponseDto create(
       NewsCreateRequestDto createNewsRequestDto, AppUserDetails userDetails) {
@@ -56,6 +65,7 @@ public class NewsServiceImpl implements NewsService {
     User creator = userRepository.getReferenceById(userDetails.getId());
     News news = newsMapper.mapToEntity(createNewsRequestDto);
     news.setCreatedBy(creator.getId());
+    news.setUpdatedBy(creator.getId());
     news = newsRepository.saveAndFlush(news);
     log.info("Successfully saved news item in DB");
 
@@ -80,9 +90,7 @@ public class NewsServiceImpl implements NewsService {
       throw new NewsException(ErrorCode.INVALID_NEWS_UPDATE_REQUEST);
     }
     News news =
-        newsRepository
-            .findById(newsId)
-            .orElseThrow(() -> new NewsException(ErrorCode.NEWS_ITEM_NOT_FOUND));
+        newsRepository.findById(newsId).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
     User user = userRepository.getReferenceById(userDetails.getId());
 
     log.info("Trying to update news entity properties");
@@ -96,9 +104,7 @@ public class NewsServiceImpl implements NewsService {
   public void delete(UUID id, AppUserDetails userDetails) {
     log.info("Trying to delete news item: news id {}", id);
     News news =
-        newsRepository
-            .findById(id)
-            .orElseThrow(() -> new NewsException(ErrorCode.NEWS_ITEM_NOT_FOUND));
+        newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
     String className = news.getClass().getSimpleName().toLowerCase();
     imageService.deleteImagesFromS3(className, id);
     newsRepository.deleteById(id);
@@ -109,9 +115,7 @@ public class NewsServiceImpl implements NewsService {
   public NewsResponseDto getById(UUID id, AppUserDetails userDetails) {
     log.info("User {} is trying to get news item by id: {}", userDetails.getUsername(), id);
     return newsMapper.mapToResponseDto(
-        newsRepository
-            .findById(id)
-            .orElseThrow(() -> new NewsException(ErrorCode.NEWS_ITEM_NOT_FOUND)));
+        newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND)));
   }
 
   @Override
@@ -142,26 +146,53 @@ public class NewsServiceImpl implements NewsService {
 
   @Override
   public Metadata getMetadata(AppUserDetails userDetails) {
-//    log.info("User {} is trying to get the news metadata", userDetails.getUsername());
-//    News lastUpdated = newsRepository.findTopByOrderByUpdatedAtDesc();
-//    long allActiveCount = newsRepository.countByStatus(Status.ACTIVE);
-//    long allArchivedCount = newsRepository.countByStatus(Status.ARCHIVED);
-//
-//    UserResponseDto lastModifier =
-//        userMapper.mapToResponseDto(
-//            userRepository.getReferenceById(
-//                lastUpdated.getUpdatedBy() != null
-//                    ? lastUpdated.getUpdatedBy()
-//                    : lastUpdated.getCreatedBy()));
-//
-//    log.info("User {} successfully got the news metadata", userDetails.getUsername());
-//    return Metadata.builder()
-//        .lastUpdatedAt(lastUpdated.getUpdatedAt())
-//        .lastUpdatedBy(lastUpdated.getUpdatedBy())
-//        .allActiveCount(allActiveCount)
-//        .allArchivedCount(allArchivedCount)
-//        .build();
-    return new Metadata();
+    log.info("User {} is trying to get the news metadata", userDetails.getUsername());
+    News lastUpdated = newsRepository.findTopByOrderByUpdatedAtDesc();
+    long allActiveCount = newsRepository.countByStatus(Status.ACTIVE);
+    long allArchivedCount = newsRepository.countByStatus(Status.ARCHIVED);
+
+    EntityOverview lastModifier =
+        userMapper.mapToOverview(
+            userRepository.getReferenceById(
+                lastUpdated.getUpdatedBy() != null
+                    ? lastUpdated.getUpdatedBy()
+                    : lastUpdated.getCreatedBy()));
+
+    log.info("User {} successfully got the news metadata", userDetails.getUsername());
+    return Metadata.builder()
+        .lastUpdatedAt(lastUpdated.getUpdatedAt())
+        .lastUpdatedBy(lastModifier)
+        .allActiveCount(allActiveCount)
+        .allArchivedCount(allArchivedCount)
+        .build();
+  }
+
+  @Override
+  public InputStreamResource exportCsv(FetchRequestDto fetchRequestDto, String username) {
+    log.info("User {} is trying to export news in csv file", username);
+    Specification<News> specification =
+        new GenericSpecification<>(newsPageSortingFieldsMap, fetchRequestDto.getFilter());
+
+    List<News> news = newsRepository.findAll(specification);
+    List<NewsRecord> newsDtoList = newsMapper.mapToNewsRecordList(news);
+
+    ByteArrayInputStream inputStream = csvService.writeToCsv(newsDtoList, NewsRecord.class);
+    log.info(
+        "User {} successfully exported {} news items in csv file", username, newsDtoList.size());
+    return new InputStreamResource(inputStream);
+  }
+
+  @Override
+  public NewsResponseDto archiveNews(UUID id, AppUserDetails userDetails) {
+    log.info("User {} is trying to archive news item with id {}", userDetails.getUsername(), id);
+    News news =
+        newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
+    news.setStatus(Status.ARCHIVED);
+    news.setUpdatedBy(userDetails.getId());
+    NewsResponseDto newsResponseDto = newsMapper.mapToResponseDto(news);
+    log.info("User {} successfully archived news item with id {}", userDetails.getUsername(), id);
+
+    return newsResponseDto;
   }
 
   private void updateNews(
@@ -183,6 +214,5 @@ public class NewsServiceImpl implements NewsService {
       imageService.uploadImagesToS3(className, news.getId(), dto.getImage(), userDetails.getId());
     }
     news.setUpdatedBy(modifier.getId());
-    newsRepository.save(news);
   }
 }

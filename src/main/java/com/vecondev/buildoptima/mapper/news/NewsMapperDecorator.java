@@ -1,11 +1,13 @@
 package com.vecondev.buildoptima.mapper.news;
 
+import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.news.NewsCategory;
+import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,16 +47,30 @@ public abstract class NewsMapperDecorator implements NewsMapper {
       responseDto.setKeywords(keywords);
     }
     responseDto.setCreatedBy(
-        userMapper.mapToResponseDto(userRepository.getReferenceById(news.getCreatedBy())));
-    if (news.getUpdatedBy() != null) {
-      responseDto.setUpdatedBy(
-          userMapper.mapToResponseDto(userRepository.getReferenceById(news.getUpdatedBy())));
-    }
+        userMapper.mapToOverview(userRepository.getReferenceById(news.getCreatedBy())));
+    responseDto.setUpdatedBy(
+        userMapper.mapToOverview(userRepository.getReferenceById(news.getUpdatedBy())));
     return responseDto;
+  }
+
+  @Override
+  public NewsRecord mapToRecord(News news) {
+    NewsRecord newsRecord = mapper.mapToRecord(news);
+    User creator = userRepository.getReferenceById(news.getCreatedBy());
+    newsRecord.setCreatedBy(String.format("%s %s", creator.getFirstName(), creator.getLastName()));
+    User modifier = userRepository.getReferenceById(news.getUpdatedBy());
+    newsRecord.setUpdatedBy(
+        String.format("%s %s", modifier.getFirstName(), modifier.getLastName()));
+    return newsRecord;
   }
 
   @Override
   public List<NewsResponseDto> mapToResponseList(Page<News> newsPage) {
     return newsPage.getContent().stream().map(this::mapToResponseDto).toList();
+  }
+
+  @Override
+  public List<NewsRecord> mapToNewsRecordList(List<News> news) {
+    return news.stream().map(this::mapToRecord).toList();
   }
 }

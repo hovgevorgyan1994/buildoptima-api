@@ -1,15 +1,18 @@
 package com.vecondev.buildoptima.service;
 
+import com.vecondev.buildoptima.csv.news.NewsRecord;
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
-import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
+import com.vecondev.buildoptima.exception.FileConvertionFailedException;
 import com.vecondev.buildoptima.exception.NewsException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.news.NewsMapper;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.news.NewsCategory;
 import com.vecondev.buildoptima.model.user.Role;
@@ -19,9 +22,11 @@ import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.news.NewsRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.csv.CsvService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.service.news.impl.NewsServiceImpl;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,11 +36,14 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,6 +69,7 @@ class NewsServiceTest {
   @Mock private NewsMapper newsMapper;
   @Mock private UserMapper userMapper;
   @Mock private UserRepository userRepository;
+  @Mock private CsvService<NewsRecord> csvService;
 
   private NewsCreateRequestDto createNewsRequestDto;
   private News news;
@@ -69,10 +78,17 @@ class NewsServiceTest {
   @BeforeEach()
   void init() {
     createNewsRequestDto = serviceTestParameters.getCreateNewsRequestDto();
-    news = serviceTestParameters.getNewsFromCreateNewsDto(createNewsRequestDto);
-    news.setId(UUID.randomUUID());
     user = userServiceTestParameters.getSavedUser();
     user.setRole(Role.ADMIN);
+    News newsToSave = serviceTestParameters.getNewsFromCreateNewsDto(createNewsRequestDto);
+    newsToSave.setCreatedBy(user.getId());
+    newsToSave.setUpdatedBy(user.getId());
+    news = serviceTestParameters.getSavedNews(createNewsRequestDto, user);
+  }
+
+  @AfterEach
+  void tearDown() {
+    newsRepository.deleteAll();
   }
 
   @Test
@@ -173,12 +189,74 @@ class NewsServiceTest {
 
   @Test
   void getMetadataSuccess() {
+    long allActiveCount = 10L;
+
     doReturn(news).when(newsRepository).findTopByOrderByUpdatedAtDesc();
-    doReturn(10L).when(newsRepository).countByStatus(any());
-    doReturn(userServiceTestParameters.getUserResponseDto(user))
-        .when(userMapper)
-        .mapToResponseDto(any());
+    doReturn(allActiveCount).when(newsRepository).countByStatus(Status.ACTIVE);
+    doReturn(userServiceTestParameters.getUserOverView(user)).when(userMapper).mapToOverview(any());
+
     Metadata metadata = newsService.getMetadata(new AppUserDetails(user));
     assertNotNull(metadata);
+    assertEquals(allActiveCount,metadata.getAllActiveCount());
+  }
+
+  @Test
+  void exportCsvSuccess() {
+    FetchRequestDto fetchRequest = serviceTestParameters.getFetchRequest();
+    List<News> fetchResponse = serviceTestParameters.getFetchResponse();
+    List<NewsRecord> newsRecordList = serviceTestParameters.getNewsRecordList(fetchResponse);
+
+    when(newsRepository.findAll(any(Specification.class))).thenReturn(fetchResponse);
+    when(newsMapper.mapToNewsRecordList(any())).thenReturn(newsRecordList);
+    when(csvService.writeToCsv(newsRecordList, NewsRecord.class))
+        .thenReturn(new ByteArrayInputStream(new byte[] {}));
+
+    Resource resource = newsService.exportCsv(fetchRequest, user.getEmail());
+    assertNotNull(resource);
+    verify(newsRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void failedExportCsv() {
+    FetchRequestDto fetchRequest = serviceTestParameters.getFetchRequest();
+    List<News> fetchResponse = serviceTestParameters.getFetchResponse();
+    List<NewsRecord> newsRecordList = serviceTestParameters.getNewsRecordList(fetchResponse);
+
+    when(newsRepository.findAll(any(Specification.class))).thenReturn(fetchResponse);
+    when(newsMapper.mapToNewsRecordList(any())).thenReturn(newsRecordList);
+    doThrow(FileConvertionFailedException.class)
+        .when(csvService)
+        .writeToCsv(newsRecordList, NewsRecord.class);
+
+    assertThrows(
+        FileConvertionFailedException.class,
+        () -> newsService.exportCsv(fetchRequest, user.getEmail()));
+    verify(newsRepository).findAll(any(Specification.class));
+  }
+
+  @Test
+  void archiveNewsSuccess() {
+    UUID newsId = news.getId();
+    NewsResponseDto newsResponseDto = serviceTestParameters.getNewsResponseDto(news);
+    newsResponseDto.setStatus(Status.ARCHIVED);
+
+    doReturn(Optional.of(news)).when(newsRepository).findById(newsId);
+    doReturn(newsResponseDto).when(newsMapper).mapToResponseDto(news);
+
+    NewsResponseDto responseDto = newsService.archiveNews(newsId, new AppUserDetails(user));
+
+    assertNotNull(responseDto);
+    assertEquals(Status.ARCHIVED, responseDto.getStatus());
+  }
+
+  @Test
+  void failedArchiveNewsAsNotFound() {
+    UUID newsId = UUID.randomUUID();
+    doThrow(NewsException.class).when(newsRepository).findById(newsId);
+
+    assertThrows(
+        NewsException.class, () -> newsService.archiveNews(newsId, new AppUserDetails(user)));
+
+    verify(newsRepository).findById(newsId);
   }
 }

@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.parameters.news;
 
+import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
 
@@ -54,7 +54,6 @@ public class NewsServiceTestParameters extends TestUtil {
             .category(NewsCategory.valueOf(dto.getCategory()))
             .status(Status.ACTIVE)
             .build();
-    news.setCreatedAt(Instant.now());
     return news;
   }
 
@@ -66,35 +65,67 @@ public class NewsServiceTestParameters extends TestUtil {
         .description(news.getDescription())
         .category(news.getCategory())
         .createdBy(
-            userServiceTestParameters.getUserResponseDto(userServiceTestParameters.getSavedUser()))
+            userServiceTestParameters.getUserOverView(userServiceTestParameters.getSavedUser()))
+        .updatedBy(
+            userServiceTestParameters.getUserOverView(userServiceTestParameters.getSavedUser()))
+        .createdAt(Instant.now())
+        .updatedAt(news.getUpdatedAt())
+        .build();
+  }
+
+  public NewsRecord getNewsRecord(News news) {
+    return NewsRecord.builder()
+        .id(news.getId())
+        .title(news.getTitle())
+        .summary(news.getSummary())
+        .description(news.getDescription())
+        .category(news.getCategory())
+        .createdBy("Poxos poxosyan")
+        .updatedBy("Petros Petrosyan")
+        .updatedAt(Instant.now())
         .createdAt(Instant.now())
         .build();
   }
 
-  public List<News> getFetchResponse () {
+  public List<News> getFetchResponse() {
     return List.of(
-            News.builder().title("Summer Sales").summary("Summer Sales").build(),
-            News.builder().title("Winter Sales").summary("Winter Sales").build());
+        News.builder().title("Summer Sales").summary("Summer Sales").build(),
+        News.builder().title("Winter Sales").summary("Winter Sales").build());
   }
 
-  public List<NewsResponseDto> getNewsResponseDtoList (List<News> news) {
+  public List<NewsResponseDto> getNewsResponseDtoList(List<News> news) {
     return news.stream().map(this::getNewsResponseDto).collect(Collectors.toList());
-
   }
 
-  public FetchRequestDto getFetchRequest () {
-    return new FetchRequestDto(
-            0,
-            10,
-            List.of(new SortDto("title", SortDto.Direction.ASC)),
-            Map.of(
-                    "and",
-                    List.of(
-                            new Criteria(LIKE, "title", "Summer"),
-                            Map.of(
-                                    "or",
-                                    List.of(
-                                            new Criteria(GT, "createdAt", "2018-11-30T18:35:24.00Z"))))));
+  public List<NewsRecord> getNewsRecordList(List<News> news) {
+    return news.stream().map(this::getNewsRecord).collect(Collectors.toList());
+  }
 
+  public FetchRequestDto getFetchRequest() {
+    return new FetchRequestDto(
+        0,
+        10,
+        List.of(new SortDto("title", SortDto.Direction.ASC)),
+        Map.of(
+            "and",
+            List.of(
+                new Criteria(LIKE, "title", "Summer"),
+                Map.of("or", List.of(new Criteria(GT, "createdAt", "2018-11-30T18:35:24.00Z"))))));
+  }
+
+  public News getSavedNews(NewsCreateRequestDto dto, User user) {
+    News news =
+        News.builder()
+            .title(dto.getTitle())
+            .summary(dto.getSummary())
+            .description(dto.getDescription())
+            .category(NewsCategory.valueOf(dto.getCategory()))
+            .status(Status.ACTIVE)
+            .build();
+    news.setCreatedAt(Instant.now());
+    news.setUpdatedAt(Instant.now());
+    news.setCreatedBy(user.getId());
+    news.setUpdatedBy(user.getId());
+    return news;
   }
 }

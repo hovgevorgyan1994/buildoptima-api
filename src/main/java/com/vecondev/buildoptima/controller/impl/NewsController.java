@@ -10,7 +10,9 @@ import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.news.NewsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -82,5 +85,24 @@ public class NewsController implements NewsApi {
   @GetMapping("/metadata")
   public ResponseEntity<Metadata> getMetadata(@AuthenticationPrincipal AppUserDetails userDetails) {
     return ResponseEntity.ok(newsService.getMetadata(userDetails));
+  }
+
+  @Override
+  @PostMapping("/csv")
+  public ResponseEntity<Resource> exportCsv(
+      @RequestBody FetchRequestDto fetchRequestDto,
+      @AuthenticationPrincipal AppUserDetails userDetails) {
+    String csvFileName = String.format("news-%s.csv", Instant.now());
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType("application/csv"))
+        .header("Content-Disposition", String.format("attachment; filename=\"%s\"", csvFileName))
+        .body(newsService.exportCsv(fetchRequestDto, userDetails.getUsername()));
+  }
+
+  @Override
+  @PatchMapping("/{id}/archive")
+  public ResponseEntity<NewsResponseDto> archiveNews(
+      @PathVariable UUID id, @AuthenticationPrincipal AppUserDetails userDetails) {
+    return ResponseEntity.ok(newsService.archiveNews(id,userDetails));
   }
 }

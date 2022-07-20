@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.parameters.user;
 
+import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
@@ -42,13 +43,9 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
         false);
   }
 
-
   public User getSavedUser(User user) {
     User savedUser =
-        user.toBuilder()
-            .password(encoder.encode(user.getPassword()))
-            .enabled(true)
-            .build();
+        user.toBuilder().password(encoder.encode(user.getPassword())).enabled(true).build();
     savedUser.setId(UUID.randomUUID());
 
     return savedUser;
@@ -65,7 +62,6 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
             CLIENT,
             true);
     user.setId(UUID.randomUUID());
-
     return user;
   }
 
@@ -79,6 +75,11 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
         user.getRole(),
         user.getCreatedAt(),
         user.getUpdatedAt());
+  }
+
+  public EntityOverview getUserOverView(User user) {
+    return new EntityOverview(
+        user.getId(), String.format("%s %s", user.getFirstName(), user.getLastName()));
   }
 
   public List<UserResponseDto> getUserResponseDtoList(List<User> users) {

@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -250,5 +251,80 @@ public interface NewsApi {
                     mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<Metadata> getMetadata(
+      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+
+  @Operation(
+      summary = "Export news csv",
+      security = @SecurityRequirement(name = "api-security"),
+      externalDocs =
+          @ExternalDocumentation(
+              description =
+                  "Click here to see a detailed explanation of this endpoint requirements",
+              url =
+                  "https://github.com/vecondev/buildoptima-api/blob/develop/docs/filter-sorting.md"))
+  @RequestBody(ref = "#/components/requestBodies/fetchNewsRequestExample")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully exported news csv"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Expired access token",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized request",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<Resource> exportCsv(
+      FetchRequestDto fetchRequestDto,
+      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+
+  @Operation(summary = "Archive news item", security = @SecurityRequirement(name = "api-security"))
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully archived news item",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NewsResponseDto.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Expired access token",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized request",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<NewsResponseDto> archiveNews(
+      @Parameter(description = "The news item id which should be archived") UUID id,
       @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
 }

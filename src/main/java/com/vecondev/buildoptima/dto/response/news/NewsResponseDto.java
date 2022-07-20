@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.dto.response.news;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
+import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.NewsCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,12 +22,11 @@ public class NewsResponseDto {
   private String title;
   private String summary;
   private String description;
-  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<String> keywords;
   private NewsCategory category;
+  private Status status;
   private Instant createdAt;
   private Instant updatedAt;
-  private UserResponseDto createdBy;
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private UserResponseDto updatedBy;
+  private EntityOverview createdBy;
+  private EntityOverview updatedBy;
 }

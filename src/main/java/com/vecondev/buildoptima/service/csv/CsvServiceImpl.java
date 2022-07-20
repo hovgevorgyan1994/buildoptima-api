@@ -33,7 +33,6 @@ public class CsvServiceImpl<T extends CsvRecord> implements CsvService<T> {
       for (T entity : list) {
         csvPrinter.printRecord(entity.getAllFieldValues());
       }
-
       csvPrinter.flush();
       return new ByteArrayInputStream(outputStream.toByteArray());
     } catch (IOException ex) {
@@ -41,7 +40,7 @@ public class CsvServiceImpl<T extends CsvRecord> implements CsvService<T> {
     }
   }
 
-  public String[] getHeaders(Class<T> clazz) {
+  private String[] getHeaders(Class<T> clazz) {
     return Arrays.stream(clazz.getDeclaredFields())
         .map(field -> field.getAnnotation(Header.class).value())
         .toArray(String[]::new);
