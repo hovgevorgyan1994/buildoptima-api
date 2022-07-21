@@ -1,13 +1,13 @@
 package com.vecondev.buildoptima.service;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
-import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.Metadata;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
+import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
-import com.vecondev.buildoptima.exception.FileConvertionFailedException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
@@ -17,7 +17,7 @@ import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryServiceTestPa
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.service.csv.CsvServiceImpl;
 import com.vecondev.buildoptima.service.faq.impl.FaqCategoryServiceImpl;
-import com.vecondev.buildoptima.service.user.impl.UserServiceImpl;
+import com.vecondev.buildoptima.service.user.UserServiceImpl;
 import com.vecondev.buildoptima.validation.faq.FaqCategoryValidator;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ class FaqCategoryServiceTest {
 
   @Test
   void successfulRetrievalOfAllCategories() {
-    faqCategoryService.getAllCategories();
+    faqCategoryService.getAll();
 
     verify(faqCategoryRepository).findAll();
     verify(faqCategoryMapper).mapToListDto(any());
@@ -77,7 +77,7 @@ class FaqCategoryServiceTest {
   @Test
   void successfulRetrievalOfCategoryById() {
     doReturn(null).when(faqCategoryService).findCategoryById(any());
-    faqCategoryService.getCategoryById(UUID.randomUUID());
+    faqCategoryService.getById(UUID.randomUUID());
 
     verify(faqCategoryMapper).mapToDto(any());
   }
@@ -88,7 +88,7 @@ class FaqCategoryServiceTest {
 
     doThrow(ResourceNotFoundException.class).when(faqCategoryService).findCategoryById(id);
 
-    assertThrows(ResourceNotFoundException.class, () -> faqCategoryService.getCategoryById(id));
+    assertThrows(ResourceNotFoundException.class, () -> faqCategoryService.getById(id));
   }
 
   @Test
@@ -100,16 +100,18 @@ class FaqCategoryServiceTest {
     FaqCategoryResponseDto faqCategoryResponseDto =
         testParameters.getFaqCategoryResponseDto(faqCategory);
 
-    when(userService.getUserById(userId)).thenReturn(user);
+    when(userService.findUserById(userId)).thenReturn(user);
     when(faqCategoryMapper.mapToEntity(faqCategoryRequestDto, user)).thenReturn(faqCategory);
     faqCategory.setId(UUID.randomUUID());
     when(faqCategoryRepository.saveAndFlush(faqCategory)).thenReturn(faqCategory);
     when(faqCategoryMapper.mapToDto(faqCategory)).thenReturn(faqCategoryResponseDto);
 
     FaqCategoryResponseDto methodResponse =
-        faqCategoryService.createCategory(faqCategoryRequestDto, userId);
+        faqCategoryService.create(faqCategoryRequestDto, userId);
     assertEquals(faqCategory.getName(), methodResponse.getName());
-    assertEquals(String.format("%s %s", user.getFirstName(), user.getLastName()), methodResponse.getUpdatedBy().getName());
+    assertEquals(
+        String.format("%s %s", user.getFirstName(), user.getLastName()),
+        methodResponse.getUpdatedBy().getName());
     verify(faqCategoryValidator).validateCategoryName(faqCategory.getName());
     verify(faqCategoryMapper).mapToDto(faqCategory);
   }
@@ -121,7 +123,7 @@ class FaqCategoryServiceTest {
     FaqCategoryRequestDto faqCategoryRequestDto = testParameters.getFaqCategoryRequestDto();
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
 
-    when(userService.getUserById(userId)).thenReturn(user);
+    when(userService.findUserById(userId)).thenReturn(user);
     when(faqCategoryMapper.mapToEntity(faqCategoryRequestDto, user)).thenReturn(faqCategory);
     doThrow(IllegalArgumentException.class)
         .when(faqCategoryValidator)
@@ -129,7 +131,7 @@ class FaqCategoryServiceTest {
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> faqCategoryService.createCategory(faqCategoryRequestDto, userId));
+        () -> faqCategoryService.create(faqCategoryRequestDto, userId));
     verify(faqCategoryValidator).validateCategoryName(faqCategory.getName());
   }
 
@@ -148,7 +150,7 @@ class FaqCategoryServiceTest {
     when(faqCategoryMapper.mapToDto(any())).thenReturn(faqCategoryResponseDto);
 
     FaqCategoryResponseDto methodResponse =
-        faqCategoryService.updateCategory(faqCategory.getId(), faqCategoryRequestDto, userId);
+        faqCategoryService.update(faqCategory.getId(), faqCategoryRequestDto, userId);
     assertEquals(newName, methodResponse.getName());
     assertEquals(faqCategory.getId(), methodResponse.getId());
     verify(faqCategoryValidator).validateCategoryName(faqCategoryRequestDto.getName());
@@ -168,7 +170,7 @@ class FaqCategoryServiceTest {
 
     assertThrows(
         FaqCategoryNotFoundException.class,
-        () -> faqCategoryService.updateCategory(categoryId, faqCategoryRequestDto, userId));
+        () -> faqCategoryService.update(categoryId, faqCategoryRequestDto, userId));
   }
 
   @Test
@@ -178,7 +180,7 @@ class FaqCategoryServiceTest {
 
     when(faqCategoryRepository.existsById(categoryId)).thenReturn(true);
 
-    faqCategoryService.deleteCategory(categoryId, userId);
+    faqCategoryService.delete(categoryId, userId);
     verify(faqCategoryRepository).deleteById(categoryId);
   }
 
@@ -190,8 +192,7 @@ class FaqCategoryServiceTest {
     when(faqCategoryRepository.existsById(categoryId)).thenReturn(false);
 
     assertThrows(
-        FaqCategoryNotFoundException.class,
-        () -> faqCategoryService.deleteCategory(categoryId, userId));
+        FaqCategoryNotFoundException.class, () -> faqCategoryService.delete(categoryId, userId));
   }
 
   @Test
@@ -221,17 +222,18 @@ class FaqCategoryServiceTest {
     Page<FaqCategory> result = new PageImpl<>(testParameters.getFaqCategoryList());
 
     try (MockedStatic<FieldNameValidator> validator =
-                 Mockito.mockStatic(FieldNameValidator.class)) {
+        Mockito.mockStatic(FieldNameValidator.class)) {
       validator
-              .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
-              .thenAnswer((Answer<Void>) invocation -> null);
+          .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
+          .thenAnswer((Answer<Void>) invocation -> null);
     }
     when(pageableConverter.convert(requestDto)).thenReturn(pageable);
-    when(faqCategoryRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
+    when(faqCategoryRepository.findAll(any(Specification.class), any(Pageable.class)))
+        .thenReturn(result);
     when(faqCategoryMapper.mapToListDtoFromPage(result))
-            .thenReturn(testParameters.getFaqCategoryResponseDtoList(result.stream().toList()));
+        .thenReturn(testParameters.getFaqCategoryResponseDtoList(result.stream().toList()));
 
-    FetchResponseDto responseDto = faqCategoryService.fetchCategories(requestDto);
+    FetchResponseDto responseDto = faqCategoryService.fetch(requestDto);
     assertEquals(result.getTotalElements(), responseDto.getTotalElements());
   }
 
@@ -243,17 +245,18 @@ class FaqCategoryServiceTest {
     Page<FaqCategory> result = new PageImpl<>(testParameters.getFaqCategoryList());
 
     try (MockedStatic<FieldNameValidator> validator =
-                 Mockito.mockStatic(FieldNameValidator.class)) {
+        Mockito.mockStatic(FieldNameValidator.class)) {
       validator
-              .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
-              .thenAnswer((Answer<Void>) invocation -> null);
+          .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
+          .thenAnswer((Answer<Void>) invocation -> null);
     }
     when(pageableConverter.convert(requestDto)).thenReturn(pageable);
-    when(faqCategoryRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
+    when(faqCategoryRepository.findAll(any(Specification.class), any(Pageable.class)))
+        .thenReturn(result);
     when(faqCategoryMapper.mapToListDtoFromPage(result))
-            .thenReturn(testParameters.getFaqCategoryResponseDtoList(result.stream().toList()));
+        .thenReturn(testParameters.getFaqCategoryResponseDtoList(result.stream().toList()));
 
-    FetchResponseDto responseDto = faqCategoryService.fetchCategories(requestDto);
+    FetchResponseDto responseDto = faqCategoryService.fetch(requestDto);
     assertEquals(result.getTotalElements(), responseDto.getTotalElements());
   }
 
@@ -265,7 +268,7 @@ class FaqCategoryServiceTest {
     when(csvService.writeToCsv(categoryRecords, FaqCategoryRecord.class))
         .thenReturn(new ByteArrayInputStream(new byte[] {}));
 
-    ResponseEntity<Resource> response = faqCategoryService.exportFaqCategoriesInCsv();
+    ResponseEntity<Resource> response = faqCategoryService.exportInCsv();
     assertEquals(200, response.getStatusCodeValue());
     assertEquals(
         "application/csv",
@@ -278,18 +281,18 @@ class FaqCategoryServiceTest {
     List<FaqCategoryRecord> categoryRecords = testParameters.getFaqCategoryRecordList();
 
     when(faqCategoryMapper.mapToRecordList(any())).thenReturn(categoryRecords);
-    doThrow(FileConvertionFailedException.class)
+    doThrow(ConvertingFailedException.class)
         .when(csvService)
         .writeToCsv(categoryRecords, FaqCategoryRecord.class);
 
-    assertThrows(
-        FileConvertionFailedException.class, () -> faqCategoryService.exportFaqCategoriesInCsv());
+    assertThrows(ConvertingFailedException.class, () -> faqCategoryService.exportInCsv());
     verify(faqCategoryRepository).findAll();
   }
 
   @Test
   void successfulGettingMetadata() {
-    when(faqCategoryRepository.findTopByOrderByUpdatedAtDesc()).thenReturn(Optional.of(new FaqCategory()));
+    when(faqCategoryRepository.findTopByOrderByUpdatedAtDesc())
+        .thenReturn(Optional.of(new FaqCategory()));
     faqCategoryService.getMetadata();
 
     verify(faqCategoryMapper).getMetadata(any(), any(), any());

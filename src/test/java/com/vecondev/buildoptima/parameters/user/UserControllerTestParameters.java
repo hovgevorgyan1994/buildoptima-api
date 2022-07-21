@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.parameters.user;
 
-import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
-import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
-import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
+import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.USER_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;

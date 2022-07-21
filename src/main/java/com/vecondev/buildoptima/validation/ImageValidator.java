@@ -11,11 +11,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FILE_SIZE;
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_IMAGE_EXTENSION;
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_IMAGE_FORMAT;
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_IMAGE_SIZE;
-import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
+import static com.vecondev.buildoptima.exception.Error.INVALID_FILE_SIZE;
+import static com.vecondev.buildoptima.exception.Error.INVALID_IMAGE_EXTENSION;
+import static com.vecondev.buildoptima.exception.Error.INVALID_IMAGE_FORMAT;
+import static com.vecondev.buildoptima.exception.Error.INVALID_IMAGE_SIZE;
+import static com.vecondev.buildoptima.util.FileUtil.*;
 
 @Slf4j
 @Component

@@ -20,6 +20,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.function.Function;
 
+import static com.vecondev.buildoptima.exception.Error.FAILED_KEY_READ;
+
 @Data
 @Component
 @RequiredArgsConstructor
@@ -41,12 +43,12 @@ public class CertificateManager {
             try {
               return keyFactory.generatePublic(new X509EncodedKeySpec(bytes));
             } catch (InvalidKeySpecException e) {
-              throw new KeypairException("InvalidKeySpecException", e);
+              throw new KeypairException(FAILED_KEY_READ);
             }
           }));
 
     } catch (Exception e) {
-      throw new KeypairException("Exception occurred when retrieving public key", e);
+      throw new KeypairException(FAILED_KEY_READ);
     }
   }
 
@@ -64,11 +66,11 @@ public class CertificateManager {
             try {
               return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
             } catch (InvalidKeySpecException ex) {
-              throw new KeypairException("InvalidKeySpecException", ex);
+              throw new KeypairException(FAILED_KEY_READ);
             }
           }));
     } catch (Exception ex) {
-      throw new KeypairException("Exception occurred when retrieving private key", ex);
+      throw new KeypairException(FAILED_KEY_READ);
     }
   }
 

@@ -7,7 +7,7 @@ import org.springframework.core.convert.converter.Converter;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_INSTANT;
+import static com.vecondev.buildoptima.exception.Error.INVALID_INSTANT;
 
 public class InstantConverter implements Converter<String, Instant> {
 

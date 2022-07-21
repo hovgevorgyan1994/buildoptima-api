@@ -1,6 +1,6 @@
 package com.vecondev.buildoptima.parameters;
 
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.InvalidFieldException;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_PAGEABLE;
+import static com.vecondev.buildoptima.exception.Error.INVALID_PAGEABLE;
 
 public interface PageableTest {
 

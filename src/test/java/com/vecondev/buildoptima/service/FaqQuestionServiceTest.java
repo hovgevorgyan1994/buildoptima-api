@@ -1,14 +1,14 @@
 package com.vecondev.buildoptima.service;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
-import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.EntityOverview;
-import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
+import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
-import com.vecondev.buildoptima.exception.FileConvertionFailedException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
@@ -77,7 +77,7 @@ class FaqQuestionServiceTest {
 
   @Test
   void successfulRetrievalOfAllQuestions() {
-    faqQuestionService.getAllQuestions();
+    faqQuestionService.getAll();
 
     verify(faqQuestionRepository).findAll();
     verify(faqQuestionMapper).mapToListDto(any());
@@ -88,7 +88,7 @@ class FaqQuestionServiceTest {
     UUID questionId = UUID.randomUUID();
 
     doReturn(null).when(faqQuestionService).findQuestionById(questionId);
-    faqQuestionService.getQuestionById(questionId);
+    faqQuestionService.getById(questionId);
 
     verify(faqQuestionMapper).mapToDto(any());
   }
@@ -99,7 +99,7 @@ class FaqQuestionServiceTest {
 
     doThrow(ResourceNotFoundException.class).when(faqQuestionService).findQuestionById(id);
 
-    assertThrows(ResourceNotFoundException.class, () -> faqQuestionService.getQuestionById(id));
+    assertThrows(ResourceNotFoundException.class, () -> faqQuestionService.getById(id));
   }
 
   @Test
@@ -113,7 +113,7 @@ class FaqQuestionServiceTest {
     FaqQuestionResponseDto faqQuestionResponseDto =
         testParameters.getFaqQuestionResponseDto(faqQuestion);
 
-    when(userService.getUserById(userId)).thenReturn(user);
+    when(userService.findUserById(userId)).thenReturn(user);
     when(faqCategoryService.findCategoryById(faqQuestionRequestDto.getFaqCategoryId()))
         .thenReturn(faqCategory);
     when(faqQuestionMapper.mapToEntity(faqQuestionRequestDto, faqCategory, user))
@@ -123,9 +123,11 @@ class FaqQuestionServiceTest {
     when(faqQuestionMapper.mapToDto(faqQuestion)).thenReturn(faqQuestionResponseDto);
 
     FaqQuestionResponseDto methodResponse =
-        faqQuestionService.createQuestion(faqQuestionRequestDto, userId);
+        faqQuestionService.create(faqQuestionRequestDto, userId);
     assertEquals(faqCategory.getId(), methodResponse.getCategory().getId());
-    assertEquals(String.format("%s %s",user.getFirstName(), user.getLastName()), methodResponse.getUpdatedBy().getName());
+    assertEquals(
+        String.format("%s %s", user.getFirstName(), user.getLastName()),
+        methodResponse.getUpdatedBy().getName());
     verify(faqQuestionValidator).validateQuestion(faqQuestion.getQuestion());
     verify(faqQuestionMapper).mapToDto(faqQuestion);
   }
@@ -139,7 +141,7 @@ class FaqQuestionServiceTest {
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
     faqCategory.setId(faqQuestionRequestDto.getFaqCategoryId());
 
-    when(userService.getUserById(userId)).thenReturn(user);
+    when(userService.findUserById(userId)).thenReturn(user);
     when(faqCategoryService.findCategoryById(faqQuestionRequestDto.getFaqCategoryId()))
         .thenReturn(faqCategory);
     when(faqQuestionMapper.mapToEntity(faqQuestionRequestDto, faqCategory, user))
@@ -150,7 +152,7 @@ class FaqQuestionServiceTest {
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> faqQuestionService.createQuestion(faqQuestionRequestDto, userId));
+        () -> faqQuestionService.create(faqQuestionRequestDto, userId));
   }
 
   @Test
@@ -170,7 +172,7 @@ class FaqQuestionServiceTest {
     when(faqQuestionMapper.mapToDto(any())).thenReturn(faqQuestionResponseDto);
 
     FaqQuestionResponseDto methodResponse =
-        faqQuestionService.updateQuestion(faqQuestion.getId(), faqQuestionRequestDto, userId);
+        faqQuestionService.update(faqQuestion.getId(), faqQuestionRequestDto, userId);
     assertEquals(newQuestion, methodResponse.getQuestion());
     assertEquals(faqQuestion.getCategory().getId(), methodResponse.getCategory().getId());
     verify(faqQuestionValidator).validateQuestion(faqQuestionRequestDto.getQuestion());
@@ -190,7 +192,7 @@ class FaqQuestionServiceTest {
 
     assertThrows(
         FaqQuestionNotFoundException.class,
-        () -> faqQuestionService.updateQuestion(questionId, faqQuestionRequestDto, userId));
+        () -> faqQuestionService.update(questionId, faqQuestionRequestDto, userId));
   }
 
   @Test
@@ -199,7 +201,7 @@ class FaqQuestionServiceTest {
 
     when(faqQuestionRepository.existsById(questionId)).thenReturn(true);
 
-    faqQuestionService.deleteQuestion(questionId, UUID.randomUUID());
+    faqQuestionService.delete(questionId, UUID.randomUUID());
     verify(faqQuestionRepository).deleteById(questionId);
   }
 
@@ -211,8 +213,7 @@ class FaqQuestionServiceTest {
     when(faqQuestionRepository.existsById(questionId)).thenReturn(false);
 
     assertThrows(
-        FaqQuestionNotFoundException.class,
-        () -> faqQuestionService.deleteQuestion(questionId, userId));
+        FaqQuestionNotFoundException.class, () -> faqQuestionService.delete(questionId, userId));
   }
 
   @Test
@@ -242,17 +243,18 @@ class FaqQuestionServiceTest {
     Page<FaqQuestion> result = new PageImpl<>(testParameters.getFaqQuestionList());
 
     try (MockedStatic<FieldNameValidator> validator =
-                 Mockito.mockStatic(FieldNameValidator.class)) {
+        Mockito.mockStatic(FieldNameValidator.class)) {
       validator
-              .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
-              .thenAnswer((Answer<Void>) invocation -> null);
+          .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
+          .thenAnswer((Answer<Void>) invocation -> null);
     }
     when(pageableConverter.convert(requestDto)).thenReturn(pageable);
-    when(faqQuestionRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
+    when(faqQuestionRepository.findAll(any(Specification.class), any(Pageable.class)))
+        .thenReturn(result);
     when(faqQuestionMapper.mapToListDtoFromPage(result))
-            .thenReturn(testParameters.getFaqQuestionResponseDtoList(result.stream().toList()));
+        .thenReturn(testParameters.getFaqQuestionResponseDtoList(result.stream().toList()));
 
-    FetchResponseDto responseDto = faqQuestionService.fetchQuestions(requestDto);
+    FetchResponseDto responseDto = faqQuestionService.fetch(requestDto);
     assertEquals(result.getTotalElements(), responseDto.getTotalElements());
   }
 
@@ -263,17 +265,18 @@ class FaqQuestionServiceTest {
     Page<FaqQuestion> result = new PageImpl<>(testParameters.getFaqQuestionList());
 
     try (MockedStatic<FieldNameValidator> validator =
-                 Mockito.mockStatic(FieldNameValidator.class)) {
+        Mockito.mockStatic(FieldNameValidator.class)) {
       validator
-              .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
-              .thenAnswer((Answer<Void>) invocation -> null);
+          .when(() -> FieldNameValidator.validateFieldNames(any(), any()))
+          .thenAnswer((Answer<Void>) invocation -> null);
     }
     when(pageableConverter.convert(requestDto)).thenReturn(pageable);
-    when(faqQuestionRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
+    when(faqQuestionRepository.findAll(any(Specification.class), any(Pageable.class)))
+        .thenReturn(result);
     when(faqQuestionMapper.mapToListDtoFromPage(result))
-            .thenReturn(testParameters.getFaqQuestionResponseDtoList(result.stream().toList()));
+        .thenReturn(testParameters.getFaqQuestionResponseDtoList(result.stream().toList()));
 
-    FetchResponseDto responseDto = faqQuestionService.fetchQuestions(requestDto);
+    FetchResponseDto responseDto = faqQuestionService.fetch(requestDto);
     assertEquals(result.getTotalElements(), responseDto.getTotalElements());
   }
 
@@ -282,11 +285,14 @@ class FaqQuestionServiceTest {
     List<FaqQuestionRecord> questionRecords = testParameters.getFaqQuestionRecordList();
 
     when(faqQuestionMapper.mapToRecordList(any())).thenReturn(questionRecords);
-    when(csvService.writeToCsv(questionRecords, FaqQuestionRecord.class)).thenReturn(new ByteArrayInputStream(new byte[] {}));
+    when(csvService.writeToCsv(questionRecords, FaqQuestionRecord.class))
+        .thenReturn(new ByteArrayInputStream(new byte[] {}));
 
-    ResponseEntity<Resource> response = faqQuestionService.exportFaqQuestionsInCsv();
+    ResponseEntity<Resource> response = faqQuestionService.exportInCsv();
     assertEquals(200, response.getStatusCodeValue());
-    assertEquals("application/csv", Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
+    assertEquals(
+        "application/csv",
+        Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
     verify(faqQuestionRepository).findAll();
   }
 
@@ -295,15 +301,18 @@ class FaqQuestionServiceTest {
     List<FaqQuestionRecord> questionRecords = testParameters.getFaqQuestionRecordList();
 
     when(faqQuestionMapper.mapToRecordList(any())).thenReturn(questionRecords);
-    doThrow(FileConvertionFailedException.class).when(csvService).writeToCsv(questionRecords, FaqQuestionRecord.class);
+    doThrow(ConvertingFailedException.class)
+        .when(csvService)
+        .writeToCsv(questionRecords, FaqQuestionRecord.class);
 
-    assertThrows(FileConvertionFailedException.class, () -> faqQuestionService.exportFaqQuestionsInCsv());
+    assertThrows(ConvertingFailedException.class, () -> faqQuestionService.exportInCsv());
     verify(faqQuestionRepository).findAll();
   }
 
   @Test
   void successfulGettingMetadata() {
-    when(faqQuestionRepository.findTopByOrderByUpdatedAtDesc()).thenReturn(Optional.of(new FaqQuestion()));
+    when(faqQuestionRepository.findTopByOrderByUpdatedAtDesc())
+        .thenReturn(Optional.of(new FaqQuestion()));
     faqQuestionService.getMetadata();
 
     verify(faqQuestionMapper).getMetadata(any(), any(), any());

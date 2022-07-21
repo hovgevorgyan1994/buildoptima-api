@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.BAD_CREDENTIALS;
+import static com.vecondev.buildoptima.exception.Error.BAD_CREDENTIALS;
 
 @Service
 @RequiredArgsConstructor

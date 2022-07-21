@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.parameters.user;
 
 import com.vecondev.buildoptima.dto.EntityOverview;
-import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
+import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;

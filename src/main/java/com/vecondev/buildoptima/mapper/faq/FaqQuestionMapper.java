@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.mapper.faq;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
-import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.Metadata;
-import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.mapper.faq.decorator.FaqQuestionMapperDecorator;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;

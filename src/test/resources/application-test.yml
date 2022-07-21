@@ -63,11 +63,11 @@ config:
       downloadImageUri: /{id}/
       uploadImageUri: /{id}/image
       restorePasswordUri: /auth/password/restore
-      verifyPasswordUri: /auth/password/receive-email
+      verifyPasswordUri: /auth/verification
       changePasswordUri: /password/change
-      refreshTokenUri: /auth/refresh-token
-      loginUri: /auth/login
-      activationUri: /auth/activate
+      refreshTokenUri: /auth/refreshment
+      loginUri: /auth
+      activationUri: /auth/activation
       registrationUri: /auth/registration
     news:
       baseUri: /news

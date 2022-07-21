@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class ResourceNotFoundException extends BaseException {
 
-  public ResourceNotFoundException(ErrorCode errorCode) {
-    super(errorCode);
+  public ResourceNotFoundException(Error error) {
+    super(error);
   }
 }

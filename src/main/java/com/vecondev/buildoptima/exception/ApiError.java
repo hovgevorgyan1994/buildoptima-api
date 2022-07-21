@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,11 +17,11 @@ public class ApiError {
   @Schema(description = "Http response status", example = "CONFLICT")
   private HttpStatus status;
 
-  @Schema(description = "The exception description", example = "USER_ALREADY_EXIST_WITH_EMAIL")
-  private ErrorCode errorCode;
+  @Schema(description = "The exception description", example = "4121")
+  private Integer errorCode;
 
   @Schema(description = "Timestamp showing when the error occurred")
-  private LocalDateTime timestamp;
+  private Instant timestamp;
 
   @Schema(
       description = "Error message",

@@ -76,11 +76,11 @@ public class UserEndpointUris implements EndpointUris {
   }
 
   public String getPasswordRestoringUri() {
-    return baseUri + restorePasswordUri;
+    return restorePasswordUri;
   }
 
   public String getPasswordVerificationUri() {
-    return baseUri + verifyPasswordUri;
+    return verifyPasswordUri;
   }
 
   public String getChangePasswordUri() {
@@ -88,18 +88,18 @@ public class UserEndpointUris implements EndpointUris {
   }
 
   public String getRefreshTokenUri() {
-    return baseUri + refreshTokenUri;
+    return refreshTokenUri;
   }
 
   public String getLoginUri() {
-    return baseUri + loginUri;
+    return loginUri;
   }
 
   public String getActivationUri() {
-    return baseUri + activationUri;
+    return activationUri;
   }
 
   public String getRegistrationUri() {
-    return baseUri + registrationUri;
+    return registrationUri;
   }
 }

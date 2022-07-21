@@ -1,11 +1,11 @@
 package com.vecondev.buildoptima.service.news;
 
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.Metadata;
-import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
+import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import org.springframework.core.io.InputStreamResource;
 
@@ -21,7 +21,7 @@ public interface NewsService {
 
   NewsResponseDto getById(UUID id, AppUserDetails userDetails);
 
-  FetchResponseDto fetch(FetchRequestDto fetchRequestDto);
+  FetchResponseDto fetch(FetchRequestDto fetchRequestDto, String username);
 
   Metadata getMetadata(AppUserDetails userDetails);
 

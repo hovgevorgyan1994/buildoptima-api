@@ -1,13 +1,13 @@
 package com.vecondev.buildoptima.util;
 
-import com.vecondev.buildoptima.exception.FileConvertionFailedException;
-import lombok.NoArgsConstructor;
+import com.vecondev.buildoptima.exception.ConvertingFailedException;
+import com.vecondev.buildoptima.exception.FailedFileOperationException;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.validation.UnexpectedTypeException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,25 +15,26 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.FAILED_IMAGE_CONVERTION;
-import static com.vecondev.buildoptima.exception.ErrorCode.FAILED_MULTIPART_CONVERTION;
-import static lombok.AccessLevel.PRIVATE;
+import static com.vecondev.buildoptima.exception.Error.FAILED_FILE_DELETION;
+import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_CONVERTING;
+import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_RESIZING;
+import static com.vecondev.buildoptima.exception.Error.FAILED_MULTIPART_CONVERTING;
 
 @Slf4j
-@NoArgsConstructor(access = PRIVATE)
-public final class FileUtil {
+@UtilityClass
+public class FileUtil {
 
-  private static final Integer THUMBNAIL_WIDTH = 100;
-  private static final Integer THUMBNAIL_HEIGHT = 100;
+  private final Integer THUMBNAIL_WIDTH = 100;
+  private final Integer THUMBNAIL_HEIGHT = 100;
 
-  public static File convertMultipartFileToFile(MultipartFile multipartFile) {
+  public File convertMultipartFileToFile(MultipartFile multipartFile) {
     File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
 
     try (FileOutputStream fos = new FileOutputStream(file)) {
       fos.write(multipartFile.getBytes());
     } catch (IOException e) {
       log.error("Error occurred while converting multipart file to file.");
-      throw new FileConvertionFailedException(FAILED_MULTIPART_CONVERTION);
+      throw new ConvertingFailedException(FAILED_MULTIPART_CONVERTING);
     }
 
     return file;
@@ -45,7 +46,7 @@ public final class FileUtil {
    * @param originalFile the original version of photo
    * @return File the thumbnail version of original photo
    */
-  public static File resizePhoto(File originalFile) {
+  public File resizePhoto(File originalFile) {
     try {
       BufferedImage originalImage = convertFileToImage(originalFile);
       BufferedImage thumbnailImage = Scalr.resize(originalImage, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
@@ -66,32 +67,27 @@ public final class FileUtil {
       return thumbnailFile;
     } catch (IOException ex) {
       log.error("Failed to resize the original photo to get thumbnail version.");
-      throw new FileConvertionFailedException(FAILED_IMAGE_CONVERTION);
+      throw new ConvertingFailedException(FAILED_IMAGE_RESIZING);
     }
   }
 
-  public static BufferedImage convertFileToImage(File file) {
+  public BufferedImage convertFileToImage(File file) {
     try {
       return ImageIO.read(file);
     } catch (IOException ex) {
       log.error("Failed to convert file to image.");
-      throw new UnexpectedTypeException();
+      throw new ConvertingFailedException(FAILED_IMAGE_CONVERTING);
     }
   }
 
-
-  /**
-   * deletes file from classpath
-   *
-   * @throws UnexpectedTypeException when failed to delete file
-   */
-  public static void deleteFile(File file) {
+  /** deletes file from classpath */
+  public void deleteFile(File file) {
     try {
-      Files.delete(file.toPath());
+      Files.deleteIfExists(file.toPath());
       log.info("The file with name: {} is succesfully deleted from local storage.", file.getName());
     } catch (IOException ex) {
       log.error("Failed to delete file with name: {}", file.getName());
-      throw new UnexpectedTypeException();
+      throw new FailedFileOperationException(FAILED_FILE_DELETION);
     }
   }
 }

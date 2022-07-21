@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.parameters.news;
 
-import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.news.NewsCategory;
@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import static com.vecondev.buildoptima.model.user.Role.ADMIN;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;

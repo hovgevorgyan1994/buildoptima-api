@@ -1,11 +1,11 @@
 package com.vecondev.buildoptima.service.faq;
 
-import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.EntityOverview;
-import com.vecondev.buildoptima.dto.response.faq.FaqQuestionResponseDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.filter.model.DictionaryField;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
@@ -17,22 +17,22 @@ import java.util.UUID;
 
 public interface FaqQuestionService {
 
-  List<FaqQuestionResponseDto> getAllQuestions();
+  List<FaqQuestionResponseDto> getAll ();
 
-  FaqQuestionResponseDto getQuestionById(UUID questionId);
+  FaqQuestionResponseDto getById (UUID questionId);
 
-  FaqQuestionResponseDto createQuestion(FaqQuestionRequestDto requestDto, UUID userId);
+  FaqQuestionResponseDto create (FaqQuestionRequestDto requestDto, UUID userId);
 
-  FaqQuestionResponseDto updateQuestion(
+  FaqQuestionResponseDto update (
       UUID questionId, FaqQuestionRequestDto requestDto, UUID userId);
 
-  void deleteQuestion(UUID questionId, UUID userId);
+  void delete (UUID questionId, UUID userId);
 
   FaqQuestion findQuestionById(UUID questionId);
 
-  FetchResponseDto fetchQuestions(FetchRequestDto fetchRequest);
+  FetchResponseDto fetch (FetchRequestDto fetchRequest);
 
-  ResponseEntity<Resource> exportFaqQuestionsInCsv();
+  ResponseEntity<Resource> exportInCsv ();
 
   Metadata getMetadata();
 

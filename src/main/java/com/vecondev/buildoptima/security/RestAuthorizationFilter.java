@@ -50,7 +50,8 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(upt);
       }
     } catch (AuthenticationException ex) {
-      response.setStatus(ex.getErrorCode().getHttpStatus().value());
+      response.addHeader("error", ex.getError().name());
+      response.setStatus(ex.getError().getHttpStatus().value());
     } finally {
       filterChain.doFilter(request, response);
     }

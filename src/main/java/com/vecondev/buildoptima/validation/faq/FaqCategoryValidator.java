@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_ALREADY_EXIST;
+import static com.vecondev.buildoptima.exception.Error.FAQ_CATEGORY_ALREADY_EXIST;
 
 @Slf4j
 @Component

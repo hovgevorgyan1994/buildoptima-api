@@ -135,3 +135,44 @@ object. The predicate object has the following structure
 - `createdBy`
 - `updatedBy`
 
+### FAQ Category Entity
+
+#### Filtering Fields
+
+| Field        | Type      | Operations                         | Notes                                                                                                           |
+|:-------------|:----------|:-----------------------------------|:----------------------------------------------------------------------------------------------------------------|
+| `name`       | String    | `eq`, `like`, `in`                 | Must be provided with `value` field in case of `eq`,`like`, and with `values` for `in`                          |
+| `createdAt`  | DateTime  | `eq`, `in`, `gt`, `ge`, `lt`, `le` | Must be provided with `value` field in case of `eq`,`like`, `gt`, `ge`, `lt`, `le`, and with `values` for `in`  |
+| `updatedAt`  | DateTime  | `eq`, `in`, `gt`, `ge`, `lt`, `le` | Must be provided with `value` field in case of `eq`,`like`, `gt`, `ge`, `lt`, `le`, and with `values` for `in`  |
+| `createdBy`  | UUID      | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                 |
+| `updatedBy`  | UUID      | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                 |
+#### Sorting Fields
+
+- `name`
+- `createdAt`
+- `updatedAt`
+
+
+### FAQ Question Entity
+
+#### Filtering Fields
+
+| Field       | Type     | Operations                         | Notes                                                                                                                                                 |
+|:------------|:---------|:-----------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `question`  | String   | `eq`, `like`, `in`                 | Must be provided with `value` field in case of `eq`,`like`, and with `values` for `in`                                                                |
+| `answer`    | String   | `eq`, `like`, `in`                 | Must be provided with `value` field in case of `eq`,`like`, and with `values` for `in`                                                                |
+| `status`    | String   | `eq`                               | Must be provided with `value` field, possible values `ACTIVE`, `ARCHIVED`                                                                             |
+| `createdAt` | DateTime | `eq`, `in`, `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field in case of `eq`,`like`, `gt`, `ge`, `lt`, `le`, and with `values` for `in` |
+| `updatedAt` | DateTime | `eq`, `in`, `gt`, `ge`, `lt`, `le` | Must be provided in ISO format `yyyy-MM-dd'T'HH:mm'Z'`, with `value` field in case of `eq`,`like`, `gt`, `ge`, `lt`, `le`, and with `values` for `in` |
+| `createdBy` | UUID     | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                                                       |
+| `updatedBy` | UUID     | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                                                       |
+| `category`  | UUID     | `eq` `in`                          | Must be provided with `value` field in case of `eq`, and with `values` for `in`                                                                       |
+
+#### Sorting Fields
+
+- `question`
+- `answer`
+- `status`
+- `createdAt`
+- `updatedAt`
+

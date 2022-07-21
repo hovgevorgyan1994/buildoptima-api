@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.parameters.result_actions;
 
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.endpoints.NewsEndpointUris;

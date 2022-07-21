@@ -1,13 +1,15 @@
 package com.vecondev.buildoptima.exception;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class BaseException extends RuntimeException {
 
-  protected final ErrorCode errorCode;
+  protected final Error error;
 
-  public BaseException(ErrorCode errorCode) {
-    this.errorCode = errorCode;
+  public BaseException(Error error) {
+    this.error = error;
   }
 }

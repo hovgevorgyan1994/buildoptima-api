@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.config;
 
+import com.vecondev.buildoptima.exception.ApiAccessDeniedHandler;
 import com.vecondev.buildoptima.security.JwtTokenAuthenticationEntryPoint;
 import com.vecondev.buildoptima.security.RestAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final UserDetailsService userDetailsService;
   private final JwtTokenAuthenticationEntryPoint entryPoint;
   private final RestAuthorizationFilter restAuthorizationFilter;
-  private static final String AUTH_URL = "/user/auth/**";
+  private final ApiAccessDeniedHandler accessDeniedHandler;
+  private static final String AUTH_URL = "/auth/**";
   private static final String OPEN_API_URL = "/swagger-ui/**";
   private static final String API_DOCS_URL = "/api-docs/**";
 
@@ -37,6 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .csrf()
         .disable()
         .exceptionHandling()
+        .accessDeniedHandler(accessDeniedHandler)
         .authenticationEntryPoint(entryPoint)
         .and()
         .sessionManagement()

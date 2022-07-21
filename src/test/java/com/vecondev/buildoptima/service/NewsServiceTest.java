@@ -2,12 +2,12 @@ package com.vecondev.buildoptima.service;
 
 import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.Metadata;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
-import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
-import com.vecondev.buildoptima.exception.FileConvertionFailedException;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
+import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import com.vecondev.buildoptima.exception.NewsException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.news.NewsMapper;
@@ -24,7 +24,7 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.csv.CsvService;
 import com.vecondev.buildoptima.service.image.ImageService;
-import com.vecondev.buildoptima.service.news.impl.NewsServiceImpl;
+import com.vecondev.buildoptima.service.news.NewsServiceImpl;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -183,7 +183,7 @@ class NewsServiceTest {
     when(newsMapper.mapToResponseList(result))
         .thenReturn(serviceTestParameters.getNewsResponseDtoList(result.stream().toList()));
 
-    FetchResponseDto responseDto = newsService.fetch(requestDto);
+    FetchResponseDto responseDto = newsService.fetch(requestDto, user.getEmail());
     assertEquals(2, responseDto.getTotalElements());
   }
 
@@ -197,7 +197,7 @@ class NewsServiceTest {
 
     Metadata metadata = newsService.getMetadata(new AppUserDetails(user));
     assertNotNull(metadata);
-    assertEquals(allActiveCount,metadata.getAllActiveCount());
+    assertEquals(allActiveCount, metadata.getAllActiveCount());
   }
 
   @Test
@@ -224,12 +224,12 @@ class NewsServiceTest {
 
     when(newsRepository.findAll(any(Specification.class))).thenReturn(fetchResponse);
     when(newsMapper.mapToNewsRecordList(any())).thenReturn(newsRecordList);
-    doThrow(FileConvertionFailedException.class)
+    doThrow(ConvertingFailedException.class)
         .when(csvService)
         .writeToCsv(newsRecordList, NewsRecord.class);
 
     assertThrows(
-        FileConvertionFailedException.class,
+        ConvertingFailedException.class,
         () -> newsService.exportCsv(fetchRequest, user.getEmail()));
     verify(newsRepository).findAll(any(Specification.class));
   }

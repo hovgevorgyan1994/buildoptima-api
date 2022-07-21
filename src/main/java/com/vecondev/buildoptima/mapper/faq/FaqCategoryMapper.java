@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.mapper.faq;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
-import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.EntityOverview;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.mapper.faq.decorator.FaqCategoryMapperDecorator;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;

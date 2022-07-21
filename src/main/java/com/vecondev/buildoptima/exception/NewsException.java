@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class NewsException extends BaseException {
 
-  public NewsException(ErrorCode errorCode) {
-    super(errorCode);
+  public NewsException(Error error) {
+    super(error);
   }
 }

@@ -1,10 +1,10 @@
 package com.vecondev.buildoptima.parameters.news;
 
 import com.vecondev.buildoptima.csv.news.NewsRecord;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.request.news.NewsUpdateRequestDto;
-import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.model.Status;
@@ -46,15 +46,13 @@ public class NewsServiceTestParameters extends TestUtil {
   }
 
   public News getNewsFromCreateNewsDto(NewsCreateRequestDto dto) {
-    News news =
-        News.builder()
-            .title(dto.getTitle())
-            .summary(dto.getSummary())
-            .description(dto.getDescription())
-            .category(NewsCategory.valueOf(dto.getCategory()))
-            .status(Status.ACTIVE)
-            .build();
-    return news;
+    return News.builder()
+        .title(dto.getTitle())
+        .summary(dto.getSummary())
+        .description(dto.getDescription())
+        .category(NewsCategory.valueOf(dto.getCategory()))
+        .status(Status.ACTIVE)
+        .build();
   }
 
   public NewsResponseDto getNewsResponseDto(News news) {

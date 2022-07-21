@@ -2,8 +2,8 @@ package com.vecondev.buildoptima.parameters.faq.category;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.EntityOverview;
-import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;

@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.mapper.news;
 
 import com.vecondev.buildoptima.csv.news.NewsRecord;
-import com.vecondev.buildoptima.dto.request.news.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.response.news.NewsResponseDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.News;

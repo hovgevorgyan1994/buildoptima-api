@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FIELD;
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_FILTER_STRUCTURE;
+import static com.vecondev.buildoptima.exception.Error.INVALID_FIELD;
+import static com.vecondev.buildoptima.exception.Error.INVALID_FILTER_STRUCTURE;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.NAME;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.OPERATION;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.VALUE;

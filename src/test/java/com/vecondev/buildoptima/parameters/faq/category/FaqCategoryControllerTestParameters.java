@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
-import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.FAQ_CATEGORY_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;

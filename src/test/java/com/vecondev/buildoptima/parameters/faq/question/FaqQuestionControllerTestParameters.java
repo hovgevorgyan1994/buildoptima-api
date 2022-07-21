@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
-import com.vecondev.buildoptima.dto.request.faq.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
@@ -15,7 +15,7 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import java.util.List;
 import java.util.Map;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_QUESTION_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.FAQ_QUESTION_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
 import static com.vecondev.buildoptima.model.Status.ACTIVE;

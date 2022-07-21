@@ -3,23 +3,23 @@
   "take": 10,
   "sort": [
     {
-      "field": "status",
-      "order": "asc"
+      "field": "updatedAt",
+      "order": "desc"
     }
   ],
   "filter": {
     "and": [
       {
         "operation": "eq",
-        "name": "status",
-        "value": "ACTIVE"
+        "name": "firstName",
+        "value": "John"
       },
       {
         "or": [
           {
             "operation": "like",
-            "name": "question",
-            "value": "how"
+            "name": "lastName",
+            "value": "ith"
           },
           {
             "operation": "gt",

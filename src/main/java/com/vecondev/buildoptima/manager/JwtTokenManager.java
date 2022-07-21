@@ -7,8 +7,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
-import com.vecondev.buildoptima.exception.ErrorCode;
 import com.vecondev.buildoptima.exception.AuthenticationException;
+import com.vecondev.buildoptima.exception.Error;
 import com.vecondev.buildoptima.model.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,34 +49,21 @@ public class JwtTokenManager {
         .sign(algorithm);
   }
 
-  public void validateToken(String token) {
-    try {
-      tokenVerifier.verify(token);
-      log.info("A valid access token was provided");
-    } catch (TokenExpiredException ex) {
-      log.warn("An expired access token was provided");
-      throw new AuthenticationException(ErrorCode.ACCESS_TOKEN_EXPIRED);
-    } catch (JWTVerificationException ex) {
-      log.warn("An invalid access token was provided");
-      throw new AuthenticationException(ErrorCode.ACCESS_TOKEN_MISSING);
-    }
-  }
-
-  public String getUsernameFromToken(String token) {
-    return decodeToken(token).getSubject();
-  }
-
-  private DecodedJWT decodeToken(String token) {
+  public DecodedJWT validateToken(String token) {
     try {
       DecodedJWT verify = tokenVerifier.verify(token);
       log.info("A valid access token was provided");
       return verify;
     } catch (TokenExpiredException ex) {
       log.warn("An expired access token was provided");
-      throw new AuthenticationException(ErrorCode.ACCESS_TOKEN_EXPIRED);
+      throw new AuthenticationException(Error.ACCESS_TOKEN_EXPIRED);
     } catch (JWTVerificationException ex) {
       log.warn("An invalid access token was provided");
-      throw new AuthenticationException(ErrorCode.ACCESS_TOKEN_MISSING);
+      throw new AuthenticationException(Error.INVALID_ACCESS_TOKEN);
     }
+  }
+
+  public String getUsernameFromToken(String token) {
+    return validateToken(token).getSubject();
   }
 }

@@ -2,7 +2,7 @@ package com.vecondev.buildoptima.service.csv;
 
 import com.vecondev.buildoptima.csv.CsvRecord;
 import com.vecondev.buildoptima.csv.Header;
-import com.vecondev.buildoptima.exception.FileConvertionFailedException;
+import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -17,7 +17,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.FAILED_CSV_CONVERTION;
+import static com.vecondev.buildoptima.exception.Error.FAILED_CSV_CONVERTING;
 
 @Slf4j
 @Service
@@ -36,7 +36,7 @@ public class CsvServiceImpl<T extends CsvRecord> implements CsvService<T> {
       csvPrinter.flush();
       return new ByteArrayInputStream(outputStream.toByteArray());
     } catch (IOException ex) {
-      throw new FileConvertionFailedException(FAILED_CSV_CONVERTION);
+      throw new ConvertingFailedException(FAILED_CSV_CONVERTING);
     }
   }
 

@@ -1,7 +1,7 @@
 package com.vecondev.buildoptima.filter.converter;
 
 import com.vecondev.buildoptima.config.properties.FilterConfigProperties;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.InvalidFieldException;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_PAGEABLE;
+import static com.vecondev.buildoptima.exception.Error.INVALID_PAGEABLE;
 
 @Component
 @RequiredArgsConstructor

@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.mapper.user;
 
 import com.vecondev.buildoptima.dto.EntityOverview;
-import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
-import com.vecondev.buildoptima.dto.response.user.UserResponseDto;
+import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

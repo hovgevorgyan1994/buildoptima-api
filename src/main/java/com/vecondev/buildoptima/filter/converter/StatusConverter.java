@@ -7,7 +7,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.INVALID_STATUS;
+import static com.vecondev.buildoptima.exception.Error.INVALID_STATUS;
 
 public class StatusConverter implements Converter<String, Status> {
 

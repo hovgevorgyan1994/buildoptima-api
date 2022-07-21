@@ -2,10 +2,10 @@ package com.vecondev.buildoptima.service.faq.impl;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.Metadata;
-import com.vecondev.buildoptima.dto.request.faq.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.request.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.response.faq.FaqCategoryResponseDto;
-import com.vecondev.buildoptima.dto.response.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.DataIntegrityViolationException;
 import com.vecondev.buildoptima.exception.FaqCategoryNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
@@ -34,8 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import static com.vecondev.buildoptima.exception.ErrorCode.CATEGORY_HAS_QUESTIONS;
-import static com.vecondev.buildoptima.exception.ErrorCode.FAQ_CATEGORY_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.CATEGORY_HAS_QUESTIONS;
+import static com.vecondev.buildoptima.exception.Error.FAQ_CATEGORY_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.FaqCategoryFields.faqCategoryPageSortingFieldsMap;
 import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
@@ -54,20 +54,20 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
   private final UserService userService;
 
   @Override
-  public List<FaqCategoryResponseDto> getAllCategories() {
+  public List<FaqCategoryResponseDto> getAll () {
     List<FaqCategory> faqCategories = faqCategoryRepository.findAll();
 
     return faqCategoryMapper.mapToListDto(faqCategories);
   }
 
   @Override
-  public FaqCategoryResponseDto getCategoryById(UUID categoryId) {
+  public FaqCategoryResponseDto getById (UUID categoryId) {
     return faqCategoryMapper.mapToDto(findCategoryById(categoryId));
   }
 
   @Override
-  public FaqCategoryResponseDto createCategory(FaqCategoryRequestDto requestDto, UUID userId) {
-    User user = userService.getUserById(userId);
+  public FaqCategoryResponseDto create (FaqCategoryRequestDto requestDto, UUID userId) {
+    User user = userService.findUserById(userId);
     FaqCategory faqCategory = faqCategoryMapper.mapToEntity(requestDto, user);
     faqCategoryValidator.validateCategoryName(faqCategory.getName());
 
@@ -79,7 +79,7 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
   }
 
   @Override
-  public FaqCategoryResponseDto updateCategory(
+  public FaqCategoryResponseDto update (
       UUID categoryId, FaqCategoryRequestDto requestDto, UUID userId) {
     FaqCategory category =
         faqCategoryRepository
@@ -90,14 +90,14 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
     category =
         category.toBuilder()
             .name(requestDto.getName())
-            .createdBy(userService.getUserById(userId))
+            .createdBy(userService.findUserById(userId))
             .build();
     log.info("User with id: {} updated the FAQ Category with id: {}", userId, categoryId);
     return faqCategoryMapper.mapToDto(faqCategoryRepository.saveAndFlush(category));
   }
 
   @Override
-  public void deleteCategory(UUID categoryId, UUID userId) {
+  public void delete (UUID categoryId, UUID userId) {
     if (!faqCategoryRepository.existsById(categoryId)) {
       log.warn(
           "User with id: {} wants to delete FAQ category with id: {} that doesn't exist.",
@@ -125,7 +125,7 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
   }
 
   @Override
-  public FetchResponseDto fetchCategories(FetchRequestDto fetchRequest) {
+  public FetchResponseDto fetch (FetchRequestDto fetchRequest) {
     log.info("Request to fetch users from DB");
     validateFieldNames(faqCategoryPageSortingFieldsMap, fetchRequest.getSort());
     if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
@@ -150,7 +150,7 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
 
   /** exports all faq categories in csv file */
   @Override
-  public ResponseEntity<Resource> exportFaqCategoriesInCsv() {
+  public ResponseEntity<Resource> exportInCsv () {
     List<FaqCategory> categories = faqCategoryRepository.findAll();
     List<FaqCategoryRecord> categoryRecords = faqCategoryMapper.mapToRecordList(categories);
     InputStreamResource categoriesResource =

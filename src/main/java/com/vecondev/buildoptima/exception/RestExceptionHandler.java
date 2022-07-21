@@ -3,34 +3,40 @@ package com.vecondev.buildoptima.exception;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.NonNullApi;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.vecondev.buildoptima.exception.Error.CONSTRAINT_VIOLATION;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
-      @NotNull MethodArgumentNotValidException ex,
-      @NotNull HttpHeaders headers,
-      @NotNull HttpStatus status,
-      @NotNull WebRequest request) {
+      @NonNull MethodArgumentNotValidException ex,
+      @NonNull HttpHeaders headers,
+      @NonNull HttpStatus status,
+      @NonNull WebRequest request) {
+    Error error = CONSTRAINT_VIOLATION;
     Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", status);
+    body.put("errorCode", error.getCode());
+    body.put("timestamp", Instant.now());
+    body.put("status", error.getHttpStatus());
+    body.put("message", error.getMessage());
 
     Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getFieldErrors().stream()
+    ex.getBindingResult()
+        .getFieldErrors()
         .forEach(fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
     body.put("errors", errors);
 
@@ -39,19 +45,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({BaseException.class})
   public ResponseEntity<ApiError> handleIllegalArgument(BaseException ex) {
+    Error error = ex.getError();
     ApiError apiError =
         new ApiError(
-            ex.getErrorCode().getHttpStatus(),
-            ex.getErrorCode(),
-            LocalDateTime.now(),
-            ex.getErrorCode().getMessage());
+            error.getHttpStatus(),
+            error.getCode(),
+            Instant.now(),
+            error.getMessage());
 
     return new ResponseEntity<>(apiError, apiError.getStatus());
   }
-
-
-
-
-
-
 }

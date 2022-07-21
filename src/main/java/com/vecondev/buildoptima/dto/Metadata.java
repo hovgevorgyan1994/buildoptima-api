@@ -1,6 +1,5 @@
 package com.vecondev.buildoptima.dto;
 
-import com.vecondev.buildoptima.dto.EntityOverview;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

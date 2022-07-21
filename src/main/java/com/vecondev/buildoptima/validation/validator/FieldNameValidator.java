@@ -1,10 +1,14 @@
 package com.vecondev.buildoptima.validation.validator;
 
+import com.vecondev.buildoptima.exception.Error;
+import com.vecondev.buildoptima.exception.InvalidFieldException;
 import com.vecondev.buildoptima.filter.model.SortDto;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+
+import static com.vecondev.buildoptima.exception.Error.*;
 
 public class FieldNameValidator {
 
@@ -15,8 +19,7 @@ public class FieldNameValidator {
     sort.forEach(
         sortDto -> {
           if (!fieldDefinitionMap.containsKey(sortDto.getField())) {
-            throw new IllegalArgumentException(
-                String.format("Invalid `%s` field for sorting", sortDto.getField()));
+            throw new InvalidFieldException(INVALID_SORTING_FIELD);
           }
         });
   }

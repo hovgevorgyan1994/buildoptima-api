@@ -1,11 +1,11 @@
 package com.vecondev.buildoptima.parameters.result_actions;
 
-import com.vecondev.buildoptima.dto.request.user.AuthRequestDto;
-import com.vecondev.buildoptima.dto.request.user.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.user.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.request.user.RefreshTokenRequestDto;
-import com.vecondev.buildoptima.dto.request.user.RestorePasswordRequestDto;
-import com.vecondev.buildoptima.dto.request.user.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
+import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.endpoints.UserEndpointUris;
