@@ -7,7 +7,6 @@ import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,8 +55,7 @@ public interface NewsApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<NewsResponseDto> create(
-      NewsCreateRequestDto createNewsRequestDto,
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+      NewsCreateRequestDto createNewsRequestDto);
 
   @Operation(
       summary = "Get news item by id",
@@ -84,12 +82,11 @@ public interface NewsApi extends SecuredApi {
                               mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<NewsResponseDto> getById(
-      @Parameter(description = "The news item id which should be fetched") UUID id,
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+      @Parameter(description = "The news item id which should be fetched") UUID id);
 
   @RequestBody(ref = "#/components/requestBodies/fetchNewsRequestExample")
   ResponseEntity<FetchResponseDto> fetch(
-            FetchRequestDto fetchRequestDto, @Parameter(hidden = true) AppUserDetails user);
+            FetchRequestDto fetchRequestDto);
 
   @Operation(summary = "Update news item",
           description = "Possible error codes: 40011, 4011, 4012, 4013, 4014, 4031, 4046, 5007.",
@@ -116,8 +113,7 @@ public interface NewsApi extends SecuredApi {
       })
   ResponseEntity<NewsResponseDto> update(
       @Parameter(description = "The news item id which should be updated") UUID id,
-      NewsUpdateRequestDto newsRequestDto,
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+      NewsUpdateRequestDto newsRequestDto);
 
   @Operation(
       summary = "Export news csv",
@@ -142,8 +138,7 @@ public interface NewsApi extends SecuredApi {
                               mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<Resource> exportInCsv(
-      FetchRequestDto fetchRequestDto,
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+      FetchRequestDto fetchRequestDto);
 
   @Operation(summary = "Delete news item",
           description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4046, 5007.",
@@ -158,16 +153,14 @@ public interface NewsApi extends SecuredApi {
                               schema = @Schema(implementation = ApiError.class),
                               mediaType = APPLICATION_JSON_VALUE))})
   ResponseEntity<Void> delete(
-      @Parameter(description = "The news item id which should be deleted") UUID id,
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+      @Parameter(description = "The news item id which should be deleted") UUID id);
 
   @Operation(summary = "Get news metadata",
           description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 5007.",
           security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
       value = {@ApiResponse(responseCode = "200", description = "Successfully got news metadata")})
-  ResponseEntity<Metadata> getMetadata(
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+  ResponseEntity<Metadata> getMetadata();
 
   @Operation(summary = "Archive news item",
           description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4046, 5007.",
@@ -190,6 +183,5 @@ public interface NewsApi extends SecuredApi {
                               mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<NewsResponseDto> archive(
-      @Parameter(description = "The news item id which should be archived") UUID id,
-      @Parameter(name = "Current user", hidden = true) AppUserDetails userDetails);
+      @Parameter(description = "The news item id which should be archived") UUID id);
 }

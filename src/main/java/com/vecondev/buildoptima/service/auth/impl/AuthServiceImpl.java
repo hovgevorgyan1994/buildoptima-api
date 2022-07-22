@@ -1,21 +1,17 @@
 package com.vecondev.buildoptima.service.auth.impl;
 
-import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
-import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
-import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
-import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
-import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.dto.user.request.*;
 import com.vecondev.buildoptima.dto.user.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.user.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
+import com.vecondev.buildoptima.exception.Error;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.AuthService;
 import com.vecondev.buildoptima.service.auth.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.auth.RefreshTokenService;
@@ -23,10 +19,6 @@ import com.vecondev.buildoptima.service.mail.MailService;
 import com.vecondev.buildoptima.validation.UserValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,10 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.Optional;
 
-import static com.vecondev.buildoptima.exception.Error.REFRESH_TOKEN_EXPIRED;
-import static com.vecondev.buildoptima.exception.Error.SEND_EMAIL_FAILED;
-import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.*;
 
 @Slf4j
 @Service
@@ -52,7 +43,6 @@ public class AuthServiceImpl implements AuthService {
   private final JwtTokenManager tokenManager;
   private final ConfirmationTokenService confirmationTokenService;
   private final RefreshTokenService refreshTokenService;
-  private final AuthenticationManager authenticationManager;
   private final MailService mailService;
 
   @Override
@@ -79,15 +69,20 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public AuthResponseDto login (final AuthRequestDto authRequestDto) {
+  public AuthResponseDto login(final AuthRequestDto authRequestDto) {
     log.info("Request from user {} to get authenticated", authRequestDto.getUsername());
-    final Authentication authentication =
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                authRequestDto.getUsername(), authRequestDto.getPassword()));
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    AppUserDetails appUser = (AppUserDetails) authentication.getPrincipal();
-    return buildAuthDto(appUser);
+    Optional<User> optionalUser = userRepository.findByEmail(authRequestDto.getUsername());
+    if (optionalUser.isEmpty()
+        || !passwordEncoder.matches(
+            authRequestDto.getPassword(), optionalUser.get().getPassword())) {
+      log.warn("{}: Provided wrong credentials for authentication", authRequestDto.getUsername());
+      throw new AuthenticationException(BAD_CREDENTIALS);
+    }
+    User user = optionalUser.get();
+    if (!user.isEnabled()) {
+      throw new AuthenticationException(Error.NOT_ACTIVE_ACCOUNT);
+    }
+    return buildAuthDto(optionalUser.get());
   }
 
   @Override
@@ -111,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public void verify (ConfirmEmailRequestDto requestDto, Locale locale) {
+  public void verify(ConfirmEmailRequestDto requestDto, Locale locale) {
     log.info(
         "Request from optional user {} to get a password restoring email", requestDto.getEmail());
     User user =
@@ -151,16 +146,16 @@ public class AuthServiceImpl implements AuthService {
     return userMapper.mapToResponseDto(user);
   }
 
-  private AuthResponseDto buildAuthDto(final AppUserDetails appUser) {
-    log.info("User {} provided credentials to receive an access token", appUser.getUsername());
-    User user = userRepository.getReferenceById(appUser.getId());
+  private AuthResponseDto buildAuthDto(final User user) {
+    log.info("User {} provided credentials to receive an access token", user.getEmail());
     final String accessToken = tokenManager.generateAccessToken(user);
     RefreshToken refreshToken = refreshTokenService.findByUserId(user.getId());
     if (refreshToken == null) {
       refreshToken = refreshTokenService.create(user.getId());
     }
-    log.info("Access token was created for user {}", user.getEmail());
+    log.info("Access token is created for user {}", user.getEmail());
     return AuthResponseDto.builder()
+        .userId(appUser.getId())
         .accessToken(accessToken)
         .refreshTokenId(refreshToken.getId().toString())
         .build();

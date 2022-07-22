@@ -6,6 +6,7 @@ import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,15 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -34,6 +27,7 @@ import java.util.UUID;
 public class UserController implements UserApi {
 
   private final UserService userService;
+  private final SecurityContextService securityContextService;
 
   @Override
   @GetMapping("/{id}")
@@ -45,18 +39,15 @@ public class UserController implements UserApi {
   @Override
   @PostMapping("/fetch")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<FetchResponseDto> fetch(
-      @RequestBody FetchRequestDto fetchRequest, @AuthenticationPrincipal AppUserDetails user) {
+  public ResponseEntity<FetchResponseDto> fetch(@RequestBody FetchRequestDto fetchRequest) {
 
-    return ResponseEntity.ok(userService.fetch(fetchRequest, user.getUsername()));
+    return ResponseEntity.ok(userService.fetch(fetchRequest));
   }
 
   @Override
   @PutMapping("/password/change")
-  public ResponseEntity<Void> changePassword(
-      @RequestBody @Valid ChangePasswordRequestDto request,
-      @AuthenticationPrincipal AppUserDetails user) {
-    userService.changePassword(request, user);
+  public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequestDto request) {
+    userService.changePassword(request);
     return ResponseEntity.ok().build();
   }
 
@@ -67,10 +58,10 @@ public class UserController implements UserApi {
   @PreAuthorize("#user.id == #id")
   public ResponseEntity<Void> uploadImage(
       @PathVariable UUID id,
-      @AuthenticationPrincipal AppUserDetails user,
-      @RequestParam("file") MultipartFile multipartFile) {
+      @RequestParam("file") MultipartFile multipartFile,
+      @AuthenticationPrincipal AppUserDetails user) {
     log.info("Attempt to upload new photo by user with id: {}", id);
-    userService.uploadImage(id, multipartFile, user);
+    userService.uploadImage(id, multipartFile);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
@@ -79,11 +70,9 @@ public class UserController implements UserApi {
   @GetMapping(value = "/{id}/image")
   @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
   public ResponseEntity<byte[]> downloadOriginalImage(
-      @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
-    log.info(
-        "User with id: {} trying to download original image of user with id: {}.",
-        user.getId(),
-        ownerId);
+      @PathVariable("id") UUID ownerId, @AuthenticationPrincipal AppUserDetails user) {
+    String username = securityContextService.getUserDetails().getUsername();
+    log.info("User {} trying to download original image of user with id: {}.", username, ownerId);
 
     return userService.downloadImage(ownerId, true);
   }
@@ -92,11 +81,9 @@ public class UserController implements UserApi {
   @GetMapping(value = "/{id}/thumbnail-image")
   @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
   public ResponseEntity<byte[]> downloadThumbnailImage(
-      @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
-    log.info(
-        "User with id: {} trying to download thumbnail image of user with id: {}.",
-        user.getId(),
-        ownerId);
+      @PathVariable("id") UUID ownerId, @AuthenticationPrincipal AppUserDetails user) {
+    String username = securityContextService.getUserDetails().getUsername();
+    log.info("User {} trying to download thumbnail image of user with id: {}.", username, ownerId);
 
     return userService.downloadImage(ownerId, false);
   }
@@ -105,7 +92,7 @@ public class UserController implements UserApi {
   @DeleteMapping(value = "/{id}/image")
   @PreAuthorize("#user.id == #ownerId or hasAnyRole('ADMIN')")
   public ResponseEntity<Void> deleteImage(
-      @AuthenticationPrincipal AppUserDetails user, @PathVariable("id") UUID ownerId) {
+      @PathVariable("id") UUID ownerId, @AuthenticationPrincipal AppUserDetails user) {
     userService.deleteImage(ownerId);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);

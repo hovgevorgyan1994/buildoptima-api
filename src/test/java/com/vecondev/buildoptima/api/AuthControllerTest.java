@@ -142,7 +142,7 @@ public class AuthControllerTest {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND))
-            .getEnabled());
+            .isEnabled());
   }
 
   @Test

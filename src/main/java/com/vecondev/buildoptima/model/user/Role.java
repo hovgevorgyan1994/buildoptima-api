@@ -2,15 +2,17 @@ package com.vecondev.buildoptima.model.user;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+import static com.vecondev.buildoptima.model.user.Authority.RESOURCE_READ;
 import static com.vecondev.buildoptima.model.user.Authority.RESOURCE_WRITE;
 
 public enum Role {
   ADMIN(Set.of(RESOURCE_WRITE)),
   MODERATOR(Set.of(RESOURCE_WRITE)),
-  CLIENT(Set.of());
+  CLIENT(Set.of(RESOURCE_READ));
 
   private static final String ROLE_PREFIX = "ROLE_";
   private final Set<Authority> authorities;
@@ -19,12 +21,12 @@ public enum Role {
     this.authorities = authorities;
   }
 
-  public Set<SimpleGrantedAuthority> getAuthorities() {
-    Set<SimpleGrantedAuthority> grantedAuthorities = new HashSet<>();
+  public List<SimpleGrantedAuthority> getAuthorities() {
+    List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>();
 
     authorities.forEach(
-        authority ->
-            grantedAuthorities.add(new SimpleGrantedAuthority(authority.name().toLowerCase())));
+            authority ->
+                    grantedAuthorities.add(new SimpleGrantedAuthority(authority.name().toLowerCase())));
     grantedAuthorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + this.name()));
 
     return grantedAuthorities;

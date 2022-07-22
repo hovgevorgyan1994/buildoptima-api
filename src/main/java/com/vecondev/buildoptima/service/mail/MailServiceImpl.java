@@ -18,26 +18,29 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
 
+  public static final String CONFIRMATION_MAIL_SUBJECT = "WELCOME TO OUR WEBSITE";
+  public static final String VERIFICATION_MAIL_SUBJECT = "CREATE NEW PASSWORD";
+  public static final String CONFIRMATION_MAIL_TEMPLATE = "email";
+  public static final String VERIFICATION_MAIL_TEMPLATE = "createPwdEmail";
+  public static final String CONFIRMATION_URI = "/user/activate?token=";
+  public static final String VERIFICATION_URI = "/recover?confirmationToken=";
+
   private final TemplateEngine templateEngine;
   private final JavaMailSender javaMailSender;
 
-  @Value("${host.ip}")
-  private String ip;
+  @Value("${host.address}")
+  private String address;
 
   @Override
   public void sendConfirm(Locale locale, ConfirmationToken token) throws MessagingException {
-    String subject = "WELCOME TO OUR WEBSITE";
-    String template = "email";
-    String host = "https://" + ip + ":443/user/activate?token=";
-    send(token, template, subject, locale, host);
+    String url = address + CONFIRMATION_URI;
+    send(token, CONFIRMATION_MAIL_TEMPLATE, CONFIRMATION_MAIL_SUBJECT, locale, url);
   }
 
   @Override
   public void sendVerify(Locale locale, ConfirmationToken token) throws MessagingException {
-    String subject = "CREATE NEW PASSWORD";
-    String template = "createPwdEmail";
-    String host = "http://localhost:3000/recover?confirmationToken=";
-    send(token, template, subject, locale, host);
+    String url = address + VERIFICATION_URI;
+    send(token, VERIFICATION_MAIL_TEMPLATE, VERIFICATION_MAIL_SUBJECT, locale, url);
   }
 
   @Async

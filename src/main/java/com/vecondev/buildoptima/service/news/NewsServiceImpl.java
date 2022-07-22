@@ -21,14 +21,17 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.news.NewsRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.csv.CsvService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,17 +53,16 @@ public class NewsServiceImpl implements NewsService {
   private final UserRepository userRepository;
   private final ImageService imageService;
   private final NewsMapper newsMapper;
-
   private final UserMapper userMapper;
   private final PageableConverter pageableConverter;
-
   private final CsvService<NewsRecord> csvService;
-
+  private final SecurityContextService securityContextService;
   @Override
   public NewsResponseDto create(
-      NewsCreateRequestDto createNewsRequestDto, AppUserDetails userDetails) {
+      NewsCreateRequestDto createNewsRequestDto) {
+    UUID userId = securityContextService.getUserDetails().getId();
     log.info("Trying to add news item with title: {}", createNewsRequestDto.getTitle());
-    User creator = userRepository.getReferenceById(userDetails.getId());
+    User creator = userRepository.getReferenceById(userId);
     News news = newsMapper.mapToEntity(createNewsRequestDto);
     news.setCreatedBy(creator.getId());
     news.setUpdatedBy(creator.getId());
@@ -70,7 +72,7 @@ public class NewsServiceImpl implements NewsService {
     if (createNewsRequestDto.getImage() != null) {
       String className = news.getClass().getSimpleName().toLowerCase();
       imageService.uploadImagesToS3(
-          className, news.getId(), createNewsRequestDto.getImage(), userDetails.getId());
+          className, news.getId(), createNewsRequestDto.getImage(), userId);
       log.info("News image successfully uploaded to S3: news id {}", news.getId());
     }
 
@@ -79,21 +81,22 @@ public class NewsServiceImpl implements NewsService {
 
   @Override
   public NewsResponseDto update(
-      UUID newsId, NewsUpdateRequestDto newsRequestDto, AppUserDetails userDetails) {
+      UUID newsId, NewsUpdateRequestDto newsRequestDto) {
+    UUID userId = securityContextService.getUserDetails().getId();
     log.info("Trying to update news item: item id {}", newsId);
     News news =
         newsRepository.findById(newsId).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
-    User user = userRepository.getReferenceById(userDetails.getId());
+    User user = userRepository.getReferenceById(userId);
 
     log.info("Trying to update news entity properties");
-    updateNews(newsRequestDto, news, user, userDetails);
+    updateNews(newsRequestDto, news, user, userId);
     log.info("Successfully updated news entity properties.");
 
     return newsMapper.mapToResponseDto(news);
   }
 
   @Override
-  public void delete(UUID id, AppUserDetails userDetails) {
+  public void delete(UUID id) {
     log.info("Trying to delete news item: news id {}", id);
     News news =
         newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
@@ -104,14 +107,16 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public NewsResponseDto getById(UUID id, AppUserDetails userDetails) {
-    log.info("User {} is trying to get news item by id: {}", userDetails.getUsername(), id);
+  public NewsResponseDto getById(UUID id) {
+    String username = securityContextService.getUserDetails().getUsername();
+    log.info("User {} is trying to get news item by id: {}", username, id);
     return newsMapper.mapToResponseDto(
         newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND)));
   }
 
   @Override
-  public FetchResponseDto fetch(FetchRequestDto fetchRequest, String username) {
+  public FetchResponseDto fetch(FetchRequestDto fetchRequest) {
+    String username = securityContextService.getUserDetails().getUsername();
     log.info("User {} is trying to fetch news", username);
     validateFieldNames(newsPageSortingFieldsMap, fetchRequest.getSort());
     if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
@@ -137,8 +142,9 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public Metadata getMetadata(AppUserDetails userDetails) {
-    log.info("User {} is trying to get the news metadata", userDetails.getUsername());
+  public Metadata getMetadata() {
+    String username = securityContextService.getUserDetails().getUsername();
+    log.info("User {} is trying to get the news metadata", username);
     News lastUpdated = newsRepository.findTopByOrderByUpdatedAtDesc();
     long allActiveCount = newsRepository.countByStatus(Status.ACTIVE);
     long allArchivedCount = newsRepository.countByStatus(Status.ARCHIVED);
@@ -153,7 +159,7 @@ public class NewsServiceImpl implements NewsService {
                     ? lastUpdated.getUpdatedBy()
                     : lastUpdated.getCreatedBy()));
 
-    log.info("User {} successfully got the news metadata", userDetails.getUsername());
+    log.info("User {} successfully got the news metadata", username);
     return Metadata.builder()
         .lastUpdatedAt(lastUpdated.getUpdatedAt())
         .lastUpdatedBy(lastModifier)
@@ -163,7 +169,8 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public InputStreamResource exportCsv(FetchRequestDto fetchRequestDto, String username) {
+  public InputStreamResource exportCsv(FetchRequestDto fetchRequestDto) {
+    String username = securityContextService.getUserDetails().getUsername();
     log.info("User {} is trying to export news in csv file", username);
     Specification<News> specification =
         new GenericSpecification<>(newsPageSortingFieldsMap, fetchRequestDto.getFilter());
@@ -178,7 +185,8 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public NewsResponseDto archiveNews(UUID id, AppUserDetails userDetails) {
+  public NewsResponseDto archiveNews(UUID id) {
+    AppUserDetails userDetails = securityContextService.getUserDetails();
     log.info("User {} is trying to archive news item with id {}", userDetails.getUsername(), id);
     News news =
         newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
@@ -191,7 +199,7 @@ public class NewsServiceImpl implements NewsService {
   }
 
   private void updateNews(
-      NewsUpdateRequestDto dto, News news, User modifier, AppUserDetails userDetails) {
+      NewsUpdateRequestDto dto, News news, User modifier, UUID userId) {
     if (dto.getTitle() != null) {
       news.setTitle(dto.getTitle());
     }
@@ -206,7 +214,7 @@ public class NewsServiceImpl implements NewsService {
     }
     if (dto.getImage() != null) {
       String className = news.getClass().getSimpleName().toLowerCase();
-      imageService.uploadImagesToS3(className, news.getId(), dto.getImage(), userDetails.getId());
+      imageService.uploadImagesToS3(className, news.getId(), dto.getImage(), userId);
     }
     news.setUpdatedBy(modifier.getId());
   }

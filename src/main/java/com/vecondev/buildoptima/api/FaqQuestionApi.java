@@ -10,10 +10,8 @@ import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.filter.model.DictionaryField;
 import com.vecondev.buildoptima.model.Status;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -72,8 +70,7 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<FaqQuestionResponseDto> create(
-      FaqQuestionRequestDto requestDto, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FaqQuestionResponseDto> create(FaqQuestionRequestDto requestDto);
 
   @Operation(
       summary = "Get FAQ Question by id",
@@ -96,8 +93,7 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<FaqQuestionResponseDto> getById(
-      @PathVariable UUID id, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FaqQuestionResponseDto> getById(@PathVariable UUID id);
 
   @Operation(
       summary = "Get all FAQ Questions",
@@ -113,12 +109,10 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = FaqQuestionResponseDto.class)))
       })
-  ResponseEntity<List<FaqQuestionResponseDto>> getAll(
-      @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<List<FaqQuestionResponseDto>> getAll();
 
   @RequestBody(ref = "#/components/requestBodies/fetchFaqQuestionsRequestExample")
-  ResponseEntity<FetchResponseDto> fetch(
-      FetchRequestDto fetchRequestDto, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FetchResponseDto> fetch(FetchRequestDto fetchRequestDto);
 
   @Operation(
       summary = "Update the FAQ Question",
@@ -152,8 +146,7 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<FaqQuestionResponseDto> update(
-      UUID id, FaqQuestionRequestDto requestDto, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FaqQuestionResponseDto> update(UUID id, FaqQuestionRequestDto requestDto);
 
   @Operation(
       summary = "Delete the FAQ Question",
@@ -176,7 +169,7 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<Void> delete(@PathVariable UUID id, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<Void> delete(@PathVariable UUID id);
 
   @Operation(
       summary = "Exporting all FAQ questions in '.csv' format",
@@ -192,7 +185,7 @@ public interface FaqQuestionApi extends SecuredApi {
               @Content(mediaType = APPLICATION_JSON_VALUE)
             })
       })
-  ResponseEntity<Resource> exportInCSV(@Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<Resource> exportInCSV();
 
   @Operation(
       summary = "Get FAQ Question metadata",
@@ -208,7 +201,7 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = Metadata.class)))
       })
-  ResponseEntity<Metadata> getMetadata(@Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<Metadata> getMetadata();
 
   @Operation(
       summary =
@@ -232,6 +225,5 @@ public interface FaqQuestionApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = EntityOverview.class)))
       })
-  ResponseEntity<List<EntityOverview>> lookup(
-      Status status, DictionaryField dictionary, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<List<EntityOverview>> lookup(Status status, DictionaryField dictionary);
 }

@@ -49,94 +49,96 @@ public class UserControllerTestParameters extends UserTestParameters {
   private RefreshTokenRepository refreshTokenRepository;
 
   public List<User> users() {
-    return List.of(
-        new User(
-            "John",
-            "Smith",
-            "+712345678",
-            "john@mail.ru",
-            "John1234.",
-            CLIENT,
-            true),
-        new User(
-            "John",
-            "Stone",
-            "+612345678",
-            "john@gmail.com",
-            "John1234/",
-            ADMIN,
-            true),
-        new User(
-            "Melissa",
-            "Jones",
-            "+812345678",
-            "melissa@gmail.com",
-            "Mellisa1234/",
-            CLIENT,
-            true),
-        new User(
-            "Olivia",
-            "Murphy",
-            "+512345678",
-            "olivia@gmail.com",
-            "Olivia1234/",
-            CLIENT,
-            true),
-        new User(
-            "Jack",
-            "Williams",
-            "+212345678",
-            "jack@gmail.com",
-            "Jack1234/",
-            CLIENT,
-            true),
-        new User(
-            "Emily",
-            "Brown",
-            "+312345678",
-            "emily@gmail.com",
-            "Emily1234/",
-            CLIENT,
-            true),
-        new User(
-            "Harry",
-            "Taylor",
-            "+112345678",
-            "harry@gmail.com",
-            "Harry1234/",
-            CLIENT,
-            true),
-        new User(
-            "Lily",
-            "Wilson",
-            "+412345678",
-            "lily@gmail.com",
-            "Lily1234/",
-            CLIENT,
-            true),
-        new User(
-            "Thomas",
-            "Williams",
-            "+912345678",
-            "thomas@gmail.com",
-            "Thomas1234/",
-            CLIENT,
-            false),
-        new User(
-            "Olivia",
-            "Taylor",
-            "+1012345678",
-            "olivia@mail.ru",
-            "Olivia1234.",
-            CLIENT,
-            false));
+    List<User> users = List.of(
+            new User(
+                    "John",
+                    "Smith",
+                    "+712345678",
+                    "john@mail.ru",
+                    "John1234.",
+                    CLIENT,
+                    true),
+            new User(
+                    "John",
+                    "Stone",
+                    "+612345678",
+                    "john@gmail.com",
+                    "John1234/",
+                    ADMIN,
+                    true),
+            new User(
+                    "Melissa",
+                    "Jones",
+                    "+812345678",
+                    "melissa@gmail.com",
+                    "Mellisa1234/",
+                    CLIENT,
+                    true),
+            new User(
+                    "Olivia",
+                    "Murphy",
+                    "+512345678",
+                    "olivia@gmail.com",
+                    "Olivia1234/",
+                    CLIENT,
+                    true),
+            new User(
+                    "Jack",
+                    "Williams",
+                    "+212345678",
+                    "jack@gmail.com",
+                    "Jack1234/",
+                    CLIENT,
+                    true),
+            new User(
+                    "Emily",
+                    "Brown",
+                    "+312345678",
+                    "emily@gmail.com",
+                    "Emily1234/",
+                    CLIENT,
+                    true),
+            new User(
+                    "Harry",
+                    "Taylor",
+                    "+112345678",
+                    "harry@gmail.com",
+                    "Harry1234/",
+                    CLIENT,
+                    true),
+            new User(
+                    "Lily",
+                    "Wilson",
+                    "+412345678",
+                    "lily@gmail.com",
+                    "Lily1234/",
+                    CLIENT,
+                    true),
+            new User(
+                    "Thomas",
+                    "Williams",
+                    "+912345678",
+                    "thomas@gmail.com",
+                    "Thomas1234/",
+                    CLIENT,
+                    false),
+            new User(
+                    "Olivia",
+                    "Taylor",
+                    "+1012345678",
+                    "olivia@mail.ru",
+                    "Olivia1234.",
+                    CLIENT,
+                    false));
+    users.forEach(user -> user.setId(UUID.randomUUID()));
+    return users;
   }
 
   public List<ConfirmationToken> confirmationTokens() {
     List<ConfirmationToken> confirmationTokens = new ArrayList<>();
 
     userRepository.findAll().stream()
-        .filter(User::getEnabled)
+        .filter(User::isEnabled)
         .forEach(
             user ->
                 confirmationTokens.add(
@@ -153,7 +155,7 @@ public class UserControllerTestParameters extends UserTestParameters {
     List<RefreshToken> refreshTokens = new ArrayList<>();
 
     userRepository.findAll().stream()
-        .filter(User::getEnabled)
+        .filter(User::isEnabled)
         .forEach(
             user ->
                 refreshTokens.add(
@@ -198,7 +200,7 @@ public class UserControllerTestParameters extends UserTestParameters {
   public AuthRequestDto getUserCredentialsToLogin() {
     User savedUser =
         users().stream()
-            .filter(User::getEnabled)
+            .filter(User::isEnabled)
             .findAny()
             .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     return new AuthRequestDto(savedUser.getEmail(), savedUser.getPassword());

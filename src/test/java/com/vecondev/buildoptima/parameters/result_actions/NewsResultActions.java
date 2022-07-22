@@ -17,6 +17,7 @@ import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -47,10 +48,9 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
   public ResultActions creationResultActions(User user, Object requestDto) throws Exception {
     NewsCreateRequestDto createRequestDto = (NewsCreateRequestDto) requestDto;
     return mockMvc.perform(
-        post(getEndpointUris().getCreationUri())
+        multipart(getEndpointUris().getCreationUri())
             .header(AUTHORIZATION_HEADER, getAccessToken(user))
             .content(createRequestDto.getImage().getBytes())
-            .contentType(MULTIPART_FORM_DATA_VALUE)
             .param("title", createRequestDto.getTitle())
             .param("summary", createRequestDto.getSummary())
             .param("description", createRequestDto.getDescription())

@@ -45,7 +45,7 @@ public class User extends AbstractEntity {
 
   @Column(name = "enabled")
   @ColumnDefault("false")
-  private Boolean enabled;
+  private boolean enabled;
 
   public String getFullName() {
     return String.format("%s %s (ID:%s)", firstName, lastName, id);
@@ -62,7 +62,7 @@ public class User extends AbstractEntity {
       String email,
       String password,
       Role role,
-      Boolean enabled) {
+      boolean enabled) {
     super(id, createdAt, updatedAt);
     this.firstName = firstName;
     this.lastName = lastName;

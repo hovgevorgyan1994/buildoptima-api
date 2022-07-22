@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.parameters.user;
 
+import com.sun.mail.imap.AppendUID;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
@@ -8,6 +9,7 @@ import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
+import com.vecondev.buildoptima.security.user.AppUserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -113,5 +115,15 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
 
   public ConfirmationToken getSavedConfirmationToken(User savedUser, UUID uuid) {
     return new ConfirmationToken(uuid.toString(), LocalDateTime.now().plusDays(1), savedUser);
+  }
+
+  public AppUserDetails userDetails(){
+    User user = getSavedUser();
+    return AppUserDetails.builder()
+            .id(user.getId())
+            .username(user.getEmail())
+            .authorities(user.getRole().getAuthorities())
+            .enabled(true)
+            .build();
   }
 }

@@ -12,6 +12,7 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.service.user.UserServiceImpl;
 import com.vecondev.buildoptima.util.RestPreconditions;
@@ -54,6 +55,7 @@ class UserServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private PasswordEncoder encoder;
   @Mock private PageableConverter pageableConverter;
+  @Mock private SecurityContextService securityContextService;
 
   @Test
   void successfulFetchingOfUsers() {
@@ -61,6 +63,7 @@ class UserServiceTest {
     Pageable pageable = testParameters.getPageable(requestDto);
     Page<User> result = new PageImpl<>(testParameters.getUserList());
 
+    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     try (MockedStatic<FieldNameValidator> validator =
         Mockito.mockStatic(FieldNameValidator.class)) {
       validator
@@ -73,7 +76,7 @@ class UserServiceTest {
         .thenReturn(testParameters.getUserResponseDtoList(result.stream().toList()));
 
     FetchResponseDto responseDto =
-        userService.fetch(requestDto, testParameters.getSavedUser().getEmail());
+        userService.fetch(requestDto);
     assertEquals(2, responseDto.getTotalElements());
   }
 
@@ -84,6 +87,7 @@ class UserServiceTest {
     Pageable pageable = testParameters.getPageable(requestDto);
     Page<User> result = new PageImpl<>(testParameters.getUserList());
 
+    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     try (MockedStatic<FieldNameValidator> validator =
         Mockito.mockStatic(FieldNameValidator.class)) {
       validator
@@ -96,7 +100,7 @@ class UserServiceTest {
         .thenReturn(testParameters.getUserResponseDtoList(result.stream().toList()));
 
     FetchResponseDto responseDto =
-        userService.fetch(requestDto, testParameters.getSavedUser().getEmail());
+        userService.fetch(requestDto);
     assertEquals(2, responseDto.getTotalElements());
   }
 
@@ -109,13 +113,13 @@ class UserServiceTest {
         testParameters.getChangePasswordRequestDto(oldPassword, newPassword);
     User user = testParameters.getSavedUser();
     user.setPassword(testParameters.getPasswordEncoded(oldPassword));
-    AppUserDetails userDetails = new AppUserDetails(user);
 
-    when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
+    when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     when(encoder.matches(any(), any())).thenReturn(true);
     when(encoder.encode(any())).thenReturn(encodedNewPassword);
 
-    assertDoesNotThrow(() -> userService.changePassword(requestDto, userDetails));
+    assertDoesNotThrow(() -> userService.changePassword(requestDto));
     verify(encoder).encode(any());
   }
 
@@ -127,13 +131,13 @@ class UserServiceTest {
         testParameters.getChangePasswordRequestDto(oldPassword, newPassword);
     User user = testParameters.getSavedUser();
     user.setPassword(testParameters.getPasswordEncoded(oldPassword + 1));
-    AppUserDetails userDetails = new AppUserDetails(user);
 
-    when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
+    when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     when(encoder.matches(any(), any())).thenReturn(false);
 
     assertThrows(
-        AuthenticationException.class, () -> userService.changePassword(requestDto, userDetails));
+        AuthenticationException.class, () -> userService.changePassword(requestDto));
   }
 
   @Test
@@ -143,13 +147,13 @@ class UserServiceTest {
         testParameters.getChangePasswordRequestDto(password, password);
     User user = testParameters.getSavedUser();
     user.setPassword(testParameters.getPasswordEncoded(password));
-    AppUserDetails userDetails = new AppUserDetails(user);
 
-    when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
+    when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     when(encoder.matches(any(), any())).thenReturn(true);
 
     assertThrows(
-        AuthenticationException.class, () -> userService.changePassword(requestDto, userDetails));
+        AuthenticationException.class, () -> userService.changePassword(requestDto));
   }
 
   @Test
@@ -176,13 +180,14 @@ class UserServiceTest {
   @Test
   void successfulImageUploading() {
     UUID userId = UUID.randomUUID();
-    User savedUser = testParameters.getSavedUser();
+
+    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     try (MockedStatic<RestPreconditions> restPreconditions =
         Mockito.mockStatic(RestPreconditions.class)) {
       restPreconditions
           .when(() -> RestPreconditions.checkNotNull(any(), any()))
           .thenAnswer((Answer<Void>) invocation -> null);
-      userService.uploadImage(userId, null, new AppUserDetails(savedUser));
+      userService.uploadImage(userId, null);
     }
 
     verify(imageService).uploadImagesToS3(any(), any(), any(), any());

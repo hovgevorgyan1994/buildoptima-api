@@ -57,7 +57,7 @@ public interface UserApi extends SecuredApi {
 
   @RequestBody(ref = "#/components/requestBodies/fetchUsersRequestExample")
   ResponseEntity<FetchResponseDto> fetch(
-            FetchRequestDto fetchRequestDto, @Parameter(hidden = true) AppUserDetails user);
+            FetchRequestDto fetchRequestDto);
 
   @Operation(
       summary = "Change password",
@@ -90,7 +90,7 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<Void> changePassword(ChangePasswordRequestDto request, AppUserDetails userDetails);
+  ResponseEntity<Void> changePassword(ChangePasswordRequestDto request);
 
   @Operation(
       summary = "Upload new image or update the previous one of given user",
@@ -123,8 +123,8 @@ public interface UserApi extends SecuredApi {
       })
   ResponseEntity<Void> uploadImage(
       @Parameter(description = "The user's id whom photo should be uploaded") UUID id,
-      @Parameter(hidden = true) AppUserDetails user,
-      @Parameter(description = "The image user want to upload") MultipartFile multipartFile);
+      @Parameter(description = "The image user want to upload") MultipartFile multipartFile,
+      @Parameter(hidden = true) AppUserDetails user);
 
   @Operation(
       summary = "Download the original image of given user",
@@ -152,8 +152,8 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<byte[]> downloadOriginalImage(
-      @Parameter(hidden = true) AppUserDetails user,
-      @Parameter(description = "The user id whom image should be downloaded") UUID ownerId);
+      @Parameter(description = "The user id whom image should be downloaded") UUID ownerId,
+      @Parameter(hidden = true) AppUserDetails user);
 
   @Operation(
       summary = "Download the thumbnail image by given id",
@@ -181,8 +181,8 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<byte[]> downloadThumbnailImage(
-      @Parameter(hidden = true) AppUserDetails user,
-      @Parameter(description = "The user id whom image should be downloaded") UUID ownerId);
+      @Parameter(description = "The user id whom image should be downloaded") UUID ownerId,
+      @Parameter(hidden = true) AppUserDetails user);
 
   @Operation(
       summary = "Delete the images (original, thumbnail) of given user",
@@ -203,6 +203,5 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<Void> deleteImage(
-      @Parameter(hidden = true) AppUserDetails user,
-      @Parameter(description = "The user id whom image should be deleted") UUID ownerId);
+      @Parameter(description = "The user id whom image should be deleted") UUID ownerId,@Parameter(hidden = true) AppUserDetails user);
 }

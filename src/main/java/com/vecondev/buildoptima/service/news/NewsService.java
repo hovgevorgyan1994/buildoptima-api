@@ -1,31 +1,30 @@
 package com.vecondev.buildoptima.service.news;
 
+import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
-import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
-import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import org.springframework.core.io.InputStreamResource;
 
 import java.util.UUID;
 
 public interface NewsService {
 
-  NewsResponseDto create(NewsCreateRequestDto dto, AppUserDetails userDetails);
+  NewsResponseDto create(NewsCreateRequestDto dto);
 
-  NewsResponseDto update(UUID id, NewsUpdateRequestDto dto, AppUserDetails userDetails);
+  NewsResponseDto update(UUID id, NewsUpdateRequestDto dto);
 
-  void delete(UUID id, AppUserDetails userDetails);
+  void delete(UUID id);
 
-  NewsResponseDto getById(UUID id, AppUserDetails userDetails);
+  NewsResponseDto getById(UUID id);
 
-  FetchResponseDto fetch(FetchRequestDto fetchRequestDto, String username);
+  FetchResponseDto fetch(FetchRequestDto fetchRequestDto);
 
-  Metadata getMetadata(AppUserDetails userDetails);
+  Metadata getMetadata();
 
-  InputStreamResource exportCsv(FetchRequestDto fetchRequestDto, String username);
+  InputStreamResource exportCsv(FetchRequestDto fetchRequestDto);
 
-  NewsResponseDto archiveNews(UUID id, AppUserDetails userDetails);
+  NewsResponseDto archiveNews(UUID id);
 }

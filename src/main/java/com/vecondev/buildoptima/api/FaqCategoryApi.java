@@ -6,10 +6,8 @@ import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -66,8 +64,7 @@ public interface FaqCategoryApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<FaqCategoryResponseDto> create(
-      FaqCategoryRequestDto requestDto, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FaqCategoryResponseDto> create(FaqCategoryRequestDto requestDto);
 
   @Operation(
       summary = "Get FAQ category by id",
@@ -90,8 +87,7 @@ public interface FaqCategoryApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<FaqCategoryResponseDto> getById(
-      UUID id, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FaqCategoryResponseDto> getById(UUID id);
 
   @Operation(
       summary = "Get all FAQ categories",
@@ -107,12 +103,10 @@ public interface FaqCategoryApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = FaqCategoryResponseDto.class)))
       })
-  ResponseEntity<List<FaqCategoryResponseDto>> getAll(
-      @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<List<FaqCategoryResponseDto>> getAll();
 
   @RequestBody(ref = "#/components/requestBodies/fetchFaqCategoriesRequestExample")
-  ResponseEntity<FetchResponseDto> fetch(
-      FetchRequestDto fetchRequestDto, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FetchResponseDto> fetch(FetchRequestDto fetchRequestDto);
 
   @Operation(
       summary = "Update the FAQ category",
@@ -146,8 +140,7 @@ public interface FaqCategoryApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<FaqCategoryResponseDto> update(
-      UUID id, FaqCategoryRequestDto requestDto, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<FaqCategoryResponseDto> update(UUID id, FaqCategoryRequestDto requestDto);
 
   @Operation(
       summary = "Delete the FAQ category",
@@ -178,7 +171,7 @@ public interface FaqCategoryApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<Void> delete(UUID id, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<Void> delete(UUID id);
 
   @Operation(
       summary = "Exporting all FAQ categories in '.csv' format",
@@ -194,7 +187,7 @@ public interface FaqCategoryApi extends SecuredApi {
               @Content(mediaType = APPLICATION_JSON_VALUE)
             })
       })
-  ResponseEntity<Resource> exportInCsv(@Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<Resource> exportInCsv();
 
   @Operation(
       summary = "Get FAQ Category metadata",
@@ -210,5 +203,5 @@ public interface FaqCategoryApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = Metadata.class)))
       })
-  ResponseEntity<Metadata> getMetadata(@Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<Metadata> getMetadata();
 }

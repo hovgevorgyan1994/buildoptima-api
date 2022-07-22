@@ -82,7 +82,7 @@ logging:
           EC2MetadataUtils: error
 
 host:
-  ip: localhost
+  address: http://localhost:3000
 
 page:
   skip: 0

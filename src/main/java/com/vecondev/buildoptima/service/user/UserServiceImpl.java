@@ -13,6 +13,7 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +48,11 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
   private final ImageService imageService;
   private final PageableConverter pageableConverter;
+  private final SecurityContextService securityContextService;
 
   @Override
-  public FetchResponseDto fetch(FetchRequestDto fetchRequest, String username) {
+  public FetchResponseDto fetch(FetchRequestDto fetchRequest) {
+    String username = securityContextService.getUserDetails().getUsername();
     log.info("User {} is trying to fetch users", username);
     validateFieldNames(userPageSortingFieldsMap, fetchRequest.getSort());
     if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
@@ -75,11 +78,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void changePassword(ChangePasswordRequestDto request, AppUserDetails userDetails) {
-    log.info("Request from user {} to change the password", userDetails.getUsername());
+  public void changePassword(ChangePasswordRequestDto request) {
+    String username = securityContextService.getUserDetails().getUsername();
+    log.info("Request from user {} to change the password", username);
     User user =
         userRepository
-            .findByEmail(userDetails.getUsername())
+            .findByEmail(username)
             .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
     if (!isValidPassword(request, user)) {
       log.warn("User {} had provided wrong credentials to change the password", user.getEmail());
@@ -109,10 +113,11 @@ public class UserServiceImpl implements UserService {
    * @param multipartFile file representing the image
    */
   @Override
-  public void uploadImage(UUID userId, MultipartFile multipartFile, AppUserDetails userDetails) {
+  public void uploadImage(UUID userId, MultipartFile multipartFile) {
+    UUID userDetailsId = securityContextService.getUserDetails().getId();
     checkNotNull(multipartFile, IMAGE_IS_REQUIRED);
 
-    imageService.uploadImagesToS3("user", userId, multipartFile, userDetails.getId());
+    imageService.uploadImagesToS3("user", userId, multipartFile, userDetailsId);
   }
 
   /**

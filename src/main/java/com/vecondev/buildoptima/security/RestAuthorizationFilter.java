@@ -4,13 +4,11 @@ import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,31 +27,30 @@ public class RestAuthorizationFilter extends OncePerRequestFilter {
 
   private final JwtTokenManager jwtTokenManager;
   private final JwtConfigProperties jwtConfigProperties;
-  private final UserDetailsService userDetailsService;
+  private final SecurityContextService securityContextService;
 
   @Override
   protected void doFilterInternal(
-      @NonNull HttpServletRequest request,
-      @NonNull HttpServletResponse response,
-      @NonNull FilterChain filterChain)
-      throws ServletException, IOException {
+          @NonNull HttpServletRequest request,
+          @NonNull HttpServletResponse response,
+          @NonNull FilterChain filterChain)
+          throws ServletException, IOException {
 
     try {
       Optional<String> accessToken = parseAccessToken(request);
       if (accessToken.isPresent()) {
-        jwtTokenManager.validateToken(accessToken.get());
-        String username = jwtTokenManager.getUsernameFromToken(accessToken.get());
-        AppUserDetails appUser = (AppUserDetails) userDetailsService.loadUserByUsername(username);
-        UsernamePasswordAuthenticationToken upt =
-            new UsernamePasswordAuthenticationToken(appUser, null, appUser.getAuthorities());
-        upt.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(upt);
+        AppUserDetails userDetails = jwtTokenManager.getUserDetailsFromToken(accessToken.get());
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+        securityContextService.setAuthentication(authenticationToken);
       }
+      filterChain.doFilter(request, response);
     } catch (AuthenticationException ex) {
       response.addHeader("error", ex.getError().name());
       response.setStatus(ex.getError().getHttpStatus().value());
     } finally {
-      filterChain.doFilter(request, response);
+      securityContextService.clearAuthentication();
     }
   }
 

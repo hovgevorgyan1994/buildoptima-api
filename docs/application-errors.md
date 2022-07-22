@@ -50,13 +50,14 @@ Below is the sample structure of payload of API error
 
 #### Errors for 401 UNAUTHORIZED and 403 FORBIDDEN
 
-| Error Name                                                    | Code  | Message                                                |
-|:--------------------------------------------------------------|:------|:-------------------------------------------------------|
-| `BAD_CREDENTIALS`                                             | 4011  | `Bad Credentials`                                      |
-| `ACCESS_TOKEN_MISSING`                                        | 4012  | `Access Token Missing`                                 |
-| `INVALID_ACCESS_TOKEN`                                        | 4013  | `Invalid Access Token`                                 |
-| `ACCESS_TOKEN_EXPIRED `                                       | 4014  | `Expired Access Token `                                |
-| `ACCESS_DENIED  `                                             | 4031  | `Permission Denied To Requested Resource`              |
+| Error Name              | Code | Message                                   |
+|:------------------------|:-----|:------------------------------------------|
+| `BAD_CREDENTIALS`       | 4011 | `Bad Credentials`                         |
+| `ACCESS_TOKEN_MISSING`  | 4012 | `Access Token Missing`                    |
+| `INVALID_ACCESS_TOKEN`  | 4013 | `Invalid Access Token`                    |
+| `ACCESS_TOKEN_EXPIRED ` | 4014 | `Expired Access Token `                   |
+| `NOT_ACTIVE_ACCOUNT  `  | 4015 | `User Email Is Not Verified  `            |
+| `ACCESS_DENIED  `       | 4031 | `Permission Denied To Requested Resource` |
 
 #### Errors for 404 NOT FOUND
 

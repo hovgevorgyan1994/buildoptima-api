@@ -1,2 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgresql:5432/buildoptima?currentSchema=buildoptima
+
 host:
-  ip: 3.95.166.178
+  address: http://buildoptima-web.s3-website-us-east-1.amazonaws.com
