@@ -155,7 +155,6 @@ public class AuthServiceImpl implements AuthService {
     }
     log.info("Access token is created for user {}", user.getEmail());
     return AuthResponseDto.builder()
-        .userId(appUser.getId())
         .accessToken(accessToken)
         .refreshTokenId(refreshToken.getId().toString())
         .build();
