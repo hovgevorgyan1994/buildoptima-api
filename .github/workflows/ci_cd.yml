@@ -46,7 +46,7 @@ jobs:
         message: 'Commit badge'
         add: '*.svg'
     - name: Build with Maven
-      run: mvn install -DskipTests
+      run: mvn package -DskipTests
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -83,13 +83,12 @@ jobs:
         echo -e "[default]\nregion = us-east-1\noutput = json" > /home/ubuntu/.aws/config
         fi
         RUNNING_CONTAINERS=$(sudo docker ps -a -q --filter ancestor=$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY)
-        SIZE=${#RUNNING_CONTAINERS}
-        if (($SIZE>0)); then
-        sudo docker stop $RUNNING_CONTAINERS
+        if [ ! -z "$RUNNING_CONTAINERS" ]; then
+        sudo docker stop $RUNNING_CONTAINERS 
         sudo docker rm $RUNNING_CONTAINERS
         fi
-        sudo docker image rm $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY
-        sudo docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) 687676024420.dkr.ecr.us-east-1.amazonaws.com
+        sudo docker image prune -af
+        sudo docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) $AWS_ECR_REGISTRY
         sudo docker-compose -f /home/ubuntu/buildoptima/docker-compose.yml up -d
         
         

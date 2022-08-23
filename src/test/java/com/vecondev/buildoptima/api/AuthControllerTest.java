@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.api;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -160,7 +161,7 @@ public class AuthControllerTest {
         .loginResultActions(requestDto)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.accessToken").exists())
-        .andExpect(jsonPath("$.refreshTokenId").exists());
+        .andExpect(jsonPath("$.refreshToken").exists());
   }
 
   @Test
@@ -176,16 +177,6 @@ public class AuthControllerTest {
     RefreshTokenRequestDto requestDto = userControllerTestParameters.getRefreshToken();
 
     resultActions.refreshTokenResultActions(requestDto).andExpect(status().isOk());
-  }
-
-  @Test
-  void failedRefreshmentOfTokensAsRefreshTokenExpired() throws Exception {
-    RefreshTokenRequestDto requestDto = userControllerTestParameters.getExpiredRefreshToken();
-
-    resultActions
-        .refreshTokenResultActions(requestDto)
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value(containsString("Expired")));
   }
 
   @Test

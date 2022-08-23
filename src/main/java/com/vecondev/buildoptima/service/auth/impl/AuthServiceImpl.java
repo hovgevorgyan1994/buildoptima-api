@@ -1,6 +1,10 @@
 package com.vecondev.buildoptima.service.auth.impl;
 
-import com.vecondev.buildoptima.dto.user.request.*;
+import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
+import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
+import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.user.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
@@ -24,11 +28,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
-import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Optional;
 
-import static com.vecondev.buildoptima.exception.Error.*;
+import static com.vecondev.buildoptima.exception.Error.BAD_CREDENTIALS;
+import static com.vecondev.buildoptima.exception.Error.SEND_EMAIL_FAILED;
+import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -88,20 +93,14 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request) {
     log.info("Request to refresh the access token");
-
     final RefreshToken refreshToken =
         refreshTokenService.findByRefreshToken(request.getRefreshToken());
-
-    if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-      log.warn("400 Bad Request response was sent because of an expired refresh token");
-      throw new AuthenticationException(REFRESH_TOKEN_EXPIRED);
-    }
 
     User user = userRepository.getReferenceById(refreshToken.getUserId());
     log.info("Access token is refreshed for user {}", user.getEmail());
     return RefreshTokenResponseDto.builder()
         .accessToken(tokenManager.generateAccessToken(user))
-        .refreshToken(refreshToken.getRefreshToken())
+        .refreshToken(refreshToken.getPlainRefreshToken())
         .build();
   }
 
@@ -155,8 +154,9 @@ public class AuthServiceImpl implements AuthService {
     }
     log.info("Access token is created for user {}", user.getEmail());
     return AuthResponseDto.builder()
+            .userId(user.getId())
         .accessToken(accessToken)
-        .refreshTokenId(refreshToken.getId().toString())
+        .refreshToken(refreshToken.getPlainRefreshToken())
         .build();
   }
 }

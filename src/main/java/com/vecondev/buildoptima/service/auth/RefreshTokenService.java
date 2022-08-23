@@ -8,8 +8,6 @@ public interface RefreshTokenService {
 
     RefreshToken create(UUID userId);
 
-    void deleteById(UUID id);
-
     void deleteExpiredOnes();
 
     RefreshToken findByUserId(UUID id);

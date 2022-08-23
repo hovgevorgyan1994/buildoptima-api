@@ -30,16 +30,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     final RefreshToken refreshToken =
         RefreshToken.builder()
             .userId(userId)
-            .refreshToken(refreshTokenPlain)
+            .plainRefreshToken(refreshTokenPlain)
             .expiresAt(
                 LocalDateTime.now().plusDays(jwtConfigProperties.getRefreshToken().getValidity()))
             .build();
     return refreshTokenRepository.saveAndFlush(refreshToken);
-  }
-
-  @Override
-  public void deleteById(UUID id) {
-    refreshTokenRepository.deleteById(id);
   }
 
   @Override
@@ -50,8 +45,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   @Override
   public RefreshToken findByRefreshToken(String refreshToken) {
     return refreshTokenRepository
-        .findByRefreshToken(refreshToken)
-        .orElseThrow(() -> new AuthenticationException(Error.REFRESH_TOKEN_INVALID));
+            .findById(refreshToken)
+            .orElseThrow(() -> new AuthenticationException(Error.REFRESH_TOKEN_INVALID));
   }
 
   @Override

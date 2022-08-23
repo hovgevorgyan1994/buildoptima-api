@@ -70,7 +70,8 @@ public class FaqQuestionController implements FaqQuestionApi {
     UUID userId = securityContextService.getUserDetails().getId();
     log.info("User with id: {} is fetching faq categories.", userId);
 
-    return ResponseEntity.ok(faqQuestionService.fetch(fetchRequest));
+    return ResponseEntity.ok(faqQuestionService.fetch(
+            fetchRequest));
   }
 
   @Override

@@ -1,6 +1,5 @@
 package com.vecondev.buildoptima.parameters.user;
 
-import com.sun.mail.imap.AppendUID;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
@@ -92,13 +91,11 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
     return new ConfirmationToken(token, LocalDateTime.now().plusDays(1), user);
   }
 
-  public RefreshToken getRefreshTokenWithRefreshTokenId(
-      String tokenId, UUID userId, Boolean isDecoded) {
+  public RefreshToken getRefreshTokenWithRefreshTokenId(UUID userId, Boolean isDecoded) {
     RefreshToken refreshToken =
         new RefreshToken(UUID.randomUUID().toString(), userId, LocalDateTime.now().plusMonths(6));
-    refreshToken.setId(UUID.fromString(tokenId));
     if (isDecoded) {
-      refreshToken.setRefreshToken(encoder.encode(refreshToken.getRefreshToken()));
+      refreshToken.setPlainRefreshToken(encoder.encode(refreshToken.getPlainRefreshToken()));
     }
 
     return refreshToken;

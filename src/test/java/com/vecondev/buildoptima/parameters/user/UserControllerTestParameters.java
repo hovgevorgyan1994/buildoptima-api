@@ -217,7 +217,7 @@ public class UserControllerTestParameters extends UserTestParameters {
             .findAny()
             .orElseThrow(NoSuchElementException::new);
 
-    return new RefreshTokenRequestDto(refreshToken.getRefreshToken());
+    return new RefreshTokenRequestDto(refreshToken.getPlainRefreshToken());
   }
 
   public RefreshTokenRequestDto getExpiredRefreshToken() {
@@ -227,7 +227,7 @@ public class UserControllerTestParameters extends UserTestParameters {
             .findAny()
             .orElseThrow(NoSuchElementException::new);
 
-    return new RefreshTokenRequestDto(refreshToken.getRefreshToken());
+    return new RefreshTokenRequestDto(refreshToken.getPlainRefreshToken());
   }
 
   public FetchRequestDto getInvalidFetchRequest() {

@@ -135,8 +135,7 @@ class AuthServiceTest {
     RefreshTokenRequestDto requestDto = new RefreshTokenRequestDto(UUID.randomUUID().toString());
     User user = testParameters.getSavedUser();
     RefreshToken refreshToken =
-        testParameters.getRefreshTokenWithRefreshTokenId(
-            requestDto.getRefreshToken(), user.getId(), false);
+        testParameters.getRefreshTokenWithRefreshTokenId(user.getId(), false);
 
     when(refreshTokenService.findByRefreshToken(requestDto.getRefreshToken()))
         .thenReturn(refreshToken);
@@ -146,21 +145,6 @@ class AuthServiceTest {
     RefreshTokenResponseDto response = authService.refreshToken(requestDto);
     assertNotNull(response.getAccessToken());
     assertNotNull(response.getRefreshToken());
-  }
-
-  @Test
-  void failedRefreshingOfTokensAsTokenIsExpired() {
-    RefreshTokenRequestDto requestDto = new RefreshTokenRequestDto(UUID.randomUUID().toString());
-    User user = testParameters.getSavedUser();
-    RefreshToken refreshToken =
-        testParameters.getRefreshTokenWithRefreshTokenId(
-            requestDto.getRefreshToken(), user.getId(), false);
-    refreshToken.setExpiresAt(LocalDateTime.now().minusDays(1));
-
-    when(refreshTokenService.findByRefreshToken(requestDto.getRefreshToken()))
-        .thenReturn(refreshToken);
-
-    assertThrows(AuthenticationException.class, () -> authService.refreshToken(requestDto));
   }
 
   @Test
