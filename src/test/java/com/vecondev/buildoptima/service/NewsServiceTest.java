@@ -94,7 +94,7 @@ class NewsServiceTest {
   void successfullyCreated() {
     when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
     when(userRepository.getReferenceById(any())).thenReturn(user);
-    when(newsMapper.mapToEntity(createNewsRequestDto)).thenReturn(news);
+    when(newsMapper.mapToEntity(createNewsRequestDto, user)).thenReturn(news);
     when(newsRepository.saveAndFlush(news)).thenReturn(news);
     when(newsMapper.mapToResponseDto(any()))
         .thenReturn(serviceTestParameters.getNewsResponseDto(news));

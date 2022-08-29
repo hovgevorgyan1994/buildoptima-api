@@ -1,7 +1,8 @@
 package com.vecondev.buildoptima.mapper.user;
 
-import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.dto.ImageOverview;
+import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
 import org.mapstruct.DecoratedWith;
@@ -15,13 +16,14 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @DecoratedWith(UserMapperDecorator.class)
 public interface UserMapper {
+  @Mapping(target = "password", ignore = true)
+  User mapToEntity(UserRegistrationRequestDto dto);
 
-    @Mapping(target = "password", ignore = true)
-    User mapToEntity(UserRegistrationRequestDto dto);
+  UserResponseDto mapToResponseDto(User user);
 
-    UserResponseDto mapToResponseDto(User user);
-
-    List<UserResponseDto> mapToResponseList(Page<User> users);
+  List<UserResponseDto> mapToResponseList(Page<User> users);
 
   EntityOverview mapToOverview(User user);
+
+  ImageOverview mapToUserImageOverview(User user);
 }

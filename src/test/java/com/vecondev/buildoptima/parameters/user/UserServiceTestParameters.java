@@ -41,7 +41,8 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
         requestDto.getEmail(),
         requestDto.getPassword(),
         CLIENT,
-        false);
+        false,
+        0);
   }
 
   public User getSavedUser(User user) {
@@ -61,7 +62,8 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
             "Example@gmail.com",
             encoder.encode("Example1234."),
             CLIENT,
-            true);
+            true,
+            1);
     user.setId(UUID.randomUUID());
     return user;
   }
@@ -69,6 +71,7 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
   public UserResponseDto getUserResponseDto(User user) {
     return new UserResponseDto(
         user.getId(),
+        user.getImageVersion(),
         user.getFirstName(),
         user.getLastName(),
         user.getPhone(),

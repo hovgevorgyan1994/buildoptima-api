@@ -31,4 +31,5 @@ public class NewsResponseDto {
   private Instant updatedAt;
   private EntityOverview createdBy;
   private EntityOverview updatedBy;
+  private Integer imageVersion;
 }

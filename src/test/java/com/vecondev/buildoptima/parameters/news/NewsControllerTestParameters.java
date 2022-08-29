@@ -9,12 +9,10 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.util.TestUtil;
 import lombok.NoArgsConstructor;
 import org.apache.http.entity.ContentType;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.awt.*;
 import java.time.Instant;
 
 import static com.vecondev.buildoptima.model.user.Role.ADMIN;
@@ -33,6 +31,7 @@ public class NewsControllerTestParameters extends TestUtil {
             .description(dto.getDescription())
             .status(Status.ACTIVE)
             .category(NewsCategory.valueOf(dto.getCategory()))
+            .imageVersion(0)
             .build();
     news.setCreatedAt(Instant.now());
     news.setCreatedAt(Instant.now());
@@ -84,6 +83,7 @@ public class NewsControllerTestParameters extends TestUtil {
     user.setRole(ADMIN);
     user.setCreatedAt(Instant.now());
     user.setEnabled(true);
+    user.setImageVersion(0);
     return user;
   }
 
@@ -96,6 +96,7 @@ public class NewsControllerTestParameters extends TestUtil {
     user.setRole(CLIENT);
     user.setCreatedAt(Instant.now());
     user.setEnabled(true);
+    user.setImageVersion(0);
     return user;
   }
 

@@ -4,6 +4,8 @@ import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
 import com.vecondev.buildoptima.model.news.News;
+import com.vecondev.buildoptima.model.user.User;
+import org.mapstruct.Context;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,7 +19,7 @@ import java.util.List;
 public interface NewsMapper {
 
   @Mapping(target = "keywords", ignore = true)
-  News mapToEntity(NewsCreateRequestDto dto);
+  News mapToEntity(NewsCreateRequestDto dto, @Context User createdBy);
 
   @Mapping(target = "keywords", ignore = true)
   @Mapping(target = "updatedBy", ignore = true)

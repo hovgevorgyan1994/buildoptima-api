@@ -17,6 +17,8 @@ public class AuthResponseDto {
 
   private UUID userId;
 
+  private Integer imageVersion;
+
   private String accessToken;
 
   private String refreshToken;

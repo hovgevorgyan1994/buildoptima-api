@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.service.user;
 
+import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
@@ -12,7 +13,6 @@ import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
@@ -113,11 +113,14 @@ public class UserServiceImpl implements UserService {
    * @param multipartFile file representing the image
    */
   @Override
-  public void uploadImage(UUID userId, MultipartFile multipartFile) {
-    UUID userDetailsId = securityContextService.getUserDetails().getId();
+  public ImageOverview uploadImage(UUID userId, MultipartFile multipartFile) {
     checkNotNull(multipartFile, IMAGE_IS_REQUIRED);
+    User user = findUserById(userId);
+    imageService.uploadImagesToS3("user", userId, user.getImageVersion(), multipartFile, userId);
 
-    imageService.uploadImagesToS3("user", userId, multipartFile, userDetailsId);
+    user.setImageVersion(user.getImageVersion() + 1);
+    user = userRepository.saveAndFlush(user);
+    return userMapper.mapToUserImageOverview(user);
   }
 
   /**
@@ -128,12 +131,12 @@ public class UserServiceImpl implements UserService {
    */
   @Override
   public ResponseEntity<byte[]> downloadImage(UUID ownerId, boolean isOriginal) {
-    if (!userRepository.existsById(ownerId)) {
-      throw new UserNotFoundException(USER_NOT_FOUND);
-    }
     String className = User.class.getSimpleName().toLowerCase();
-    byte[] imageAsByteArray = imageService.downloadImage(className, ownerId, isOriginal);
-    String contentType = imageService.getContentTypeOfObject("user", ownerId, isOriginal);
+    User user = findUserById(ownerId);
+    byte[] imageAsByteArray =
+        imageService.downloadImage(className, ownerId, user.getImageVersion(), isOriginal);
+    String contentType =
+        imageService.getContentTypeOfObject("user", ownerId, user.getImageVersion(), isOriginal);
 
     return ResponseEntity.ok()
         .contentLength(imageAsByteArray.length)
@@ -148,15 +151,17 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void deleteImage(UUID userId) {
-    if (!userRepository.existsById(userId)) {
-      throw new UserNotFoundException(USER_NOT_FOUND);
-    }
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
     String className = User.class.getSimpleName().toLowerCase();
 
-    imageService.checkExistenceOfObject(imageService.getImagePath(className, userId, true), userId);
     imageService.checkExistenceOfObject(
-        imageService.getImagePath(className, userId, false), userId);
-    imageService.deleteImagesFromS3("user", userId);
+        imageService.getImagePath(className, userId, user.getImageVersion(), true), userId);
+    imageService.checkExistenceOfObject(
+        imageService.getImagePath(className, userId, user.getImageVersion(), false), userId);
+    imageService.deleteImagesFromS3("user", userId, user.getImageVersion());
   }
 
   @Override

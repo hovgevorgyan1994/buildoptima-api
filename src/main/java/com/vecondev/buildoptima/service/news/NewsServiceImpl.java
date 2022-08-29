@@ -63,7 +63,7 @@ public class NewsServiceImpl implements NewsService {
     UUID userId = securityContextService.getUserDetails().getId();
     log.info("Trying to add news item with title: {}", createNewsRequestDto.getTitle());
     User creator = userRepository.getReferenceById(userId);
-    News news = newsMapper.mapToEntity(createNewsRequestDto);
+    News news = newsMapper.mapToEntity(createNewsRequestDto, creator);
     news.setCreatedBy(creator.getId());
     news.setUpdatedBy(creator.getId());
     news = newsRepository.saveAndFlush(news);
@@ -72,10 +72,17 @@ public class NewsServiceImpl implements NewsService {
     if (createNewsRequestDto.getImage() != null) {
       String className = news.getClass().getSimpleName().toLowerCase();
       imageService.uploadImagesToS3(
-          className, news.getId(), createNewsRequestDto.getImage(), userId);
+          className,
+          news.getId(),
+          news.getImageVersion(),
+          createNewsRequestDto.getImage(),
+          userId);
       log.info("News image successfully uploaded to S3: news id {}", news.getId());
+      news.setImageVersion(news.getImageVersion() + 1);
     }
 
+    news = newsRepository.saveAndFlush(news);
+    log.info("Successfully saved news item in DB");
     return newsMapper.mapToResponseDto(news);
   }
 
@@ -101,7 +108,7 @@ public class NewsServiceImpl implements NewsService {
     News news =
         newsRepository.findById(id).orElseThrow(() -> new NewsException(NEWS_ITEM_NOT_FOUND));
     String className = news.getClass().getSimpleName().toLowerCase();
-    imageService.deleteImagesFromS3(className, id);
+    imageService.deleteImagesFromS3(className, id, news.getImageVersion());
     newsRepository.deleteById(id);
     log.info("Successfully deleted the news item: news id was {}", id);
   }
@@ -214,7 +221,9 @@ public class NewsServiceImpl implements NewsService {
     }
     if (dto.getImage() != null) {
       String className = news.getClass().getSimpleName().toLowerCase();
-      imageService.uploadImagesToS3(className, news.getId(), dto.getImage(), userId);
+      imageService.uploadImagesToS3(
+          className, news.getId(), news.getImageVersion(), dto.getImage(), userId);
+      news.setImageVersion(news.getImageVersion() + 1);
     }
     news.setUpdatedBy(modifier.getId());
   }

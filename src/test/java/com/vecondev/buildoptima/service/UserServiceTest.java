@@ -11,7 +11,6 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.service.user.UserServiceImpl;
@@ -180,17 +179,20 @@ class UserServiceTest {
   @Test
   void successfulImageUploading() {
     UUID userId = UUID.randomUUID();
+    User user = testParameters.getSavedUser();
+    user.setId(userId);
 
-    when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     try (MockedStatic<RestPreconditions> restPreconditions =
         Mockito.mockStatic(RestPreconditions.class)) {
       restPreconditions
           .when(() -> RestPreconditions.checkNotNull(any(), any()))
           .thenAnswer((Answer<Void>) invocation -> null);
+      when(userRepository.findById(userId)).thenReturn(Optional.of(user));
       userService.uploadImage(userId, null);
     }
 
-    verify(imageService).uploadImagesToS3(any(), any(), any(), any());
+    user.setImageVersion(user.getImageVersion() + 1);
+    verify(userRepository).saveAndFlush(user);
   }
 
   @Test
@@ -199,28 +201,29 @@ class UserServiceTest {
     String contentType = IMAGE_JPEG_VALUE;
     boolean isOriginal = true;
 
-    when(userRepository.existsById(any())).thenReturn(true);
-    when(imageService.downloadImage("user", ownerId, isOriginal)).thenReturn(new byte[] {});
-    when(imageService.getContentTypeOfObject("user", ownerId, isOriginal)).thenReturn(contentType);
+    when(userRepository.findById(any())).thenReturn(Optional.of(testParameters.getSavedUser()));
+    when(imageService.downloadImage("user", ownerId, 1, isOriginal)).thenReturn(new byte[] {});
+    when(imageService.getContentTypeOfObject("user", ownerId, 1, isOriginal))
+        .thenReturn(contentType);
     ResponseEntity<byte[]> response = userService.downloadImage(ownerId, isOriginal);
 
     assertEquals(
         contentType, Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
-    verify(imageService).downloadImage("user", ownerId, isOriginal);
+    verify(imageService).downloadImage("user", ownerId, 1, isOriginal);
   }
 
   @Test
   void successfulImageDeleting() {
-    when(userRepository.existsById(any())).thenReturn(true);
+    when(userRepository.findById(any())).thenReturn(Optional.of(testParameters.getSavedUser()));
     userService.deleteImage(UUID.randomUUID());
 
-    verify(imageService).deleteImagesFromS3(any(), any());
+    verify(imageService).deleteImagesFromS3(any(), any(), any());
   }
 
   @Test
   void failedImageDeletingAsObjectDoesntExist() {
     UUID userId = UUID.randomUUID();
-    when(userRepository.existsById(any())).thenReturn(false);
+    when(userRepository.findById(any())).thenReturn(Optional.empty());
 
     assertThrows(UserNotFoundException.class, () -> userService.deleteImage(userId));
   }

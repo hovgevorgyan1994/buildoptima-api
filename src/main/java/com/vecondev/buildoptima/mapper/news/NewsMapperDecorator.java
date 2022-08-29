@@ -26,11 +26,14 @@ public abstract class NewsMapperDecorator implements NewsMapper {
   @Autowired private UserRepository userRepository;
 
   @Override
-  public News mapToEntity(NewsCreateRequestDto dto) {
+  public News mapToEntity(NewsCreateRequestDto dto, User createdBy) {
     News news =
-        mapper.mapToEntity(dto).toBuilder()
+        mapper.mapToEntity(dto, createdBy).toBuilder()
             .category(NewsCategory.valueOf(dto.getCategory()))
             .status(Status.ACTIVE)
+            .createdBy(createdBy.getId())
+            .updatedBy(createdBy.getId())
+            .imageVersion(0)
             .build();
     StringBuilder keywords = new StringBuilder();
     dto.getKeywords().forEach(keyword -> keywords.append(keyword).append(" "));

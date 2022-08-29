@@ -1,5 +1,6 @@
 package com.vecondev.buildoptima.api;
 
+import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
@@ -53,7 +54,7 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<UserResponseDto> getById(@PathVariable("id") UUID userId);
+  ResponseEntity<UserResponseDto> getById(@PathVariable("id") UUID id, @Parameter(hidden = true) AppUserDetails user);
 
   @RequestBody(ref = "#/components/requestBodies/fetchUsersRequestExample")
   ResponseEntity<FetchResponseDto> fetch(
@@ -97,7 +98,7 @@ public interface UserApi extends SecuredApi {
       description = """
               Possible error codes: 4004, 4011, 4012, 4013, 4014, 4031, 4121, 4122, 4123, 4124, 5002, 5003, 5005, 5006, 5007, 5009.
               The image has following requirements (extension: jpeg/jpg/png, min_width: 600px, max_width: 600px, size: 70KB-30MB).
-              To get the uploaded image urls: original image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/original' thumbnail image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/thumbnail'""",
+              To get the uploaded image urls: original image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/original/{version}' thumbnail image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/thumbnail/{version}'""",
       security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
       value = {
@@ -121,7 +122,7 @@ public interface UserApi extends SecuredApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class))),
       })
-  ResponseEntity<Void> uploadImage(
+  ResponseEntity<ImageOverview> uploadImage(
       @Parameter(description = "The user's id whom photo should be uploaded") UUID id,
       @Parameter(description = "The image user want to upload") MultipartFile multipartFile,
       @Parameter(hidden = true) AppUserDetails user);

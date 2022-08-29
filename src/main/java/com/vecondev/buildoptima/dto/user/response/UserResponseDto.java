@@ -20,6 +20,9 @@ public class UserResponseDto {
   @Schema(example = "2635b586-d0d7-4a2d-b4b5-c98377a02322")
   private UUID id;
 
+  @Schema(example = "2")
+  private Integer imageVersion;
+
   @Schema(example = "John")
   private String firstName;
 

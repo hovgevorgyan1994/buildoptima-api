@@ -61,7 +61,7 @@ public interface NewsApi extends SecuredApi {
       summary = "Get news item by id",
       description = """
               Possible error codes: 4011, 4012, 4013, 4014, 4031, 4046,  5007.
-              To get the uploaded image urls: original image url: 'https://buildoptima.s3.amazonaws.com/news/{user_id}/original' thumbnail image url: 'https://buildoptima.s3.amazonaws.com/news/{user_id}/thumbnail'
+              To get the uploaded image urls: original image url: 'https://buildoptima.s3.amazonaws.com/news/{user_id}/original/{version}' thumbnail image url: 'https://buildoptima.s3.amazonaws.com/news/{user_id}/thumbnail/{version}'
               """,
       security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(

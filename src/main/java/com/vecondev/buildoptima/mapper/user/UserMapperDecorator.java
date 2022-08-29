@@ -1,6 +1,7 @@
 package com.vecondev.buildoptima.mapper.user;
 
 import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
@@ -27,6 +28,7 @@ public abstract class UserMapperDecorator implements UserMapper {
         .password(passwordEncoder.encode(dto.getPassword()))
         .role(CLIENT)
         .enabled(false)
+        .imageVersion(0)
         .build();
   }
 
@@ -46,5 +48,10 @@ public abstract class UserMapperDecorator implements UserMapper {
     return mapper.mapToOverview(user).toBuilder()
         .name(String.format("%s %s", user.getFirstName(), user.getLastName()))
         .build();
+  }
+
+  @Override
+  public ImageOverview mapToUserImageOverview(User user) {
+    return mapper.mapToUserImageOverview(user);
   }
 }

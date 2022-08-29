@@ -47,4 +47,6 @@ public class News extends AbstractEntity {
   private UUID createdBy;
 
   private UUID updatedBy;
+
+  private Integer imageVersion;
 }

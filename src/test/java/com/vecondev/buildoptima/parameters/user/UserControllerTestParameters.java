@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.parameters.user;
 
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
@@ -49,89 +49,21 @@ public class UserControllerTestParameters extends UserTestParameters {
   private RefreshTokenRepository refreshTokenRepository;
 
   public List<User> users() {
-    List<User> users = List.of(
-            new User(
-                    "John",
-                    "Smith",
-                    "+712345678",
-                    "john@mail.ru",
-                    "John1234.",
-                    CLIENT,
-                    true),
-            new User(
-                    "John",
-                    "Stone",
-                    "+612345678",
-                    "john@gmail.com",
-                    "John1234/",
-                    ADMIN,
-                    true),
-            new User(
-                    "Melissa",
-                    "Jones",
-                    "+812345678",
-                    "melissa@gmail.com",
-                    "Mellisa1234/",
-                    CLIENT,
-                    true),
-            new User(
-                    "Olivia",
-                    "Murphy",
-                    "+512345678",
-                    "olivia@gmail.com",
-                    "Olivia1234/",
-                    CLIENT,
-                    true),
-            new User(
-                    "Jack",
-                    "Williams",
-                    "+212345678",
-                    "jack@gmail.com",
-                    "Jack1234/",
-                    CLIENT,
-                    true),
-            new User(
-                    "Emily",
-                    "Brown",
-                    "+312345678",
-                    "emily@gmail.com",
-                    "Emily1234/",
-                    CLIENT,
-                    true),
-            new User(
-                    "Harry",
-                    "Taylor",
-                    "+112345678",
-                    "harry@gmail.com",
-                    "Harry1234/",
-                    CLIENT,
-                    true),
-            new User(
-                    "Lily",
-                    "Wilson",
-                    "+412345678",
-                    "lily@gmail.com",
-                    "Lily1234/",
-                    CLIENT,
-                    true),
-            new User(
-                    "Thomas",
-                    "Williams",
-                    "+912345678",
-                    "thomas@gmail.com",
-                    "Thomas1234/",
-                    CLIENT,
-                    false),
-            new User(
-                    "Olivia",
-                    "Taylor",
-                    "+1012345678",
-                    "olivia@mail.ru",
-                    "Olivia1234.",
-                    CLIENT,
-                    false));
-    users.forEach(user -> user.setId(UUID.randomUUID()));
-    return users;
+    return List.of(
+        new User("John", "Smith", "+712345678", "john@mail.ru", "John1234.", CLIENT, true, 0),
+        new User("John", "Stone", "+612345678", "john@gmail.com", "John1234/", ADMIN, true, 0),
+        new User(
+            "Melissa", "Jones", "+812345678", "melissa@gmail.com", "Mellisa1234/", CLIENT, true, 0),
+        new User(
+            "Olivia", "Murphy", "+512345678", "olivia@gmail.com", "Olivia1234/", CLIENT, true, 0),
+        new User("Jack", "Williams", "+212345678", "jack@gmail.com", "Jack1234/", CLIENT, true, 0),
+        new User("Emily", "Brown", "+312345678", "emily@gmail.com", "Emily1234/", CLIENT, true, 0),
+        new User("Harry", "Taylor", "+112345678", "harry@gmail.com", "Harry1234/", CLIENT, true, 0),
+        new User("Lily", "Wilson", "+412345678", "lily@gmail.com", "Lily1234/", CLIENT, true, 0),
+        new User(
+            "Thomas", "Williams", "+912345678", "thom@gmail.com", "Thom1234/", CLIENT, false, 0),
+        new User(
+            "Olivia", "Taylor", "+1012345678", "olivia@mail.ru", "Olivia1234.", CLIENT, false, 0));
   }
 
   public List<ConfirmationToken> confirmationTokens() {

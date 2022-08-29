@@ -43,7 +43,7 @@ class ImageServiceTest {
       fileUtil.when(() -> FileUtil.resizePhoto(any())).thenReturn(Files.newTemporaryFile());
       when(s3Client.doesBucketExistV2(any())).thenReturn(true);
       when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
-      imageService.uploadImagesToS3("user", userId, null, userId);
+      imageService.uploadImagesToS3("user", userId, 1,null, userId);
     }
 
     verify(s3Client, times(2)).putObject(any(), any(), any(File.class));
@@ -61,7 +61,7 @@ class ImageServiceTest {
       fileUtil.when(() -> FileUtil.resizePhoto(any())).thenReturn(Files.newTemporaryFile());
       when(s3Client.doesBucketExistV2(any())).thenReturn(true);
       when(s3Client.doesObjectExist(any(), any())).thenReturn(true);
-      imageService.uploadImagesToS3("user", userId, null, userId);
+      imageService.uploadImagesToS3("user", userId, 1,null,  userId);
     }
 
     verify(s3Client, times(2)).putObject(any(), any(), any(File.class));
@@ -76,7 +76,7 @@ class ImageServiceTest {
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> imageService.uploadImagesToS3("user", userId, null, userId));
+        () -> imageService.uploadImagesToS3("user", userId, 1,null,   userId));
   }
 
   @Test
@@ -86,7 +86,7 @@ class ImageServiceTest {
     when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
 
     assertThrows(
-        ResourceNotFoundException.class, () -> imageService.downloadImage("user", userId, false));
+        ResourceNotFoundException.class, () -> imageService.downloadImage("user", userId, 1,false));
     verify(configProperties).getBucketName();
   }
 
@@ -94,7 +94,7 @@ class ImageServiceTest {
   void successfulImageDeletion() {
     UUID userId = UUID.randomUUID();
 
-    imageService.deleteImagesFromS3("user", userId);
+    imageService.deleteImagesFromS3("user", userId, 1);
 
     verify(s3Client, times(2)).deleteObject(any(), any());
   }

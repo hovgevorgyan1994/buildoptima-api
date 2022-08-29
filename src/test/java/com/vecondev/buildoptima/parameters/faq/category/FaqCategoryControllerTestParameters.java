@@ -25,23 +25,9 @@ public class FaqCategoryControllerTestParameters extends FaqCategoryTestParamete
     private final UserRepository userRepository;
 
     public List<User> users() {
-        return List.of(
-                new User(
-                        "John",
-                        "Smith",
-                        "+712345678",
-                        "john@mail.ru",
-                        "John1234.",
-                        MODERATOR,
-                        true),
-                new User(
-                        "John",
-                        "Stone",
-                        "+612345678",
-                        "john@gmail.com",
-                        "John1234/",
-                        CLIENT,
-                        true));
+    return List.of(
+        new User("John", "Smith", "+712345678", "john@mail.ru", "John1234.", MODERATOR, true, 0),
+        new User("John", "Stone", "+612345678", "john@gmail.com", "John1234/", CLIENT, true, 0));
     }
 
     public List<FaqCategory> faqCategories() {

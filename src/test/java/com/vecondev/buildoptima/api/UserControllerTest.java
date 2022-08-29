@@ -39,7 +39,8 @@ import java.util.UUID;
 
 import static com.vecondev.buildoptima.model.user.Role.ADMIN;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
-import static com.vecondev.buildoptima.util.FileUtil.*;
+import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -95,35 +96,33 @@ class UserControllerTest {
   void successfulFetchingOfUsers() throws Exception {
     FetchRequestDto requestDto = userControllerTestParameters
             .getFetchRequest();
-    User adminUser = userControllerTestParameters
-            .getUser(ADMIN);
+    User admin = userControllerTestParameters.getSavedUser(ADMIN);
 
-    resultActions.fetchingResultActions(requestDto, adminUser).andExpect(status().isOk());
+    resultActions.fetchingResultActions(requestDto, admin).andExpect(status().isOk());
   }
 
   @Test
   void failedFetchingOfUsersAsPermissionDenied() throws Exception {
     FetchRequestDto requestDto = userControllerTestParameters
             .getFetchRequest();
-    User clientUser = userControllerTestParameters
-            .getUser(CLIENT);
+    User client = userControllerTestParameters.getSavedUser(CLIENT);
 
-    resultActions.fetchingResultActions(requestDto, clientUser).andExpect(status().isForbidden());
+    resultActions.fetchingResultActions(requestDto, client).andExpect(status().isForbidden());
   }
 
   @Test
   void failedFetchingOfUsersAsRequestDtoIsInvalid() throws Exception {
     FetchRequestDto requestDto = userControllerTestParameters
             .getInvalidFetchRequest();
-    User adminUser = userControllerTestParameters
-            .getUser(Role.ADMIN);
+    User admin = userControllerTestParameters.getSavedUser(ADMIN);
 
-    resultActions.fetchingResultActions(requestDto, adminUser).andExpect(status().isBadRequest());
+    resultActions.fetchingResultActions(requestDto, admin).andExpect(status().isBadRequest());
   }
 
   @Test
   void successfulPasswordChanging() throws Exception {
-    User savedUser = userControllerTestParameters.getUser();
+    User savedUser = userControllerTestParameters.getSavedUser();
+    savedUser.setPassword(userControllerTestParameters.getUserByEmail(savedUser.getEmail()).getPassword());
     ChangePasswordRequestDto requestDto = userControllerTestParameters
             .getChangePasswordRequestDto(savedUser);
 
@@ -155,8 +154,8 @@ class UserControllerTest {
   @Nested
   class ImageTest {
 
-    private static final String ORIGINAL_IMAGES_PATH = "user/%s/original";
-    private static final String THUMBNAIL_IMAGES_PATH = "user/%s/thumbnail";
+    private static final String ORIGINAL_IMAGES_PATH = "user/%s/original/%s";
+    private static final String THUMBNAIL_IMAGES_PATH = "user/%s/thumbnail/%s";
     private static final String[] TEST_IMAGES = {"valid_image.jpg", "invalid_image_size.jpg"};
 
     @BeforeEach
@@ -175,18 +174,21 @@ class UserControllerTest {
     void successfulImageUploading() throws Exception {
       User user = userControllerTestParameters.getSavedUser();
       UUID userId = user.getId();
+      Integer imageVersion = user.getImageVersion();
       MockMultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
 
       resultActions
           .imageUploadingResultActions(file, userId, user)
-          .andExpect(status().isNoContent());
+          .andExpect(status().isOk());
       assertTrue(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(),
+              String.format(ORIGINAL_IMAGES_PATH, userId, imageVersion + 1)));
       assertTrue(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(),
+              String.format(THUMBNAIL_IMAGES_PATH, userId, imageVersion + 1)));
     }
 
     @Test
@@ -202,10 +204,10 @@ class UserControllerTest {
           .andExpect(status().isPreconditionFailed());
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId, user.getImageVersion() + 1)));
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId, user.getImageVersion() + 1)));
       Files.delete(Paths.get(filename));
     }
 
@@ -213,12 +215,15 @@ class UserControllerTest {
     void successfulOriginalImageDownloading() throws Exception {
       User savedUser = userControllerTestParameters.getSavedUser();
       UUID userId = savedUser.getId();
+      Integer imageVersion = savedUser.getImageVersion() + 1;
       MultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          String.format(ORIGINAL_IMAGES_PATH, userId),
+          String.format(ORIGINAL_IMAGES_PATH, userId, imageVersion),
           convertMultipartFileToFile(file));
+      savedUser.setImageVersion(imageVersion);
+      userRepository.saveAndFlush(savedUser);
 
       resultActions
           .imageDownloadingResultActions("image", userId, savedUser)
@@ -240,8 +245,10 @@ class UserControllerTest {
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          String.format(THUMBNAIL_IMAGES_PATH, savedUser.getId()),
+          String.format(THUMBNAIL_IMAGES_PATH, savedUser.getId(), savedUser.getImageVersion() + 1),
           convertMultipartFileToFile(file));
+      savedUser.setImageVersion(savedUser.getImageVersion() + 1);
+      userRepository.saveAndFlush(savedUser);
 
       resultActions
           .imageDownloadingResultActions("thumbnail-image", savedUser.getId(), savedUser)
@@ -253,29 +260,34 @@ class UserControllerTest {
     void successfulImageDeletion() throws Exception {
       User savedUser = userControllerTestParameters.getSavedUser();
       UUID userId = savedUser.getId();
+      Integer imageVersion = savedUser.getImageVersion() + 1;
       MultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
 
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          String.format(ORIGINAL_IMAGES_PATH, userId),
+          String.format(ORIGINAL_IMAGES_PATH, userId, imageVersion),
           convertMultipartFileToFile(file));
       amazonS3.putObject(
           s3ConfigProperties.getBucketName(),
-          String.format(THUMBNAIL_IMAGES_PATH, userId),
+          String.format(THUMBNAIL_IMAGES_PATH, userId, imageVersion),
           convertMultipartFileToFile(file));
-
+      savedUser.setImageVersion(imageVersion);
+      userRepository.saveAndFlush(savedUser);
       assumeTrue(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(),
+              String.format(THUMBNAIL_IMAGES_PATH, userId, imageVersion)));
 
       resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNoContent());
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(),
+              String.format(ORIGINAL_IMAGES_PATH, userId, imageVersion)));
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(),
+              String.format(THUMBNAIL_IMAGES_PATH, userId, imageVersion)));
     }
 
     @Test
@@ -285,10 +297,10 @@ class UserControllerTest {
 
       assumeFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId, savedUser.getImageVersion())));
       assumeFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId, savedUser.getImageVersion())));
 
       resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNotFound());
     }

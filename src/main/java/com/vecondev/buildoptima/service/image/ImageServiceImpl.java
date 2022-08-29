@@ -45,14 +45,28 @@ public class ImageServiceImpl implements ImageService {
    */
   @Override
   public void uploadImagesToS3(
-      String className, UUID objectId, MultipartFile multipartFile, UUID userId) {
+      String className,
+      UUID objectId,
+      Integer imageVersion,
+      MultipartFile multipartFile,
+      UUID userId) {
     checkExistenceOfBucket();
     imageValidator.validateImage(multipartFile, userId);
     File originalFile = convertMultipartFileToFile(multipartFile);
-    uploadImage(className, originalFile, objectId, true);
+    uploadImage(className, originalFile, objectId, imageVersion + 1, true);
     File thumbnailFile = resizePhoto(originalFile);
-    uploadImage(className, thumbnailFile, objectId, false);
+    uploadImage(className, thumbnailFile, objectId, imageVersion + 1, false);
 
+    if (amazonS3.doesObjectExist(
+        s3ConfigProperties.getBucketName(),
+        getImagePath(className, objectId, imageVersion, true))) {
+      deleteImage(className, objectId, imageVersion, true);
+    }
+    if (amazonS3.doesObjectExist(
+        s3ConfigProperties.getBucketName(),
+        getImagePath(className, objectId, imageVersion, false))) {
+      deleteImage(className, objectId, imageVersion, false);
+    }
     deleteFile(originalFile);
     deleteFile(thumbnailFile);
   }
@@ -65,8 +79,9 @@ public class ImageServiceImpl implements ImageService {
    * @return byte[] image as byte array
    */
   @Override
-  public byte[] downloadImage(String className, UUID objectId, Boolean isOriginal) {
-    String imageName = getImagePath(className, objectId, isOriginal);
+  public byte[] downloadImage(
+      String className, UUID objectId, Integer imageVersion, Boolean isOriginal) {
+    String imageName = getImagePath(className, objectId, imageVersion, isOriginal);
     checkExistenceOfObject(imageName, objectId);
     S3Object object = amazonS3.getObject(s3ConfigProperties.getBucketName(), imageName);
     S3ObjectInputStream inputStream = object.getObjectContent();
@@ -83,8 +98,9 @@ public class ImageServiceImpl implements ImageService {
   }
 
   @Override
-  public String getContentTypeOfObject(String className, UUID objectId, boolean isOriginal) {
-    String imageName = getImagePath(className, objectId, isOriginal);
+  public String getContentTypeOfObject(
+      String className, UUID objectId, Integer imageVersion, boolean isOriginal) {
+    String imageName = getImagePath(className, objectId, imageVersion, isOriginal);
 
     return amazonS3
         .getObject(s3ConfigProperties.getBucketName(), imageName)
@@ -98,9 +114,9 @@ public class ImageServiceImpl implements ImageService {
    * @param objectId the image owner id which should be deleted
    */
   @Override
-  public void deleteImagesFromS3(String className, UUID objectId) {
-    deleteImage(className, objectId, true);
-    deleteImage(className, objectId, false);
+  public void deleteImagesFromS3(String className, UUID objectId, Integer imageVersion) {
+    deleteImage(className, objectId, imageVersion, true);
+    deleteImage(className, objectId, imageVersion, false);
   }
 
   /**
@@ -123,8 +139,10 @@ public class ImageServiceImpl implements ImageService {
    * @return the image path in S3
    */
   @Override
-  public String getImagePath(String className, UUID objectId, boolean isOriginal) {
-    return String.format("%s/%s/%s", className, objectId, isOriginal ? ORIGINAL : THUMBNAIL);
+  public String getImagePath(
+      String className, UUID objectId, Integer imageVersion, boolean isOriginal) {
+    return String.format(
+        "%s/%s/%s/%s", className, objectId, isOriginal ? ORIGINAL : THUMBNAIL, imageVersion);
   }
 
   private void checkExistenceOfBucket() {
@@ -134,8 +152,9 @@ public class ImageServiceImpl implements ImageService {
     }
   }
 
-  private void uploadImage(String className, File file, UUID objectId, boolean isOriginal) {
-    String imagePath = getImagePath(className, objectId, isOriginal);
+  private void uploadImage(
+      String className, File file, UUID objectId, Integer imageVersion, boolean isOriginal) {
+    String imagePath = getImagePath(className, objectId, imageVersion, isOriginal);
 
     if (amazonS3.doesObjectExist(s3ConfigProperties.getBucketName(), imagePath)) {
       log.info("The old {} image of item: {} is deleted.", imagePath, objectId);
@@ -145,8 +164,9 @@ public class ImageServiceImpl implements ImageService {
     log.info("New picture has been uploaded for news item {}", imagePath);
   }
 
-  private void deleteImage(String className, UUID objectId, boolean isOriginal) {
-    String imageName = getImagePath(className, objectId, isOriginal);
+  private void deleteImage(
+      String className, UUID objectId, Integer imageVersion, boolean isOriginal) {
+    String imageName = getImagePath(className, objectId, imageVersion, isOriginal);
 
     amazonS3.deleteObject(s3ConfigProperties.getBucketName(), imageName);
     log.info(

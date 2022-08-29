@@ -17,7 +17,8 @@ public class FaqQuestionValidator {
 
   public void validateQuestion(String question) {
     if (Boolean.TRUE.equals(repository.existsByQuestionIgnoreCase(question))) {
-      log.warn("Invalid FAQ Question! There is a FAQ Question in database with such question content.");
+      log.warn(
+          "Invalid FAQ Question! There is a FAQ Question in database with such question content.");
 
       throw new FaqQuestionAlreadyExistException(FAQ_QUESTION_ALREADY_EXIST);
     }

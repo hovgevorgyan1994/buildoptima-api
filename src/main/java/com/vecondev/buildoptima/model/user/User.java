@@ -47,6 +47,9 @@ public class User extends AbstractEntity {
   @ColumnDefault("false")
   private boolean enabled;
 
+  @Column(name = "image_version")
+  private Integer imageVersion;
+
   public String getFullName() {
     return String.format("%s %s (ID:%s)", firstName, lastName, id);
   }
@@ -62,7 +65,8 @@ public class User extends AbstractEntity {
       String email,
       String password,
       Role role,
-      boolean enabled) {
+      boolean enabled,
+      Integer imageVersion) {
     super(id, createdAt, updatedAt);
     this.firstName = firstName;
     this.lastName = lastName;
@@ -71,5 +75,6 @@ public class User extends AbstractEntity {
     this.password = password;
     this.role = role;
     this.enabled = enabled;
+    this.imageVersion = imageVersion;
   }
 }
