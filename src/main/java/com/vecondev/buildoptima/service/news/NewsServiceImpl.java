@@ -23,7 +23,7 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.csv.CsvService;
-import com.vecondev.buildoptima.service.image.ImageService;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +51,7 @@ public class NewsServiceImpl implements NewsService {
 
   private final NewsRepository newsRepository;
   private final UserRepository userRepository;
-  private final ImageService imageService;
+  private final AmazonS3Service imageService;
   private final NewsMapper newsMapper;
   private final UserMapper userMapper;
   private final PageableConverter pageableConverter;

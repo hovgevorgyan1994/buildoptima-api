@@ -19,6 +19,7 @@ import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
 @Import({AmazonS3Config.class, UserEndpointUris.class, UserResultActions.class})
-public class AuthControllerTest {
+class AuthControllerTest {
 
   @RegisterExtension
   private static final GreenMailExtension greenMail =

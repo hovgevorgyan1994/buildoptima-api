@@ -18,7 +18,8 @@ public class AmazonS3Config {
 
   private String region;
   private String url;
-  private String bucketName;
+  private String imageBucketName;
+  private String dataBucketName;
   private String accessKey;
   private String secretKey;
 
@@ -33,7 +34,8 @@ public class AmazonS3Config {
                 new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
             .build();
 
-    amazonS3.createBucket(bucketName);
+    amazonS3.createBucket(imageBucketName);
+    amazonS3.createBucket(dataBucketName);
 
     return amazonS3;
   }

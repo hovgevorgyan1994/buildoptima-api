@@ -7,7 +7,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;INIT=create domain if not exists jsonb as json;MODE=PostgreSQL
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -26,14 +26,16 @@ spring:
 aws:
   properties:
     s3:
-      bucketName: buildoptima-test
+      imageBucketName: buildoptima-test
+      dataBucketName: buildoptima-data-test
 
 config:
   aws:
     s3:
       region: us-east-1
       url: http://localhost:4566
-      bucketName: ${aws.properties.s3.bucketName}
+      imageBucketName: ${aws.properties.s3.imageBucketName}
+      dataBucketName: ${aws.properties.s3.dataBucketName}
       accessKey: localstack
       secretKey: localstack
 

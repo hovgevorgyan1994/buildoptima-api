@@ -3,7 +3,7 @@ package com.vecondev.buildoptima.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
-import com.vecondev.buildoptima.service.image.ImageServiceImpl;
+import com.vecondev.buildoptima.service.s3.AmazonS3ServiceImpl;
 import com.vecondev.buildoptima.util.FileUtil;
 import com.vecondev.buildoptima.validation.ImageValidator;
 import org.assertj.core.util.Files;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
 
-  @InjectMocks private ImageServiceImpl imageService;
+  @InjectMocks private AmazonS3ServiceImpl imageService;
   @Mock private ImageValidator imageValidator;
   @Mock private AmazonS3 s3Client;
   @Mock private S3ConfigProperties configProperties;
@@ -86,8 +86,8 @@ class ImageServiceTest {
     when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
 
     assertThrows(
-        ResourceNotFoundException.class, () -> imageService.downloadImage("user", userId, 1,false));
-    verify(configProperties).getBucketName();
+        ResourceNotFoundException.class, () -> imageService.downloadImage("user", userId,1, false));
+    verify(configProperties).getImageBucketName();
   }
 
   @Test

@@ -11,6 +11,7 @@ import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryControllerTes
 import com.vecondev.buildoptima.parameters.result_actions.FaqCategoryResultActions;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,6 @@ class FaqCategoryControllerTest  {
   @Autowired private FaqCategoryRepository faqCategoryRepository;
   @Autowired private PasswordEncoder encoder;
   @Autowired private FaqCategoryResultActions resultActions;
-
   private FaqCategoryControllerTestParameters testParameters;
 
   @BeforeEach

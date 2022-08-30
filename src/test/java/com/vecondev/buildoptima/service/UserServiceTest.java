@@ -11,8 +11,8 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
-import com.vecondev.buildoptima.service.image.ImageService;
 import com.vecondev.buildoptima.service.user.UserServiceImpl;
 import com.vecondev.buildoptima.util.RestPreconditions;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
@@ -49,7 +49,7 @@ class UserServiceTest {
   private final UserServiceTestParameters testParameters = new UserServiceTestParameters();
 
   @InjectMocks private UserServiceImpl userService;
-  @Mock private ImageService imageService;
+  @Mock private AmazonS3Service imageService;
   @Mock private UserMapper userMapper;
   @Mock private UserRepository userRepository;
   @Mock private PasswordEncoder encoder;

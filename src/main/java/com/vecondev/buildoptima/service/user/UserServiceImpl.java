@@ -14,7 +14,7 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
-import com.vecondev.buildoptima.service.image.ImageService;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
   private final PasswordEncoder passwordEncoder;
-  private final ImageService imageService;
+  private final AmazonS3Service imageService;
   private final PageableConverter pageableConverter;
   private final SecurityContextService securityContextService;
 

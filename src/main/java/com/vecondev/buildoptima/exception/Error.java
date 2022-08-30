@@ -79,8 +79,10 @@ public enum Error {
       5005, INTERNAL_SERVER_ERROR, "Error Occurred While Processing Downloaded Image"),
   BUCKET_NOT_FOUND(5006, INTERNAL_SERVER_ERROR, "Cannot Find Bucket In AWS S3"),
   FAILED_JSON_CONVERTING(5007, INTERNAL_SERVER_ERROR, "Error Occurred While Parsing To Json"),
+  FAILED_READ_FROM_JSON(50010, INTERNAL_SERVER_ERROR, "Error Occurred While Reading From Json"),
   FAILED_KEY_READ(5008, INTERNAL_SERVER_ERROR, "Error Occurred While Retrieving Security Keys"),
-  FAILED_FILE_DELETION(5009, INTERNAL_SERVER_ERROR, "Error Occurred While Deleting The File");
+  FAILED_FILE_DELETION(5009, INTERNAL_SERVER_ERROR, "Error Occurred While Deleting The File"),
+  FAILED_DATA_DOWNLOAD(50011,INTERNAL_SERVER_ERROR , "Error Occurred While Downloading The Data");
 
   private final Integer code;
   private final HttpStatus httpStatus;

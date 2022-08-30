@@ -9,5 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "aws.properties.s3")
 public class S3ConfigProperties {
 
-  private String bucketName;
+  private String imageBucketName;
+  private String dataBucketName;
 }

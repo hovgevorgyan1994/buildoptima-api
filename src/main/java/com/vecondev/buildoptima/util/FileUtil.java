@@ -1,5 +1,8 @@
 package com.vecondev.buildoptima.util;
 
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import com.vecondev.buildoptima.exception.FailedFileOperationException;
 import lombok.experimental.UtilityClass;
@@ -10,15 +13,16 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 
-import static com.vecondev.buildoptima.exception.Error.FAILED_FILE_DELETION;
-import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_CONVERTING;
-import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_RESIZING;
-import static com.vecondev.buildoptima.exception.Error.FAILED_MULTIPART_CONVERTING;
+import static com.vecondev.buildoptima.exception.Error.*;
 
 @Slf4j
 @UtilityClass
@@ -84,10 +88,45 @@ public class FileUtil {
   public void deleteFile(File file) {
     try {
       Files.deleteIfExists(file.toPath());
-      log.info("The file with name: {} is succesfully deleted from local storage.", file.getName());
+      log.info(
+          "The file with name: {} is successfully deleted from local storage.", file.getName());
     } catch (IOException ex) {
       log.error("Failed to delete file with name: {}", file.getName());
       throw new FailedFileOperationException(FAILED_FILE_DELETION);
     }
+  }
+
+  public static Path convertS3ObjectToPath(S3Object s3Object) throws IOException {
+    S3ObjectInputStream inputStream = s3Object.getObjectContent();
+    byte[] bytes = IOUtils.toByteArray(inputStream);
+    return convertByteArrayToJsonPath(bytes);
+  }
+
+  private Path convertByteArrayToJsonPath(byte[] bytes) throws IOException {
+    Path gzipFile = convertByteArrayToPathList(bytes);
+    Path path = decompressGzipFile(gzipFile);
+    Files.delete(gzipFile);
+    log.info("Removed unzipped files from local memory");
+    return path;
+  }
+
+  private Path convertByteArrayToPathList(byte[] bytes) throws IOException {
+    Path tempFile = Files.createTempFile(String.valueOf(UUID.randomUUID()), ".json.gz");
+    Files.write(tempFile, bytes);
+    return tempFile;
+  }
+
+  private Path decompressGzipFile(Path gzipFile) throws IOException {
+    Path path = Files.createTempFile(String.valueOf(UUID.randomUUID()), ".json");
+    try (FileInputStream fis = new FileInputStream(gzipFile.toFile().getAbsolutePath());
+        GZIPInputStream gis = new GZIPInputStream(fis);
+        FileOutputStream fos = new FileOutputStream(path.toFile().getAbsolutePath())) {
+      byte[] buffer = new byte[1024];
+      int len;
+      while ((len = gis.read(buffer)) != -1) {
+        fos.write(buffer, 0, len);
+      }
+    }
+    return path;
   }
 }

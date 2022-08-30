@@ -24,7 +24,7 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.csv.CsvService;
-import com.vecondev.buildoptima.service.image.ImageService;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import com.vecondev.buildoptima.service.news.NewsServiceImpl;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -42,16 +42,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NewsServiceTest {
@@ -61,7 +65,7 @@ class NewsServiceTest {
       new UserServiceTestParameters();
   @InjectMocks private NewsServiceImpl newsService;
   @Mock private NewsRepository newsRepository;
-  @Mock private ImageService imageService;
+  @Mock private AmazonS3Service amazonS3Service;
   @Mock private SecurityContextService securityContextService;
   @Mock private PageableConverter pageableConverter;
   @Mock private NewsMapper newsMapper;

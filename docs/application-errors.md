@@ -92,15 +92,17 @@ Below is the sample structure of payload of API error
 
 #### Errors for 500 INTERNAL SERVER ERROR
 
-| Error Name                                          | Code | Message                                                   |
-|:----------------------------------------------------|:-----|:----------------------------------------------------------|
-| `SEND_EMAIL_FAILED`                                 | 5001 | `Failed To Send An Email`                                 |
-| `FAILED_MULTIPART_CONVERTING`                       | 5002 | `Error Occurred While Converting Multipart File To File`  |
-| `FAILED_IMAGE_RESIZING`                             | 5003 | `Error Occurred While Resizing The Image`                 |
-| `FAILED_CSV_CONVERTING `                            | 5004 | `Error Occurred While Converting Result To '.csv' Format` |
-| `FAILED_IMAGE_CONVERTING `                          | 5005 | `Error Occurred While Processing Downloaded Image`        |
-| `BUCKET_NOT_FOUND `                                 | 5006 | `Cannot Find Bucket In AWS S3`                            |
-| `FAILED_JSON_CONVERTING `                           | 5007 | `Error Occurred While Parsing To Json`                    |
-| `FAILED_KEY_READ `                                  | 5008 | `Error Occurred While Retrieving Security Keys`           |
-| `FAILED_FILE_DELETION `                             | 5009 | `Error Occurred While Deleting The File`                  |
+| Error Name                    | Code  | Message                                                     |
+|:------------------------------|:------|:------------------------------------------------------------|
+| `SEND_EMAIL_FAILED`           | 5001  | `Failed To Send An Email`                                   |
+| `FAILED_MULTIPART_CONVERTING` | 5002  | `Error Occurred While Converting Multipart File To File`    |
+| `FAILED_IMAGE_RESIZING`       | 5003  | `Error Occurred While Resizing The Image`                   |
+| `FAILED_CSV_CONVERTING `      | 5004  | `Error Occurred While Converting Result To '.csv' Format`   |
+| `FAILED_IMAGE_CONVERTING `    | 5005  | `Error Occurred While Processing Downloaded Image`          |
+| `BUCKET_NOT_FOUND `           | 5006  | `Cannot Find Bucket In AWS S3`                              |
+| `FAILED_JSON_CONVERTING `     | 5007  | `Error Occurred While Parsing To Json`                      |
+| `FAILED_KEY_READ `            | 5008  | `Error Occurred While Retrieving Security Keys`             |
+| `FAILED_FILE_DELETION `       | 5009  | `Error Occurred While Deleting The File`                    |
+| `FAILED_READ_FROM_JSON `      | 50010 | `Error Occurred While Reading From Json`                    |
+| `FAILED_DATA_DOWNLOAD  `      | 50011 | `Error Occurred While Downloading The Data`                 |
 

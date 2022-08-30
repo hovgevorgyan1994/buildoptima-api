@@ -9,8 +9,9 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        show_sql: true
+        show_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
 
   flyway:
     locations:
@@ -50,8 +51,9 @@ cloud:
       auto: false
       static: us-east-1
       use-default-aws-region-chain: true
-    stack:
-      auto: false
+    stack: false
+    stack.auto: false
+
 
 platform:
   security:
@@ -70,7 +72,8 @@ platform:
 aws:
   properties:
     s3:
-      bucketName: buildoptima
+      imageBucketName: buildoptima
+      dataBucketName: buildoptima-data
 
 logging:
   level:
