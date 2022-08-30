@@ -1,0 +1,16 @@
+{
+  "properties":{
+    "property_ain":{
+      "type":"keyword"
+    },
+    "address_to_search":{
+      "type":"search_as_you_type",
+      "analyzer":"my_analyzer",
+      "search_analyzer":"my_stop_analyzer",
+      "search_quote_analyzer":"my_analyzer"
+    },
+    "address_to_display": {
+      "type": "keyword"
+    }
+  }
+}

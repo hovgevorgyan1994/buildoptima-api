@@ -2,11 +2,10 @@ package com.vecondev.buildoptima.dto.user.request;
 
 import com.vecondev.buildoptima.validation.constraint.Password;
 import io.swagger.v3.oas.annotations.media.Schema;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotNull;
 
 @Getter
 @NoArgsConstructor

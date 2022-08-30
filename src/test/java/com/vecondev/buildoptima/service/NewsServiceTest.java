@@ -1,5 +1,14 @@
 package com.vecondev.buildoptima.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
@@ -21,12 +30,15 @@ import com.vecondev.buildoptima.parameters.news.NewsServiceTestParameters;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.news.NewsRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.csv.CsvService;
-import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import com.vecondev.buildoptima.service.news.NewsServiceImpl;
+import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,20 +54,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NewsServiceTest {
@@ -86,7 +84,6 @@ class NewsServiceTest {
     newsToSave.setCreatedBy(user.getId());
     newsToSave.setUpdatedBy(user.getId());
     news = serviceTestParameters.getSavedNews(createNewsRequestDto, user);
-
   }
 
   @AfterEach
@@ -96,7 +93,8 @@ class NewsServiceTest {
 
   @Test
   void successfullyCreated() {
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     when(userRepository.getReferenceById(any())).thenReturn(user);
     when(newsMapper.mapToEntity(createNewsRequestDto, user)).thenReturn(news);
     when(newsRepository.saveAndFlush(news)).thenReturn(news);
@@ -109,17 +107,18 @@ class NewsServiceTest {
 
   @Test
   void successfullyUpdated() {
-    NewsUpdateRequestDto updateNewsRequestDto = serviceTestParameters.getUpdateNewsRequestDto();
     news.setCategory(NewsCategory.OPINION);
     news.setTitle("Winter Sales");
     NewsResponseDto responseDto = serviceTestParameters.getNewsResponseDto(news);
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doReturn(Optional.of(news)).when(newsRepository).findById(any());
     when(userRepository.getReferenceById(any())).thenReturn(user);
     when(newsMapper.mapToResponseDto(news)).thenReturn(responseDto);
 
-    NewsResponseDto update = newsService.update(UUID.randomUUID(), updateNewsRequestDto);
+    NewsResponseDto update =
+        newsService.update(UUID.randomUUID(), serviceTestParameters.getUpdateNewsRequestDto());
     assertEquals(news.getCategory(), update.getCategory());
     assertEquals(news.getTitle(), update.getTitle());
   }
@@ -127,11 +126,14 @@ class NewsServiceTest {
   @Test
   void failToUpdateAsNewsEntityNotFound() {
     NewsUpdateRequestDto updateNewsRequestDto = serviceTestParameters.getUpdateNewsRequestDto();
+    final UUID newsId = UUID.randomUUID();
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doThrow(NewsException.class).when(newsRepository).findById(any());
 
-    assertThrows(NewsException.class, () -> newsService.update(UUID.randomUUID(), updateNewsRequestDto));
+    assertThrows(
+        NewsException.class, () -> newsService.update(newsId, updateNewsRequestDto));
   }
 
   @Test
@@ -157,7 +159,8 @@ class NewsServiceTest {
   void getByIdSuccess() {
     UUID id = UUID.randomUUID();
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doReturn(Optional.of(news)).when(newsRepository).findById(id);
     doReturn(serviceTestParameters.getNewsResponseDto(news))
         .when(newsMapper)
@@ -171,7 +174,8 @@ class NewsServiceTest {
   void getByIdFailedAsNewsNotFound() {
     UUID id = UUID.randomUUID();
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doThrow(NewsException.class).when(newsRepository).findById(id);
 
     assertThrows(NewsException.class, () -> newsService.getById(id));
@@ -181,7 +185,7 @@ class NewsServiceTest {
   void fetchNewsSuccess() {
     FetchRequestDto requestDto = serviceTestParameters.getFetchRequest();
     Pageable pageable = userServiceTestParameters.getPageable(requestDto);
-    Page<News> result = new PageImpl<>(serviceTestParameters.getFetchResponse());
+    final Page<News> result = new PageImpl<>(serviceTestParameters.getFetchResponse());
 
     try (MockedStatic<FieldNameValidator> validator =
         Mockito.mockStatic(FieldNameValidator.class)) {
@@ -190,7 +194,8 @@ class NewsServiceTest {
           .thenAnswer((Answer<Void>) invocation -> null);
     }
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     when(pageableConverter.convert(requestDto)).thenReturn(pageable);
     when(newsRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(result);
     when(newsMapper.mapToResponseList(result))
@@ -204,7 +209,8 @@ class NewsServiceTest {
   void getMetadataSuccess() {
     long allActiveCount = 10L;
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doReturn(news).when(newsRepository).findTopByOrderByUpdatedAtDesc();
     doReturn(allActiveCount).when(newsRepository).countByStatus(Status.ACTIVE);
     doReturn(userServiceTestParameters.getUserOverView(user)).when(userMapper).mapToOverview(any());
@@ -220,7 +226,8 @@ class NewsServiceTest {
     List<News> fetchResponse = serviceTestParameters.getFetchResponse();
     List<NewsRecord> newsRecordList = serviceTestParameters.getNewsRecordList(fetchResponse);
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     when(newsRepository.findAll(any(Specification.class))).thenReturn(fetchResponse);
     when(newsMapper.mapToNewsRecordList(any())).thenReturn(newsRecordList);
     when(csvService.writeToCsv(newsRecordList, NewsRecord.class))
@@ -233,18 +240,19 @@ class NewsServiceTest {
 
   @Test
   void failedExportCsv() {
-    FetchRequestDto fetchRequest = serviceTestParameters.getFetchRequest();
     List<News> fetchResponse = serviceTestParameters.getFetchResponse();
     List<NewsRecord> newsRecordList = serviceTestParameters.getNewsRecordList(fetchResponse);
+    final FetchRequestDto requestDto = serviceTestParameters.getFetchRequest();
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     when(newsRepository.findAll(any(Specification.class))).thenReturn(fetchResponse);
     when(newsMapper.mapToNewsRecordList(any())).thenReturn(newsRecordList);
     doThrow(ConvertingFailedException.class)
         .when(csvService)
         .writeToCsv(newsRecordList, NewsRecord.class);
 
-    assertThrows(ConvertingFailedException.class, () -> newsService.exportCsv(fetchRequest));
+    assertThrows(ConvertingFailedException.class, () -> newsService.exportCsv(requestDto));
     verify(newsRepository).findAll(any(Specification.class));
   }
 
@@ -254,7 +262,8 @@ class NewsServiceTest {
     NewsResponseDto newsResponseDto = serviceTestParameters.getNewsResponseDto(news);
     newsResponseDto.setStatus(Status.ARCHIVED);
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doReturn(Optional.of(news)).when(newsRepository).findById(newsId);
     doReturn(newsResponseDto).when(newsMapper).mapToResponseDto(news);
 
@@ -268,7 +277,8 @@ class NewsServiceTest {
   void failedArchiveNewsAsNotFound() {
     UUID newsId = UUID.randomUUID();
 
-    when(securityContextService.getUserDetails()).thenReturn(userServiceTestParameters.userDetails());
+    when(securityContextService.getUserDetails())
+        .thenReturn(userServiceTestParameters.userDetails());
     doThrow(NewsException.class).when(newsRepository).findById(newsId);
 
     assertThrows(NewsException.class, () -> newsService.archiveNews(newsId));

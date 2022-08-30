@@ -3,18 +3,18 @@ package com.vecondev.buildoptima.csv.faq;
 import com.vecondev.buildoptima.csv.CsvRecord;
 import com.vecondev.buildoptima.csv.Header;
 import com.vecondev.buildoptima.model.Status;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class FaqQuestionRecord implements CsvRecord {
+
   @Header("ID")
   private UUID id;
   @Header("Question")
@@ -31,9 +31,8 @@ public class FaqQuestionRecord implements CsvRecord {
   private Instant createdAt;
   @Header("Updated by")
   private String updatedBy;
-
-  @Header("Updated at")
-  protected Instant updatedAt;
+  @Header("Created at")
+  private Instant updatedAt;
 
   @Override
   public List<Object> getAllFieldValues() {

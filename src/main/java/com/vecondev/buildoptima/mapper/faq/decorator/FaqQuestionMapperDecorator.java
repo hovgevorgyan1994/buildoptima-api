@@ -1,8 +1,8 @@
 package com.vecondev.buildoptima.mapper.faq.decorator;
 
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
-import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.faq.response.FaqQuestionResponseDto;
 import com.vecondev.buildoptima.mapper.faq.FaqCategoryMapper;
 import com.vecondev.buildoptima.mapper.faq.FaqQuestionMapper;
@@ -10,11 +10,10 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.User;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 public abstract class FaqQuestionMapperDecorator implements FaqQuestionMapper {
 
@@ -65,8 +64,8 @@ public abstract class FaqQuestionMapperDecorator implements FaqQuestionMapper {
   @Override
   public Metadata getMetadata(FaqQuestion question, Long allActiveCount, Long allArchivedCount) {
     return faqQuestionMapper.getMetadata(question, allActiveCount, allArchivedCount).toBuilder()
-            .lastUpdatedAt(question.getUpdatedAt())
-            .lastUpdatedBy(userMapper.mapToOverview(question.getUpdatedBy()))
-            .build();
+        .lastUpdatedAt(question.getUpdatedAt())
+        .lastUpdatedBy(userMapper.mapToOverview(question.getUpdatedBy()))
+        .build();
   }
 }

@@ -1,14 +1,11 @@
 package com.vecondev.buildoptima.model.property;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +17,6 @@ public class Details implements Serializable {
   private Land land;
   private Set<Building> buildings;
   private Improvements improvements;
-
 
   @Data
   private static class Land implements Serializable {

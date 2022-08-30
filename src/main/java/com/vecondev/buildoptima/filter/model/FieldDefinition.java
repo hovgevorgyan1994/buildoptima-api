@@ -1,10 +1,9 @@
 package com.vecondev.buildoptima.filter.model;
 
-import org.springframework.core.convert.converter.Converter;
-
+import java.util.function.Function;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
-import java.util.function.Function;
+import org.springframework.core.convert.converter.Converter;
 
 public class FieldDefinition<T, Y extends Comparable<Y>> {
 
@@ -19,17 +18,18 @@ public class FieldDefinition<T, Y extends Comparable<Y>> {
   private final Converter<String, Y> converter;
 
   public FieldDefinition(
-          String searchParamName,
-          FieldType type,
-          String entityFieldName,
-          Converter<String, Y> converter,
-          Function<Root<T>, Path<Y>> function) {
+      String searchParamName,
+      FieldType type,
+      String entityFieldName,
+      Converter<String, Y> converter,
+      Function<Root<T>, Path<Y>> function) {
     this.searchParamName = searchParamName;
     this.type = type;
     this.entityFieldName = entityFieldName;
     this.converter = converter;
     this.function = function;
   }
+
   @SuppressWarnings("unchecked")
   public FieldDefinition(String searchParamName, FieldType type, String entityFieldName) {
     this(searchParamName, type, entityFieldName, convert -> (Y) convert, path -> (Path<Y>) path);
@@ -43,8 +43,6 @@ public class FieldDefinition<T, Y extends Comparable<Y>> {
       Converter<String, Y> converter) {
     this(searchParamName, type, entityFieldName, converter, path -> (Path<Y>) path);
   }
-
-
 
   public String getSearchParamName() {
     return searchParamName;

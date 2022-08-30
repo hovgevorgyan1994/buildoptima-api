@@ -1,12 +1,11 @@
 package com.vecondev.buildoptima.dto.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotBlank;
 
 @Data
 @Builder
@@ -15,7 +14,11 @@ import javax.validation.constraints.NotBlank;
 @Schema(name = "Authentication Request DTO")
 public class AuthRequestDto {
 
-  @NotBlank private String username;
+  @NotBlank
+  @Schema(example = "example@gmail.com")
+  private String username;
 
-  @NotBlank private String password;
+  @NotBlank
+  @Schema(example = "Example1234.")
+  private String password;
 }

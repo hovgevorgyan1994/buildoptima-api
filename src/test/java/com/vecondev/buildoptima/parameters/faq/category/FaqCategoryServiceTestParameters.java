@@ -8,7 +8,6 @@ import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

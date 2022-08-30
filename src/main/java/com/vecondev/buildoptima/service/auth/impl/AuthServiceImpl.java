@@ -1,5 +1,9 @@
 package com.vecondev.buildoptima.service.auth.impl;
 
+import static com.vecondev.buildoptima.exception.Error.BAD_CREDENTIALS;
+import static com.vecondev.buildoptima.exception.Error.SEND_EMAIL_FAILED;
+import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
+
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
@@ -21,19 +25,14 @@ import com.vecondev.buildoptima.service.auth.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.auth.RefreshTokenService;
 import com.vecondev.buildoptima.service.mail.MailService;
 import com.vecondev.buildoptima.validation.UserValidator;
+import java.util.Locale;
+import java.util.Optional;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.mail.MessagingException;
-import java.util.Locale;
-import java.util.Optional;
-
-import static com.vecondev.buildoptima.exception.Error.BAD_CREDENTIALS;
-import static com.vecondev.buildoptima.exception.Error.SEND_EMAIL_FAILED;
-import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -154,7 +153,8 @@ public class AuthServiceImpl implements AuthService {
     }
     log.info("Access token is created for user {}", user.getEmail());
     return AuthResponseDto.builder()
-            .userId(user.getId())
+        .userId(user.getId())
+        .imageVersion(user.getImageVersion())
         .accessToken(accessToken)
         .refreshToken(refreshToken.getPlainRefreshToken())
         .build();

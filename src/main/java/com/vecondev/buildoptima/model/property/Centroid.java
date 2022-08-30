@@ -1,9 +1,8 @@
 package com.vecondev.buildoptima.model.property;
 
-import lombok.Data;
-
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.Data;
 
 @Data
 public class Centroid implements Serializable {

@@ -1,20 +1,19 @@
 package com.vecondev.buildoptima.model.user;
 
 import com.vecondev.buildoptima.model.AbstractEntity;
+import java.time.Instant;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-import java.time.Instant;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -50,10 +49,6 @@ public class User extends AbstractEntity {
   @Column(name = "image_version")
   private Integer imageVersion;
 
-  public String getFullName() {
-    return String.format("%s %s (ID:%s)", firstName, lastName, id);
-  }
-
   @Builder(toBuilder = true)
   public User(
       UUID id,
@@ -76,5 +71,9 @@ public class User extends AbstractEntity {
     this.role = role;
     this.enabled = enabled;
     this.imageVersion = imageVersion;
+  }
+
+  public String getFullName() {
+    return String.format("%s %s (ID:%s)", firstName, lastName, id);
   }
 }

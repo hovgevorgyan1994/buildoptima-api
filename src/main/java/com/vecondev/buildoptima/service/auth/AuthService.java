@@ -8,7 +8,6 @@ import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.user.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
-
 import java.util.Locale;
 
 public interface AuthService {
@@ -16,11 +15,11 @@ public interface AuthService {
 
   UserResponseDto activate(String token);
 
-  AuthResponseDto login (final AuthRequestDto authRequestDto);
+  AuthResponseDto login(final AuthRequestDto authRequestDto);
 
   RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 
-  void verify (ConfirmEmailRequestDto email, Locale locale);
+  void verify(ConfirmEmailRequestDto email, Locale locale);
 
   void restorePassword(RestorePasswordRequestDto restorePasswordRequestDto);
 }

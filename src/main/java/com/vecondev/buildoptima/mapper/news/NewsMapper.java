@@ -5,14 +5,13 @@ import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.user.User;
+import java.util.List;
 import org.mapstruct.Context;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @DecoratedWith(NewsMapperDecorator.class)
@@ -33,5 +32,5 @@ public interface NewsMapper {
   @Mapping(target = "keywords", ignore = true)
   List<NewsResponseDto> mapToResponseList(Page<News> newsPage);
 
-  List<NewsRecord> mapToNewsRecordList (List<News> news);
+  List<NewsRecord> mapToNewsRecordList(List<News> news);
 }

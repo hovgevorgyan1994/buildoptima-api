@@ -1,9 +1,5 @@
 package com.vecondev.buildoptima.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
@@ -11,6 +7,10 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 /**
  * Error contains: CODE a unique code which value's first 3 numbers represent the response status
@@ -36,7 +36,7 @@ public enum Error {
   ACCESS_TOKEN_MISSING(4012, UNAUTHORIZED, "Access Token Missing"),
   INVALID_ACCESS_TOKEN(4013, UNAUTHORIZED, "Invalid Access Token"),
   ACCESS_TOKEN_EXPIRED(4014, UNAUTHORIZED, "Expired Access Token"),
-  NOT_ACTIVE_ACCOUNT(4015,UNAUTHORIZED , "User Email Is Not Verified"),
+  NOT_ACTIVE_ACCOUNT(4015, UNAUTHORIZED, "User Email Is Not Verified"),
 
   ACCESS_DENIED(
       4031, FORBIDDEN, "Permission Denied To Requested Resource"),
@@ -47,6 +47,10 @@ public enum Error {
   FAQ_CATEGORY_NOT_FOUND(4044, NOT_FOUND, "There Is No FAQ Category With Such Id"),
   IMAGE_NOT_FOUND(4045, NOT_FOUND, "There Is No Image For The Given User"),
   NEWS_ITEM_NOT_FOUND(4046, NOT_FOUND, "News Item Not Found"),
+  MIGRATION_HISTORY_NOT_FOUND(
+      4047, NOT_FOUND, "There Is No Migration History With Such Id/File_Path."),
+  MIGRATION_METADATA_NOT_FOUND(
+      4048, NOT_FOUND, "There Is No Migration Metadata With Such Id/Property_AIN."),
 
   PROVIDED_SAME_PASSWORD(4091, CONFLICT, "Provided The Same Password In Change Password Request"),
   USER_ALREADY_EXIST_WITH_EMAIL(4092, CONFLICT, "There Is a User Registered With Such Email"),
@@ -82,7 +86,7 @@ public enum Error {
   FAILED_READ_FROM_JSON(50010, INTERNAL_SERVER_ERROR, "Error Occurred While Reading From Json"),
   FAILED_KEY_READ(5008, INTERNAL_SERVER_ERROR, "Error Occurred While Retrieving Security Keys"),
   FAILED_FILE_DELETION(5009, INTERNAL_SERVER_ERROR, "Error Occurred While Deleting The File"),
-  FAILED_DATA_DOWNLOAD(50011,INTERNAL_SERVER_ERROR , "Error Occurred While Downloading The Data");
+  FAILED_DATA_DOWNLOAD(50011, INTERNAL_SERVER_ERROR, "Error Occurred While Downloading The Data");
 
   private final Integer code;
   private final HttpStatus httpStatus;

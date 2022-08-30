@@ -1,14 +1,13 @@
 package com.vecondev.buildoptima.filter.model;
 
-import com.vecondev.buildoptima.filter.converter.InstantConverter;
-import com.vecondev.buildoptima.model.faq.FaqCategory;
-import lombok.NoArgsConstructor;
-
-import java.util.Map;
-
 import static com.vecondev.buildoptima.filter.model.FieldType.DATETIME;
 import static com.vecondev.buildoptima.filter.model.FieldType.STRING;
 import static lombok.AccessLevel.PRIVATE;
+
+import com.vecondev.buildoptima.filter.converter.InstantConverter;
+import com.vecondev.buildoptima.model.faq.FaqCategory;
+import java.util.Map;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = PRIVATE)
 public class FaqCategoryFields {

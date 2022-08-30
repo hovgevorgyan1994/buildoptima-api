@@ -23,12 +23,6 @@ spring:
     password: buildoptima
     username: managementstaffing09@gmail.com
 
-aws:
-  properties:
-    s3:
-      imageBucketName: buildoptima-test
-      dataBucketName: buildoptima-data-test
-
 config:
   aws:
     s3:
@@ -80,3 +74,8 @@ config:
       exportCsvUri: /csv
       fetchUri: /fetch
       archiveUri: /{id}/archive
+    property:
+      baseUri: /properties
+      migrationUri: /migrate
+      reprocessUri: /re-process
+      trackProgressUri: /progress

@@ -1,14 +1,13 @@
 package com.vecondev.buildoptima.parameters.faq.category;
 
+import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
+
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.filter.model.Criteria;
 import com.vecondev.buildoptima.filter.model.SortDto;
-
 import java.util.List;
 import java.util.Map;
-
-import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 
 public class FaqCategoryTestParameters {
 

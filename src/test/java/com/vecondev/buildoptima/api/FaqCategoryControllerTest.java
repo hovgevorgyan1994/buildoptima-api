@@ -1,17 +1,27 @@
 package com.vecondev.buildoptima.api;
 
+import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.actions.FaqCategoryResultActions;
 import com.vecondev.buildoptima.parameters.endpoints.FaqCategoryEndpointUris;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryControllerTestParameters;
-import com.vecondev.buildoptima.parameters.result_actions.FaqCategoryResultActions;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.service.s3.AmazonS3Service;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,18 +33,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.model.user.Role.CLIENT;
-import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -101,7 +99,9 @@ class FaqCategoryControllerTest  {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions.getByIdResultActions(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
+    resultActions
+        .getByIdResultActions(UUID.randomUUID(), moderatorUser)
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -130,7 +130,9 @@ class FaqCategoryControllerTest  {
     assumeFalse(moderatorUser == null);
     FaqCategoryRequestDto requestDto = new FaqCategoryRequestDto();
 
-    resultActions.creationResultActions(moderatorUser, requestDto).andExpect(status().isBadRequest());
+    resultActions
+        .creationResultActions(moderatorUser, requestDto)
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -175,7 +177,9 @@ class FaqCategoryControllerTest  {
     FaqCategory faqCategory = faqCategoryRepository.findAll().stream().findAny().orElse(null);
     assumeFalse(faqCategory == null);
 
-    resultActions.deleteByIdResultActions(faqCategory.getId(), moderatorUser).andExpect(status().isOk());
+    resultActions
+        .deleteByIdResultActions(faqCategory.getId(), moderatorUser)
+        .andExpect(status().isOk());
     assertFalse(faqCategoryRepository.existsById(faqCategory.getId()));
   }
 
@@ -184,7 +188,9 @@ class FaqCategoryControllerTest  {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions.deleteByIdResultActions(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
+    resultActions
+        .deleteByIdResultActions(UUID.randomUUID(), moderatorUser)
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -209,7 +215,9 @@ class FaqCategoryControllerTest  {
     FetchRequestDto requestDto = testParameters.getInvalidFetchRequest();
     User moderatorUser = getUserByRole(MODERATOR);
 
-    resultActions.fetchingResultActions(requestDto, moderatorUser).andExpect(status().isBadRequest());
+    resultActions
+        .fetchingResultActions(requestDto, moderatorUser)
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -224,13 +232,15 @@ class FaqCategoryControllerTest  {
   @Test
   void successfulGettingMetadata() throws Exception {
     User moderatorUser = getUserByRole(MODERATOR);
-    FaqCategory lastUpdatedCategory = faqCategoryRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
+    FaqCategory lastUpdatedCategory =
+        faqCategoryRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
     assumeFalse(lastUpdatedCategory == null);
 
-    resultActions.getMetadataResultActions(moderatorUser)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedCategory.getUpdatedAt().toString()))
-            .andExpect(jsonPath("$.allActiveCount").value(faqCategoryRepository.count()));
+    resultActions
+        .getMetadataResultActions(moderatorUser)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedCategory.getUpdatedAt().toString()))
+        .andExpect(jsonPath("$.allActiveCount").value(faqCategoryRepository.count()));
   }
 
   private User getUserByRole(Role role) {

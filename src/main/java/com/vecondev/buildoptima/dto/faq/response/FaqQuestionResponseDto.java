@@ -3,13 +3,12 @@ package com.vecondev.buildoptima.dto.faq.response;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.model.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,8 +24,9 @@ public class FaqQuestionResponseDto {
   private String question;
 
   @Schema(
-      example =
-          "Click 'Forgot password' button inside the 'Sign up' form and write your email address in order to recover the account.")
+      example = """
+          Click 'Forgot password' button inside the 'Sign up' form and
+          write your email address in order to recover the account.""")
   private String answer;
 
   @Schema(example = "ACTIVE")

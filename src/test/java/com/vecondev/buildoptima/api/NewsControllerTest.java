@@ -1,17 +1,21 @@
 package com.vecondev.buildoptima.api;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.model.news.News;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.actions.NewsResultActions;
 import com.vecondev.buildoptima.parameters.endpoints.NewsEndpointUris;
 import com.vecondev.buildoptima.parameters.news.NewsControllerTestParameters;
 import com.vecondev.buildoptima.parameters.news.NewsServiceTestParameters;
-import com.vecondev.buildoptima.parameters.result_actions.NewsResultActions;
 import com.vecondev.buildoptima.repository.news.NewsRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,11 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.Set;
-import java.util.UUID;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc

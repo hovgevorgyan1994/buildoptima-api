@@ -1,14 +1,13 @@
 package com.vecondev.buildoptima.dto.news.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -16,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @Schema(name = "News Creation Request DTO")
 public class NewsCreateRequestDto {
-
 
   @Schema(
       title = "News title",
@@ -26,7 +24,6 @@ public class NewsCreateRequestDto {
       minLength = 5)
   @NotBlank(message = "News title may not be empty")
   private String title;
-
 
   @Schema(
       title = "News Short Summary",
@@ -39,7 +36,6 @@ public class NewsCreateRequestDto {
 
   @Schema(title = "News Keywords")
   private List<String> keywords;
-
 
   @Schema(
       title = "News Description",

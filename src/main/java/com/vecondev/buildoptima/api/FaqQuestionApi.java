@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
@@ -19,14 +21,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.List;
-import java.util.UUID;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(
     name = "FAQ Question",
@@ -185,7 +184,7 @@ public interface FaqQuestionApi extends SecuredApi {
               @Content(mediaType = APPLICATION_JSON_VALUE)
             })
       })
-  ResponseEntity<Resource> exportInCSV();
+  ResponseEntity<Resource> exportInCsv();
 
   @Operation(
       summary = "Get FAQ Question metadata",
@@ -204,8 +203,9 @@ public interface FaqQuestionApi extends SecuredApi {
   ResponseEntity<Metadata> getMetadata();
 
   @Operation(
-      summary =
-          "Find all users who updated questions with given status, or all categories that have questions with such status",
+      summary = """
+                Find all users who updated questions with given status,
+                or all categories that have questions with such status""",
       description = "Possible error codes: 4009, 4011, 4012, 4013, 4014, 4031, 5007",
       security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(

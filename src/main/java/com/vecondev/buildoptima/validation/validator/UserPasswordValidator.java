@@ -1,6 +1,10 @@
 package com.vecondev.buildoptima.validation.validator;
 
 import com.vecondev.buildoptima.validation.constraint.Password;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.LengthRule;
@@ -9,11 +13,6 @@ import org.passay.PasswordValidator;
 import org.passay.Rule;
 import org.passay.RuleResult;
 import org.passay.WhitespaceRule;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserPasswordValidator implements ConstraintValidator<Password, String> {
 

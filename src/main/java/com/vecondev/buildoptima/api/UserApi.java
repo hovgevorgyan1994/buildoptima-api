@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
@@ -17,17 +19,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-@Tag(name = "User", description = "Endpoints for managing users",externalDocs =
-@ExternalDocumentation(
+@Tag(name = "User", description = "Endpoints for managing users", externalDocs =
+    @ExternalDocumentation(
         description = "Click here to see a detailed explanation of application errors",
         url =
                 "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
@@ -54,7 +53,8 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<UserResponseDto> getById(@PathVariable("id") UUID id, @Parameter(hidden = true) AppUserDetails user);
+  ResponseEntity<UserResponseDto> getById(@PathVariable("id") UUID id,
+      @Parameter(hidden = true) AppUserDetails user);
 
   @RequestBody(ref = "#/components/requestBodies/fetchUsersRequestExample")
   ResponseEntity<FetchResponseDto> fetch(
@@ -96,31 +96,35 @@ public interface UserApi extends SecuredApi {
   @Operation(
       summary = "Upload new image or update the previous one of given user",
       description = """
-              Possible error codes: 4004, 4011, 4012, 4013, 4014, 4031, 4121, 4122, 4123, 4124, 5002, 5003, 5005, 5006, 5007, 5009.
-              The image has following requirements (extension: jpeg/jpg/png, min_width: 600px, max_width: 600px, size: 70KB-30MB).
-              To get the uploaded image urls: original image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/original/{version}' thumbnail image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/thumbnail/{version}'""",
+              Possible error codes: 4004, 4011, 4012, 4013, 4014, 4031, 4121,
+              4122, 4123, 4124, 5002, 5003, 5005, 5006, 5007, 5009.
+              The image has following requirements (extension: jpeg/jpg/png, 
+              min_width: 600px, max_width: 600px, size: 70KB-30MB).
+              To get the uploaded image urls: original image url: 
+              'https://buildoptima.s3.amazonaws.com/user/{user_id}/original/{version}' 
+              thumbnail image url: 'https://buildoptima.s3.amazonaws.com/user/{user_id}/thumbnail/{version}'""",
       security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "The image is successfully uploaded/updated"),
-              @ApiResponse(
-                      responseCode = "400",
-                      description =
-                              "Image is not provided",
-                      content =
-                      @Content(
-                              mediaType = APPLICATION_JSON_VALUE,
-                              schema = @Schema(implementation = ApiError.class))),
-        @ApiResponse(
-            responseCode = "412",
-            description =
-                "The provided image  doesn't fit the requirements",
-            content =
-                @Content(
-                    mediaType = APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = ApiError.class))),
+          @ApiResponse(
+              responseCode = "204",
+              description = "The image is successfully uploaded/updated"),
+          @ApiResponse(
+              responseCode = "400",
+              description =
+                  "Image is not provided",
+              content =
+              @Content(
+                  mediaType = APPLICATION_JSON_VALUE,
+                  schema = @Schema(implementation = ApiError.class))),
+          @ApiResponse(
+              responseCode = "412",
+              description =
+                  "The provided image  doesn't fit the requirements",
+              content =
+                  @Content(
+                      mediaType = APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = ApiError.class))),
       })
   ResponseEntity<ImageOverview> uploadImage(
       @Parameter(description = "The user's id whom photo should be uploaded") UUID id,
@@ -204,5 +208,6 @@ public interface UserApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class)))
       })
   ResponseEntity<Void> deleteImage(
-      @Parameter(description = "The user id whom image should be deleted") UUID ownerId,@Parameter(hidden = true) AppUserDetails user);
+      @Parameter(description = "The user id whom image should be deleted") UUID ownerId,
+      @Parameter(hidden = true) AppUserDetails user);
 }

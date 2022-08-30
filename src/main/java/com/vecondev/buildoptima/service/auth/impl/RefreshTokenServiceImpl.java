@@ -6,14 +6,13 @@ import com.vecondev.buildoptima.exception.Error;
 import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.service.auth.RefreshTokenService;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -45,8 +44,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   @Override
   public RefreshToken findByRefreshToken(String refreshToken) {
     return refreshTokenRepository
-            .findById(refreshToken)
-            .orElseThrow(() -> new AuthenticationException(Error.REFRESH_TOKEN_INVALID));
+        .findById(refreshToken)
+        .orElseThrow(() -> new AuthenticationException(Error.REFRESH_TOKEN_INVALID));
   }
 
   @Override

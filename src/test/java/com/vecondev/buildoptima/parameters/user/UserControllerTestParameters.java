@@ -1,5 +1,12 @@
 package com.vecondev.buildoptima.parameters.user;
 
+import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
+import static com.vecondev.buildoptima.model.user.Role.ADMIN;
+import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
@@ -15,11 +22,6 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.mock.web.MockMultipartFile;
-
-import javax.validation.UnexpectedTypeException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,19 +33,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
-import static com.vecondev.buildoptima.model.user.Role.ADMIN;
-import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+import javax.validation.UnexpectedTypeException;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.mock.web.MockMultipartFile;
 
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserControllerTestParameters extends UserTestParameters {
 
-  private static final String TEST_IMAGES_PATH = "src/test/resources/test-images/";
+  private static final String TEST_IMAGES_PATH = "src/test/resources/images/";
   private UserRepository userRepository;
   private ConfirmationTokenRepository confirmationTokenRepository;
   private RefreshTokenRepository refreshTokenRepository;

@@ -2,15 +2,14 @@ package com.vecondev.buildoptima.dto.faq.request;
 
 import com.vecondev.buildoptima.model.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.UUID;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,9 +32,10 @@ public class FaqQuestionRequestDto {
   @Length(min = 2, max = 300)
   @Schema(
       title = "Answer",
-      description = "Answers's length should be between 2 and 300.",
-      example =
-          "Click 'Forgot password' button inside the 'Sign up' form and write your email address in order to recover the account.",
+      description = "Answer's length should be between 2 and 300.",
+      example = """
+                Click 'Forgot password' button inside the 'Sign up' form
+                and write your email address in order to recover the account.""",
       minLength = 2,
       maxLength = 300)
   private String answer;

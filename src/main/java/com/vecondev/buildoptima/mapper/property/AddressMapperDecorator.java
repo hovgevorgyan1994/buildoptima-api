@@ -2,11 +2,10 @@ package com.vecondev.buildoptima.mapper.property;
 
 import com.vecondev.buildoptima.dto.property.AddressDto;
 import com.vecondev.buildoptima.model.property.Address;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public abstract class AddressMapperDecorator implements AddressMapper {
 

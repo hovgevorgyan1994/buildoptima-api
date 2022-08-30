@@ -1,5 +1,10 @@
 package com.vecondev.buildoptima.service.s3;
 
+import static com.vecondev.buildoptima.exception.Error.BUCKET_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_CONVERTING;
+import static com.vecondev.buildoptima.exception.Error.IMAGE_NOT_FOUND;
+import static com.vecondev.buildoptima.util.FileUtil.*;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -10,19 +15,15 @@ import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.service.property.migration.MigrationHistoryService;
 import com.vecondev.buildoptima.validation.ImageValidator;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.*;
-import static com.vecondev.buildoptima.util.FileUtil.*;
 
 @Slf4j
 @Data
@@ -30,16 +31,16 @@ import static com.vecondev.buildoptima.util.FileUtil.*;
 @RequiredArgsConstructor
 public class AmazonS3ServiceImpl implements AmazonS3Service {
 
+  private static final String ORIGINAL = "original";
+  private static final String THUMBNAIL = "thumbnail";
   private final S3ConfigProperties s3ConfigProperties;
   private final AmazonS3 amazonS3;
   private final ImageValidator imageValidator;
   private final MigrationHistoryService migrationHistoryService;
-  private static final String ORIGINAL = "original";
-  private static final String THUMBNAIL = "thumbnail";
 
   /**
-   * checks the existence of the bucket, uploads original image 'and' it's thumbnail version by
-   * resizing with size of 100x100, after all these actions deletes created images from classpath
+   * Checks the existence of the bucket, uploads original image 'and' it's thumbnail version by
+   * resizing with size of 100x100, after all these actions deletes created images from classpath.
    *
    * @param objectId the id of the image owner entity
    * @param multipartFile representing images
@@ -73,8 +74,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   /**
-   * downloads image from s3 by given user
+   * Downloads image from s3 by given entity id.
    *
+   * @param className shows in which entity the image belongs to e.g. user, news
    * @param objectId the resource owner
    * @param isOriginal shows if the image is original or not (thumbnail)
    * @return byte[] image as byte array
@@ -110,7 +112,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   /**
-   * deletes both images the original and thumbnail
+   * Deletes both images the original and thumbnail.
    *
    * @param objectId the image owner id which should be deleted
    */
@@ -121,7 +123,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   /**
-   * checks if there is an object with given image name in s3 bucket or not
+   * Checks if there is an object with given image name in s3 bucket or not.
    *
    * @throws ResourceNotFoundException when no image found by given image name
    */
@@ -134,7 +136,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   /**
-   * forms the path image should be saved in S3 bucket
+   * Forms the path image should be saved in S3 bucket.
    *
    * @param isOriginal whether it's original (true) or thumbnail version
    * @return the image path in S3
@@ -147,13 +149,22 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
   }
 
   @Override
-  public List<S3Object> getUnprocessedFiles(String bucketName) {
+  public List<S3Object> getObjects(String bucketName) {
     checkExistenceOfBucket(bucketName);
     return amazonS3.listObjectsV2(bucketName).getObjectSummaries().stream()
         .map(S3ObjectSummary::getKey)
-        .filter(key -> !migrationHistoryService.existsByKey(key))
-        .map(key -> amazonS3.getObject(bucketName, key))
+        .map(key -> getObject(bucketName, key))
         .toList();
+  }
+
+  @Override
+  public S3Object getObject(String bucketName, String objectKey) {
+    return amazonS3.getObject(bucketName, objectKey);
+  }
+
+  @Override
+  public boolean doesObjectExist(String bucketName, String objectKey) {
+    return amazonS3.doesObjectExist(bucketName, objectKey);
   }
 
   private void checkExistenceOfBucket(String bucketName) {

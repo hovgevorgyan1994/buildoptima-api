@@ -1,11 +1,20 @@
 package com.vecondev.buildoptima.service.faq.impl;
 
+import static com.vecondev.buildoptima.exception.Error.FAQ_QUESTION_NOT_FOUND;
+import static com.vecondev.buildoptima.exception.Error.INVALID_FIELD;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
+import static com.vecondev.buildoptima.filter.model.FaqQuestionFields.faqQuestionPageSortingFieldsMap;
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
+import static com.vecondev.buildoptima.model.Status.ARCHIVED;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
+
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.faq.response.FaqQuestionResponseDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
 import com.vecondev.buildoptima.exception.InvalidFieldException;
@@ -24,6 +33,9 @@ import com.vecondev.buildoptima.service.faq.FaqCategoryService;
 import com.vecondev.buildoptima.service.faq.FaqQuestionService;
 import com.vecondev.buildoptima.service.user.UserService;
 import com.vecondev.buildoptima.validation.faq.FaqQuestionValidator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -35,19 +47,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.FAQ_QUESTION_NOT_FOUND;
-import static com.vecondev.buildoptima.exception.Error.INVALID_FIELD;
-import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
-import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
-import static com.vecondev.buildoptima.filter.model.FaqQuestionFields.faqQuestionPageSortingFieldsMap;
-import static com.vecondev.buildoptima.model.Status.ACTIVE;
-import static com.vecondev.buildoptima.model.Status.ARCHIVED;
-import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 @Slf4j
 @Service
@@ -65,19 +64,19 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
   private final CsvService<FaqQuestionRecord> csvService;
 
   @Override
-  public List<FaqQuestionResponseDto> getAll () {
+  public List<FaqQuestionResponseDto> getAll() {
     List<FaqQuestion> faqQuestions = faqQuestionRepository.findAll();
 
     return faqQuestionMapper.mapToListDto(faqQuestions);
   }
 
   @Override
-  public FaqQuestionResponseDto getById (UUID questionId) {
+  public FaqQuestionResponseDto getById(UUID questionId) {
     return faqQuestionMapper.mapToDto(findQuestionById(questionId));
   }
 
   @Override
-  public FaqQuestionResponseDto create (FaqQuestionRequestDto requestDto, UUID userId) {
+  public FaqQuestionResponseDto create(FaqQuestionRequestDto requestDto, UUID userId) {
     User user = userService.findUserById(userId);
     FaqCategory faqCategory = faqCategoryService.findCategoryById(requestDto.getFaqCategoryId());
     FaqQuestion faqQuestion = faqQuestionMapper.mapToEntity(requestDto, faqCategory, user);
@@ -90,7 +89,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
   }
 
   @Override
-  public FaqQuestionResponseDto update (
+  public FaqQuestionResponseDto update(
       UUID questionId, FaqQuestionRequestDto requestDto, UUID userId) {
     FaqQuestion question =
         faqQuestionRepository
@@ -98,7 +97,8 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
             .orElseThrow(() -> new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND));
     faqQuestionValidator.validateQuestion(requestDto.getQuestion());
 
-    question = question.toBuilder()
+    question =
+        question.toBuilder()
             .question(requestDto.getQuestion())
             .answer(requestDto.getAnswer())
             .status(requestDto.getStatus())
@@ -111,7 +111,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
   }
 
   @Override
-  public void delete (UUID questionId, UUID userId) {
+  public void delete(UUID questionId, UUID userId) {
     if (!faqQuestionRepository.existsById(questionId)) {
       throw new FaqQuestionNotFoundException(FAQ_QUESTION_NOT_FOUND);
     }
@@ -128,7 +128,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
   }
 
   @Override
-  public FetchResponseDto fetch (FetchRequestDto fetchRequest) {
+  public FetchResponseDto fetch(FetchRequestDto fetchRequest) {
     log.info("Request to fetch FAQ questions from DB");
     validateFieldNames(faqQuestionPageSortingFieldsMap, fetchRequest.getSort());
     if (fetchRequest.getSort() == null || fetchRequest.getSort().isEmpty()) {
@@ -151,8 +151,10 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
         .build();
   }
 
-  /** exports all faq questions in csv file */
-  public ResponseEntity<Resource> exportInCsv () {
+  /**
+   * Exports all faq questions in csv file.
+   */
+  public ResponseEntity<Resource> exportInCsv() {
     List<FaqQuestion> questions = faqQuestionRepository.findAll();
     List<FaqQuestionRecord> questionRecords = faqQuestionMapper.mapToRecordList(questions);
     InputStreamResource questionsResource =

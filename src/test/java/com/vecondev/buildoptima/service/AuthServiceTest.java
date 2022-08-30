@@ -1,5 +1,14 @@
 package com.vecondev.buildoptima.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
@@ -19,6 +28,10 @@ import com.vecondev.buildoptima.service.auth.impl.ConfirmationTokenServiceImpl;
 import com.vecondev.buildoptima.service.auth.impl.RefreshTokenServiceImpl;
 import com.vecondev.buildoptima.service.mail.MailService;
 import com.vecondev.buildoptima.validation.UserValidator;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
+import javax.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,21 +39,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.config.annotation.AlreadyBuiltException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.mail.MessagingException;
-import java.time.LocalDateTime;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -91,7 +89,7 @@ class AuthServiceTest {
 
   @Test
   void failedRegistrationAsThrowsExceptionWhileSendingEmail() throws MessagingException {
-    Locale locale = new Locale("en");
+    final Locale locale = new Locale("en");
     UserRegistrationRequestDto requestDto = testParameters.getUserRegistrationRequestDto();
     User user = testParameters.getUserFromRegistrationDto(requestDto);
     User savedUser = testParameters.getSavedUser(user);
@@ -100,7 +98,8 @@ class AuthServiceTest {
     when(userRepository.saveAndFlush(user)).thenReturn(savedUser);
     doThrow(MessagingException.class).when(mailService).sendConfirm(any(), any());
 
-    assertThrows(AuthenticationException.class, () -> authService.register(requestDto, locale));
+    assertThrows(AuthenticationException.class, () -> authService
+        .register(requestDto, locale));
     verify(confirmationTokenService).create(savedUser);
     verify(userValidator).validateUserRegistration(user);
   }

@@ -1,17 +1,4 @@
-package com.vecondev.buildoptima.parameters.result_actions;
-
-import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
-import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
-import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
-import com.vecondev.buildoptima.manager.JwtTokenManager;
-import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.endpoints.NewsEndpointUris;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.UUID;
+package com.vecondev.buildoptima.parameters.actions;
 
 import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -20,6 +7,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
+import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.manager.JwtTokenManager;
+import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.endpoints.NewsEndpointUris;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @TestConfiguration
 @RequiredArgsConstructor
@@ -76,8 +75,7 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
 
   public ResultActions getMetadataResultActions(User user) throws Exception {
     return mockMvc.perform(
-        get(getEndpointUris().getMetadataUri())
-            .header(AUTHORIZATION_HEADER, getAccessToken(user)));
+        get(getEndpointUris().getMetadataUri()).header(AUTHORIZATION_HEADER, getAccessToken(user)));
   }
 
   public ResultActions getExportCsvResultActions(FetchRequestDto fetchRequest, User user)

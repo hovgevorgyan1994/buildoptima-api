@@ -1,19 +1,34 @@
 package com.vecondev.buildoptima.api;
 
+import static com.vecondev.buildoptima.model.user.Role.ADMIN;
+import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
-import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.actions.UserResultActions;
 import com.vecondev.buildoptima.parameters.endpoints.UserEndpointUris;
-import com.vecondev.buildoptima.parameters.result_actions.UserResultActions;
 import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -30,24 +45,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.model.user.Role.ADMIN;
-import static com.vecondev.buildoptima.model.user.Role.CLIENT;
-import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -122,7 +119,8 @@ class UserControllerTest {
   @Test
   void successfulPasswordChanging() throws Exception {
     User savedUser = userControllerTestParameters.getSavedUser();
-    savedUser.setPassword(userControllerTestParameters.getUserByEmail(savedUser.getEmail()).getPassword());
+    savedUser.setPassword(
+        userControllerTestParameters.getUserByEmail(savedUser.getEmail()).getPassword());
     ChangePasswordRequestDto requestDto = userControllerTestParameters
             .getChangePasswordRequestDto(savedUser);
 
@@ -154,8 +152,8 @@ class UserControllerTest {
   @Nested
   class ImageTest {
 
-    private static final String ORIGINAL_IMAGES_PATH = "user/%s/original";
-    private static final String THUMBNAIL_IMAGES_PATH = "user/%s/thumbnail";
+    private static final String ORIGINAL_IMAGES_PATH = "user/%s/original/%s";
+    private static final String THUMBNAIL_IMAGES_PATH = "user/%s/thumbnail/%s";
     private static final String[] TEST_IMAGES = {"valid_image.jpg", "invalid_image_size.jpg"};
 
     @BeforeEach
@@ -204,10 +202,12 @@ class UserControllerTest {
           .andExpect(status().isPreconditionFailed());
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getImageBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId, user.getImageVersion() + 1)));
+              s3ConfigProperties.getImageBucketName(),
+              String.format(ORIGINAL_IMAGES_PATH, userId, user.getImageVersion() + 1)));
       assertFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getImageBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId, user.getImageVersion() + 1)));
+              s3ConfigProperties.getImageBucketName(),
+              String.format(THUMBNAIL_IMAGES_PATH, userId, user.getImageVersion() + 1)));
       Files.delete(Paths.get(filename));
     }
 
@@ -297,10 +297,12 @@ class UserControllerTest {
 
       assumeFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getImageBucketName(), String.format(ORIGINAL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getImageBucketName(),
+              String.format(ORIGINAL_IMAGES_PATH, userId, savedUser.getImageVersion())));
       assumeFalse(
           amazonS3.doesObjectExist(
-              s3ConfigProperties.getImageBucketName(), String.format(THUMBNAIL_IMAGES_PATH, userId)));
+              s3ConfigProperties.getImageBucketName(),
+              String.format(THUMBNAIL_IMAGES_PATH, userId, savedUser.getImageVersion())));
 
       resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNotFound());
     }

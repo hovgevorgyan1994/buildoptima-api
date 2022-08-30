@@ -1,18 +1,15 @@
 package com.vecondev.buildoptima.filter.model;
 
+import static com.vecondev.buildoptima.filter.model.FieldType.DATETIME;
+import static com.vecondev.buildoptima.filter.model.FieldType.STRING;
+
 import com.vecondev.buildoptima.filter.converter.InstantConverter;
 import com.vecondev.buildoptima.filter.converter.NewsCategoryConverter;
 import com.vecondev.buildoptima.filter.converter.UUIDConverter;
 import com.vecondev.buildoptima.model.news.News;
-
 import java.util.Map;
 
-import static com.vecondev.buildoptima.filter.model.FieldType.DATETIME;
-import static com.vecondev.buildoptima.filter.model.FieldType.STRING;
-
 public class NewsFields {
-
-  private NewsFields() {}
 
   public static final Map<String, FieldDefinition<News, ?>> newsPageSortingFieldsMap;
   private static final String TITLE = "title";
@@ -34,8 +31,10 @@ public class NewsFields {
             UPDATED_AT,
             new FieldDefinition<>(UPDATED_AT, DATETIME, UPDATED_AT, new InstantConverter()),
             CREATED_BY,
-            new FieldDefinition<>(CREATED_BY, STRING, CREATED_BY,  new UUIDConverter()),
+            new FieldDefinition<>(CREATED_BY, STRING, CREATED_BY, new UUIDConverter()),
             UPDATED_BY,
             new FieldDefinition<>(UPDATED_BY, STRING, UPDATED_BY, new UUIDConverter()));
   }
+
+  private NewsFields() {}
 }

@@ -1,5 +1,9 @@
 package com.vecondev.buildoptima.service.news;
 
+import static com.vecondev.buildoptima.exception.Error.NEWS_ITEM_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.NewsFields.newsPageSortingFieldsMap;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
+
 import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.Metadata;
@@ -24,24 +28,17 @@ import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.csv.CsvService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.NEWS_ITEM_NOT_FOUND;
-import static com.vecondev.buildoptima.filter.model.NewsFields.newsPageSortingFieldsMap;
-import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 @Slf4j
 @Service
@@ -57,9 +54,9 @@ public class NewsServiceImpl implements NewsService {
   private final PageableConverter pageableConverter;
   private final CsvService<NewsRecord> csvService;
   private final SecurityContextService securityContextService;
+
   @Override
-  public NewsResponseDto create(
-      NewsCreateRequestDto createNewsRequestDto) {
+  public NewsResponseDto create(NewsCreateRequestDto createNewsRequestDto) {
     UUID userId = securityContextService.getUserDetails().getId();
     log.info("Trying to add news item with title: {}", createNewsRequestDto.getTitle());
     User creator = userRepository.getReferenceById(userId);
@@ -72,11 +69,7 @@ public class NewsServiceImpl implements NewsService {
     if (createNewsRequestDto.getImage() != null) {
       String className = news.getClass().getSimpleName().toLowerCase();
       imageService.uploadImagesToS3(
-          className,
-          news.getId(),
-          news.getImageVersion(),
-          createNewsRequestDto.getImage(),
-          userId);
+          className, news.getId(), news.getImageVersion(), createNewsRequestDto.getImage(), userId);
       log.info("News image successfully uploaded to S3: news id {}", news.getId());
       news.setImageVersion(news.getImageVersion() + 1);
     }
@@ -87,8 +80,7 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public NewsResponseDto update(
-      UUID newsId, NewsUpdateRequestDto newsRequestDto) {
+  public NewsResponseDto update(UUID newsId, NewsUpdateRequestDto newsRequestDto) {
     UUID userId = securityContextService.getUserDetails().getId();
     log.info("Trying to update news item: item id {}", newsId);
     News news =
@@ -205,8 +197,7 @@ public class NewsServiceImpl implements NewsService {
     return newsResponseDto;
   }
 
-  private void updateNews(
-      NewsUpdateRequestDto dto, News news, User modifier, UUID userId) {
+  private void updateNews(NewsUpdateRequestDto dto, News news, User modifier, UUID userId) {
     if (dto.getTitle() != null) {
       news.setTitle(dto.getTitle());
     }

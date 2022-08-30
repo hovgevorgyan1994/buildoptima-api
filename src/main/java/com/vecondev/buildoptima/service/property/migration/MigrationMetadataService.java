@@ -9,5 +9,6 @@ public interface MigrationMetadataService {
 
   MigrationMetadata save(MigrationHistory migrationHistory, Property property);
 
-  MigrationMetadata save(MigrationHistory migrationHistory, PropertyReadDto property, String failedReason);
+  MigrationMetadata save(
+      MigrationHistory migrationHistory, PropertyReadDto property, String failedReason);
 }

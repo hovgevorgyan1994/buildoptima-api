@@ -2,9 +2,8 @@ package com.vecondev.buildoptima.util;
 
 import com.vecondev.buildoptima.exception.Error;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
-import lombok.experimental.UtilityClass;
-
 import java.util.Objects;
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class RestPreconditions {

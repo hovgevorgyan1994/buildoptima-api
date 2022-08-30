@@ -1,5 +1,9 @@
 package com.vecondev.buildoptima.api.controller;
 
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
 import com.vecondev.buildoptima.api.FaqQuestionApi;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.Metadata;
@@ -11,20 +15,22 @@ import com.vecondev.buildoptima.filter.model.DictionaryField;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.faq.FaqQuestionService;
+import java.util.List;
+import java.util.UUID;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -70,8 +76,7 @@ public class FaqQuestionController implements FaqQuestionApi {
     UUID userId = securityContextService.getUserDetails().getId();
     log.info("User with id: {} is fetching faq categories.", userId);
 
-    return ResponseEntity.ok(faqQuestionService.fetch(
-            fetchRequest));
+    return ResponseEntity.ok(faqQuestionService.fetch(fetchRequest));
   }
 
   @Override
@@ -96,7 +101,7 @@ public class FaqQuestionController implements FaqQuestionApi {
 
   @Override
   @GetMapping(value = "/csv")
-  public ResponseEntity<Resource> exportInCSV() {
+  public ResponseEntity<Resource> exportInCsv() {
     UUID userId = securityContextService.getUserDetails().getId();
     log.info("User with id: {} trying to export all faq questions in '.csv' format.", userId);
 

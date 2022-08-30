@@ -1,33 +1,5 @@
 package com.vecondev.buildoptima.api;
 
-import com.vecondev.buildoptima.config.AmazonS3Config;
-import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
-import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
-import com.vecondev.buildoptima.model.Status;
-import com.vecondev.buildoptima.model.faq.FaqQuestion;
-import com.vecondev.buildoptima.model.user.Role;
-import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.endpoints.FaqQuestionEndpointUris;
-import com.vecondev.buildoptima.parameters.faq.question.FaqQuestionControllerTestParameters;
-import com.vecondev.buildoptima.parameters.result_actions.FaqQuestionResultActions;
-import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
-import com.vecondev.buildoptima.repository.faq.FaqQuestionRepository;
-import com.vecondev.buildoptima.repository.user.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.List;
-import java.util.UUID;
-
 import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
 import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
 import static com.vecondev.buildoptima.model.Status.ACTIVE;
@@ -40,6 +12,33 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.vecondev.buildoptima.config.AmazonS3Config;
+import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.model.Status;
+import com.vecondev.buildoptima.model.faq.FaqQuestion;
+import com.vecondev.buildoptima.model.user.Role;
+import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.actions.FaqQuestionResultActions;
+import com.vecondev.buildoptima.parameters.endpoints.FaqQuestionEndpointUris;
+import com.vecondev.buildoptima.parameters.faq.question.FaqQuestionControllerTestParameters;
+import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
+import com.vecondev.buildoptima.repository.faq.FaqQuestionRepository;
+import com.vecondev.buildoptima.repository.user.UserRepository;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -235,14 +234,17 @@ class FaqQuestionControllerTest {
   @Test
   void successfulGettingMetadata() throws Exception {
     User moderatorUser = getUserByRole(MODERATOR);
-    FaqQuestion lastUpdatedQuestion = faqQuestionRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
+    FaqQuestion lastUpdatedQuestion =
+        faqQuestionRepository.findTopByOrderByUpdatedAtDesc().orElse(null);
     assumeFalse(lastUpdatedQuestion == null);
 
-    resultActions.getMetadataResultActions(moderatorUser)
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedQuestion.getUpdatedAt().toString()))
-            .andExpect(jsonPath("$.allActiveCount").value(faqQuestionRepository.countByStatus(ACTIVE)))
-            .andExpect(jsonPath("$.allArchivedCount").value(faqQuestionRepository.countByStatus(ARCHIVED)));
+    resultActions
+        .getMetadataResultActions(moderatorUser)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedQuestion.getUpdatedAt().toString()))
+        .andExpect(jsonPath("$.allActiveCount").value(faqQuestionRepository.countByStatus(ACTIVE)))
+        .andExpect(
+            jsonPath("$.allArchivedCount").value(faqQuestionRepository.countByStatus(ARCHIVED)));
   }
 
   @Test

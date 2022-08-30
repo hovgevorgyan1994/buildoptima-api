@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
@@ -17,15 +19,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
-import java.util.UUID;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-@Tag(name = "News", description = "Endpoints for managing news",externalDocs =
-@ExternalDocumentation(
+@Tag(name = "News", description = "Endpoints for managing news", externalDocs =
+    @ExternalDocumentation(
         description = "Click here to see a detailed explanation of application errors",
         url =
                 "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
@@ -33,8 +32,9 @@ public interface NewsApi extends SecuredApi {
 
   @Operation(
       summary = "Add news item",
-      description =
-          "Possible error codes: 40011, 4011, 4012, 4013, 4014, 4031, 4121, 4122, 4123, 4124, 5002, 5003, 5005, 5006, 5007, 5009",
+      description = """
+                    Possible error codes: 40011, 4011, 4012, 4013, 4014,
+                    4031, 4121, 4122, 4123, 4124, 5002, 5003, 5005, 5006, 5007, 5009""",
       security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
       value = {
@@ -66,20 +66,20 @@ public interface NewsApi extends SecuredApi {
       security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Fetched news item from DB",
-            content =
-                @Content(
-                    schema = @Schema(implementation = NewsResponseDto.class),
-                    mediaType = APPLICATION_JSON_VALUE)),
-              @ApiResponse(
-                      responseCode = "404",
-                      description = "No News item found by id",
-                      content =
-                      @Content(
-                              schema = @Schema(implementation = NewsResponseDto.class),
-                              mediaType = APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Fetched news item from DB",
+              content =
+              @Content(
+                  schema = @Schema(implementation = NewsResponseDto.class),
+                  mediaType = APPLICATION_JSON_VALUE)),
+          @ApiResponse(
+              responseCode = "404",
+              description = "No News item found by id",
+              content =
+              @Content(
+                  schema = @Schema(implementation = NewsResponseDto.class),
+                  mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<NewsResponseDto> getById(
       @Parameter(description = "The news item id which should be fetched") UUID id);
@@ -117,7 +117,9 @@ public interface NewsApi extends SecuredApi {
 
   @Operation(
       summary = "Export news csv",
-          description = "Possible error codes: 4002, 4003, 40014, 4011, 4012, 4013, 4014, 4031, 5004, 5007.",
+          description = """
+                        Possible error codes: 4002, 4003, 40014, 4011, 4012,
+                        4013, 4014, 4031, 5004, 5007.""",
           security = @SecurityRequirement(name = "api-security"),
       externalDocs =
           @ExternalDocumentation(
@@ -129,13 +131,13 @@ public interface NewsApi extends SecuredApi {
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "200", description = "Successfully exported news csv"),
-              @ApiResponse(
-                      responseCode = "400",
-                      description = "There is an invalid value in fetch request",
-                      content =
-                      @Content(
-                              schema = @Schema(implementation = ApiError.class),
-                              mediaType = APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "400",
+              description = "There is an invalid value in fetch request",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiError.class),
+                  mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<Resource> exportInCsv(
       FetchRequestDto fetchRequestDto);
@@ -144,14 +146,15 @@ public interface NewsApi extends SecuredApi {
           description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4046, 5007.",
           security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
-      value = {@ApiResponse(responseCode = "200", description = "News item has been deleted"),
-              @ApiResponse(
-                      responseCode = "404",
-                      description = "There is no News item found by given id",
-                      content =
-                      @Content(
-                              schema = @Schema(implementation = ApiError.class),
-                              mediaType = APPLICATION_JSON_VALUE))})
+      value = {
+          @ApiResponse(responseCode = "200", description = "News item has been deleted"),
+          @ApiResponse(
+              responseCode = "404",
+              description = "There is no News item found by given id",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiError.class),
+                  mediaType = APPLICATION_JSON_VALUE))})
   ResponseEntity<Void> delete(
       @Parameter(description = "The news item id which should be deleted") UUID id);
 
@@ -167,20 +170,20 @@ public interface NewsApi extends SecuredApi {
           security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successfully archived news item",
-            content =
-                @Content(
-                    schema = @Schema(implementation = NewsResponseDto.class),
-                    mediaType = APPLICATION_JSON_VALUE)),
-              @ApiResponse(
-                      responseCode = "404",
-                      description = "No News item found by given id",
-                      content =
-                      @Content(
-                              schema = @Schema(implementation = ApiError.class),
-                              mediaType = APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Successfully archived news item",
+              content =
+                  @Content(
+                      schema = @Schema(implementation = NewsResponseDto.class),
+                      mediaType = APPLICATION_JSON_VALUE)),
+          @ApiResponse(
+              responseCode = "404",
+              description = "No News item found by given id",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiError.class),
+                  mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<NewsResponseDto> archive(
       @Parameter(description = "The news item id which should be archived") UUID id);

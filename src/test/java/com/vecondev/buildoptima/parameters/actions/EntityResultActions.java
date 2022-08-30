@@ -1,13 +1,4 @@
-package com.vecondev.buildoptima.parameters.result_actions;
-
-import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
-import com.vecondev.buildoptima.manager.JwtTokenManager;
-import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.endpoints.EndpointUris;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.UUID;
+package com.vecondev.buildoptima.parameters.actions;
 
 import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -16,6 +7,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.manager.JwtTokenManager;
+import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.endpoints.EndpointUris;
+import java.util.UUID;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 public abstract class EntityResultActions<T extends EndpointUris> {
 
@@ -98,11 +97,11 @@ public abstract class EntityResultActions<T extends EndpointUris> {
 
   public ResultActions getMetadataResultActions(User user) throws Exception {
     return getMockMvc()
-            .perform(
-                    get(getEndpointUris().getMetadataUri())
-                            .header(AUTHORIZATION_HEADER, getAccessToken(user))
-                            .contentType(APPLICATION_JSON)
-                            .accept(APPLICATION_JSON_VALUE));
+        .perform(
+            get(getEndpointUris().getMetadataUri())
+                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON_VALUE));
   }
 
   public String getAccessToken(User user) {

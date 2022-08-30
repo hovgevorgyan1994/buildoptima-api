@@ -2,12 +2,11 @@ package com.vecondev.buildoptima.mapper.property;
 
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.model.property.Property;
+import java.util.List;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @DecoratedWith(PropertyMapperDecorator.class)

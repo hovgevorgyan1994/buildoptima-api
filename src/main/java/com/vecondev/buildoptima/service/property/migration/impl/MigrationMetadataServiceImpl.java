@@ -1,6 +1,9 @@
 package com.vecondev.buildoptima.service.property.migration.impl;
 
+import static com.vecondev.buildoptima.exception.Error.MIGRATION_METADATA_NOT_FOUND;
+
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
+import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.mapper.property.AddressMapper;
 import com.vecondev.buildoptima.model.property.Address;
 import com.vecondev.buildoptima.model.property.Property;
@@ -8,14 +11,13 @@ import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import com.vecondev.buildoptima.model.property.migration.MigrationMetadata;
 import com.vecondev.buildoptima.repository.property.MigrationMetadataRepository;
 import com.vecondev.buildoptima.service.property.migration.MigrationMetadataService;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -28,26 +30,48 @@ public class MigrationMetadataServiceImpl implements MigrationMetadataService {
 
   @Override
   public MigrationMetadata save(MigrationHistory migrationHistory, Property property) {
-    MigrationMetadata migrationMetadata =
-        MigrationMetadata.builder()
-            .ain(property.getAin())
-            .syncedAt(Instant.now())
-            .migrationHistory(migrationHistory)
-            .build();
+    MigrationMetadata migrationMetadata;
+    if (repository.existsByAin(property.getAin())) {
+      migrationMetadata =
+          repository.save(
+              repository
+                  .findByAin(property.getAin())
+                  .orElseThrow(() -> new ResourceNotFoundException(MIGRATION_METADATA_NOT_FOUND))
+                  .toBuilder()
+                  .migrationHistory(migrationHistory)
+                  .addresses(addressMapper.mapToDtoList(property.getAddresses()))
+                  .build());
+    } else {
+      migrationMetadata =
+          MigrationMetadata.builder()
+              .ain(property.getAin())
+              .migrationHistory(migrationHistory)
+              .build();
+    }
     return saveSucceeded(property, migrationMetadata);
   }
 
   @Override
   public MigrationMetadata save(
       MigrationHistory migrationHistory, PropertyReadDto property, String failedReason) {
+    MigrationMetadata.MigrationMetadataBuilder migrationMetadataBuilder;
+    if (repository.existsByAin(property.getAin())) {
+      migrationMetadataBuilder =
+          repository
+              .findByAin(property.getAin())
+              .orElseThrow(() -> new ResourceNotFoundException(MIGRATION_METADATA_NOT_FOUND))
+              .toBuilder();
+    } else {
+      migrationMetadataBuilder = MigrationMetadata.builder();
+    }
     MigrationMetadata migrationMetadata =
-        MigrationMetadata.builder()
+        migrationMetadataBuilder
             .ain(property.getAin())
-            .syncedAt(Instant.now())
             .migrationHistory(migrationHistory)
             .failedAt(Instant.now())
             .failedReason(failedReason)
             .build();
+
     return saveFailed(property, migrationMetadata);
   }
 
@@ -67,7 +91,9 @@ public class MigrationMetadataServiceImpl implements MigrationMetadataService {
       } else {
         addresses.forEach(
             address -> {
-              if (address != null) address.setPrimary(false);
+              if (address != null) {
+                address.setPrimary(false);
+              }
             });
         Address primaryAddress = property.getPropertyAddress();
         if (primaryAddress != null) {

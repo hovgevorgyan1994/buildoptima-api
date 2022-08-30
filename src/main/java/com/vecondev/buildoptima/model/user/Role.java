@@ -1,13 +1,12 @@
 package com.vecondev.buildoptima.model.user;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import static com.vecondev.buildoptima.model.user.Authority.RESOURCE_READ;
+import static com.vecondev.buildoptima.model.user.Authority.RESOURCE_WRITE;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import static com.vecondev.buildoptima.model.user.Authority.RESOURCE_READ;
-import static com.vecondev.buildoptima.model.user.Authority.RESOURCE_WRITE;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public enum Role {
   ADMIN(Set.of(RESOURCE_WRITE)),
@@ -25,8 +24,8 @@ public enum Role {
     List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>();
 
     authorities.forEach(
-            authority ->
-                    grantedAuthorities.add(new SimpleGrantedAuthority(authority.name().toLowerCase())));
+        authority ->
+            grantedAuthorities.add(new SimpleGrantedAuthority(authority.name().toLowerCase())));
     grantedAuthorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + this.name()));
 
     return grantedAuthorities;

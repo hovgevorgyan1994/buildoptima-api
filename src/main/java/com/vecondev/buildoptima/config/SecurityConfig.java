@@ -21,29 +21,29 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+  private static final String[] PERMITTED_URIS = {"/auth/**", "/swagger-ui/**", "/api-docs/**"};
   private final JwtTokenAuthenticationEntryPoint entryPoint;
   private final RestAuthorizationFilter restAuthorizationFilter;
   private final ApiAccessDeniedHandler accessDeniedHandler;
-  private static final String[] PERMITTED_URIS = {"/auth/**", "/swagger-ui/**", "/api-docs/**"};
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.cors()
-            .and()
-            .csrf()
-            .disable()
-            .exceptionHandling()
-            .accessDeniedHandler(accessDeniedHandler)
-            .authenticationEntryPoint(entryPoint)
-            .and()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeRequests()
-            .antMatchers(PERMITTED_URIS)
-            .permitAll()
-            .anyRequest()
-            .authenticated();
+        .and()
+        .csrf()
+        .disable()
+        .exceptionHandling()
+        .accessDeniedHandler(accessDeniedHandler)
+        .authenticationEntryPoint(entryPoint)
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .authorizeRequests()
+        .antMatchers(PERMITTED_URIS)
+        .permitAll()
+        .anyRequest()
+        .authenticated();
     http.addFilterBefore(restAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
   }
 

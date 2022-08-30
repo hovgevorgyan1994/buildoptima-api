@@ -1,5 +1,12 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
+import static com.vecondev.buildoptima.exception.Error.FAQ_QUESTION_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
+import static com.vecondev.buildoptima.model.Status.ARCHIVED;
+import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
+
 import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.exception.FaqQuestionNotFoundException;
@@ -11,18 +18,10 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryControllerTestParameters;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-
 import java.util.List;
 import java.util.Map;
 
-import static com.vecondev.buildoptima.exception.Error.FAQ_QUESTION_NOT_FOUND;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
-import static com.vecondev.buildoptima.model.Status.ACTIVE;
-import static com.vecondev.buildoptima.model.Status.ARCHIVED;
-import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
-
-public class FaqQuestionControllerTestParameters extends FaqQuestionTestParameters{
+public class FaqQuestionControllerTestParameters extends FaqQuestionTestParameters {
 
   private final FaqCategoryControllerTestParameters faqCategoryControllerTestParameters;
   private final UserRepository userRepository;
@@ -45,7 +44,7 @@ public class FaqQuestionControllerTestParameters extends FaqQuestionTestParamete
             ACTIVE,
             faqCategoryRepository.findAll().stream().findAny().orElse(null),
             moderator,
-                moderator),
+            moderator),
         new FaqQuestion(
             "Question2",
             "Answer2",
@@ -104,17 +103,17 @@ public class FaqQuestionControllerTestParameters extends FaqQuestionTestParamete
 
   public FetchRequestDto getInvalidFetchRequest() {
     return new FetchRequestDto(
-            0,
-            10,
-            List.of(new SortDto("question", SortDto.Direction.ASC)),
-            Map.of(
-                    "and",
+        0,
+        10,
+        List.of(new SortDto("question", SortDto.Direction.ASC)),
+        Map.of(
+            "and",
+            List.of(
+                new Criteria(LIKE, "question", "how"),
+                Map.of(
+                    "or",
                     List.of(
-                            new Criteria(LIKE, "question", "how"),
-                            Map.of(
-                                    "or",
-                                    List.of(
-                                            new Criteria(LIKE, "answer", "password"),
-                                            new Criteria(GT, "creationDate", "2018-11-30T18:35:24.00Z"))))));
+                        new Criteria(LIKE, "answer", "password"),
+                        new Criteria(GT, "creationDate", "2018-11-30T18:35:24.00Z"))))));
   }
 }

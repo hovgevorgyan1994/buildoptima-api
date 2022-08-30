@@ -1,32 +1,31 @@
 package com.vecondev.buildoptima.filter.specification;
 
-import com.vecondev.buildoptima.exception.InvalidFieldException;
-import com.vecondev.buildoptima.filter.converter.SingleCriteriaConverter;
-import com.vecondev.buildoptima.filter.model.Criteria;
-import com.vecondev.buildoptima.filter.model.FieldDefinition;
-import com.vecondev.buildoptima.filter.model.SearchOperation;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static com.vecondev.buildoptima.exception.Error.INVALID_FIELD;
 import static com.vecondev.buildoptima.exception.Error.INVALID_FILTER_STRUCTURE;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.NAME;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.OPERATION;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.VALUE;
 import static com.vecondev.buildoptima.filter.model.FilterConstants.VALUES;
+
+import com.vecondev.buildoptima.exception.InvalidFieldException;
+import com.vecondev.buildoptima.filter.converter.SingleCriteriaConverter;
+import com.vecondev.buildoptima.filter.model.Criteria;
+import com.vecondev.buildoptima.filter.model.FieldDefinition;
+import com.vecondev.buildoptima.filter.model.SearchOperation;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NonNull;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 
 @Data
 @AllArgsConstructor

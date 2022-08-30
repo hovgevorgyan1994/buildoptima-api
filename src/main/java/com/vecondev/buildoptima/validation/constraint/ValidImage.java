@@ -1,15 +1,14 @@
 package com.vecondev.buildoptima.validation.constraint;
 
-import com.vecondev.buildoptima.validation.validator.NotNullFile;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
+import com.vecondev.buildoptima.validation.validator.NotNullFile;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import javax.validation.Constraint;
+import javax.validation.Payload;
 
 @Target({ElementType.FIELD})
 @Retention(RUNTIME)

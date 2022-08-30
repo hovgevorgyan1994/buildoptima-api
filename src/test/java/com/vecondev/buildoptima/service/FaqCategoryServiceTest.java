@@ -1,5 +1,14 @@
 package com.vecondev.buildoptima.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
@@ -20,6 +29,11 @@ import com.vecondev.buildoptima.service.faq.impl.FaqCategoryServiceImpl;
 import com.vecondev.buildoptima.service.user.UserServiceImpl;
 import com.vecondev.buildoptima.validation.faq.FaqCategoryValidator;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,21 +49,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FaqCategoryServiceTest {
@@ -97,14 +96,13 @@ class FaqCategoryServiceTest {
     User user = testParameters.getUserById(userId);
     FaqCategoryRequestDto faqCategoryRequestDto = testParameters.getFaqCategoryRequestDto();
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
-    FaqCategoryResponseDto faqCategoryResponseDto =
-        testParameters.getFaqCategoryResponseDto(faqCategory);
 
     when(userService.findUserById(userId)).thenReturn(user);
     when(faqCategoryMapper.mapToEntity(faqCategoryRequestDto, user)).thenReturn(faqCategory);
     faqCategory.setId(UUID.randomUUID());
     when(faqCategoryRepository.saveAndFlush(faqCategory)).thenReturn(faqCategory);
-    when(faqCategoryMapper.mapToDto(faqCategory)).thenReturn(faqCategoryResponseDto);
+    when(faqCategoryMapper.mapToDto(faqCategory))
+        .thenReturn(testParameters.getFaqCategoryResponseDto(faqCategory));
 
     FaqCategoryResponseDto methodResponse =
         faqCategoryService.create(faqCategoryRequestDto, userId);

@@ -7,5 +7,7 @@
 <suppressions>
     <suppress checks="MissingJavadocMethod" files="."/>
     <suppress checks="MissingJavadocType" files="."/>
-    <suppress checks="CustomImportOrder" files="."/>
+    <suppress checks="AvoidStarImport" files="."/>
+    <suppress checks="AbbreviationAsWordInName" files="UUIDConverter.java"/>
+    <suppress checks="LineLength" files="SwaggerConfig.java"/>
 </suppressions>

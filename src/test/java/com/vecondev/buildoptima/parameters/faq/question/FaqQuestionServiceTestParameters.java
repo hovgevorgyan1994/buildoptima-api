@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.parameters.faq.question;
 
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
+
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
@@ -10,13 +12,10 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryServiceTestParameters;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static com.vecondev.buildoptima.model.Status.ACTIVE;
 
 public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
     implements PageableTest {
@@ -108,6 +107,7 @@ public class FaqQuestionServiceTestParameters extends FaqQuestionTestParameters
   public List<FaqCategory> getFaqCategories() {
     return faqCategoryServiceTestParameters.getFaqCategoryList();
   }
+
   public User getUserById(UUID userId) {
     User user = userServiceTestParameters.getSavedUser();
     user.setId(userId);

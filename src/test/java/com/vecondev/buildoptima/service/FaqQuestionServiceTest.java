@@ -1,5 +1,18 @@
 package com.vecondev.buildoptima.service;
 
+import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
+import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
+import static com.vecondev.buildoptima.model.Status.ACTIVE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.vecondev.buildoptima.csv.faq.FaqQuestionRecord;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.Metadata;
@@ -24,6 +37,11 @@ import com.vecondev.buildoptima.service.faq.impl.FaqQuestionServiceImpl;
 import com.vecondev.buildoptima.service.user.UserService;
 import com.vecondev.buildoptima.validation.faq.FaqQuestionValidator;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,25 +57,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.filter.model.DictionaryField.CATEGORY;
-import static com.vecondev.buildoptima.filter.model.DictionaryField.UPDATED_BY;
-import static com.vecondev.buildoptima.model.Status.ACTIVE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FaqQuestionServiceTest {
@@ -107,11 +106,9 @@ class FaqQuestionServiceTest {
     UUID userId = UUID.randomUUID();
     User user = testParameters.getUserById(userId);
     FaqQuestionRequestDto faqQuestionRequestDto = testParameters.getFaqQuestionRequestDto();
-    FaqQuestion faqQuestion = testParameters.getFaqQuestion(userId);
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
     faqCategory.setId(faqQuestionRequestDto.getFaqCategoryId());
-    FaqQuestionResponseDto faqQuestionResponseDto =
-        testParameters.getFaqQuestionResponseDto(faqQuestion);
+    FaqQuestion faqQuestion = testParameters.getFaqQuestion(userId);
 
     when(userService.findUserById(userId)).thenReturn(user);
     when(faqCategoryService.findCategoryById(faqQuestionRequestDto.getFaqCategoryId()))
@@ -120,7 +117,8 @@ class FaqQuestionServiceTest {
         .thenReturn(faqQuestion);
     faqQuestion.setId(UUID.randomUUID());
     when(faqQuestionRepository.saveAndFlush(faqQuestion)).thenReturn(faqQuestion);
-    when(faqQuestionMapper.mapToDto(faqQuestion)).thenReturn(faqQuestionResponseDto);
+    when(faqQuestionMapper.mapToDto(faqQuestion))
+        .thenReturn(testParameters.getFaqQuestionResponseDto(faqQuestion));
 
     FaqQuestionResponseDto methodResponse =
         faqQuestionService.create(faqQuestionRequestDto, userId);
@@ -137,7 +135,7 @@ class FaqQuestionServiceTest {
     UUID userId = UUID.randomUUID();
     User user = testParameters.getUserById(userId);
     FaqQuestionRequestDto faqQuestionRequestDto = testParameters.getFaqQuestionRequestDto();
-    FaqQuestion faqQuestion = testParameters.getFaqQuestion(userId);
+    final FaqQuestion faqQuestion = testParameters.getFaqQuestion(userId);
     FaqCategory faqCategory = testParameters.getFaqCategory(userId);
     faqCategory.setId(faqQuestionRequestDto.getFaqCategoryId());
 

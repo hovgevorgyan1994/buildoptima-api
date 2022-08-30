@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.util;
 
+import static com.vecondev.buildoptima.exception.Error.FAILED_JSON_CONVERTING;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -8,13 +10,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vecondev.buildoptima.dto.property.PropertyListDto;
 import com.vecondev.buildoptima.exception.ConvertingFailedException;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.IOException;
-
-import static com.vecondev.buildoptima.exception.Error.FAILED_JSON_CONVERTING;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @UtilityClass

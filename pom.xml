@@ -273,6 +273,7 @@
                     <linkXRef>false</linkXRef>
                     <violationSeverity>warning</violationSeverity>
                     <suppressionsLocation>docs/checkstyle_suppresions.xml</suppressionsLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                 </configuration>
                 <executions>
                     <execution>

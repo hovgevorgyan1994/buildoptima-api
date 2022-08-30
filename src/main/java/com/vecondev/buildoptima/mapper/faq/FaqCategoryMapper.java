@@ -1,21 +1,20 @@
 package com.vecondev.buildoptima.mapper.faq;
 
 import com.vecondev.buildoptima.csv.faq.FaqCategoryRecord;
-import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
-import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.EntityOverview;
+import com.vecondev.buildoptima.dto.Metadata;
+import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
 import com.vecondev.buildoptima.mapper.faq.decorator.FaqCategoryMapperDecorator;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.User;
+import java.util.List;
 import org.mapstruct.Context;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @DecoratedWith(FaqCategoryMapperDecorator.class)

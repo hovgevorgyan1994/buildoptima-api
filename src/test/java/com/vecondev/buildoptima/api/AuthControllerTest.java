@@ -1,6 +1,13 @@
 package com.vecondev.buildoptima.api;
 
-import com.amazonaws.services.s3.AmazonS3;
+import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -13,13 +20,16 @@ import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
+import com.vecondev.buildoptima.parameters.actions.UserResultActions;
 import com.vecondev.buildoptima.parameters.endpoints.UserEndpointUris;
-import com.vecondev.buildoptima.parameters.result_actions.UserResultActions;
 import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
-import com.vecondev.buildoptima.service.s3.AmazonS3Service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import javax.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,20 +43,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.mail.internet.MimeMessage;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -122,9 +118,7 @@ class AuthControllerTest {
     UserRegistrationRequestDto requestDto =
         userControllerTestParameters.getUserToSaveWithDuplicatedEmail();
 
-    resultActions
-        .registrationResultActions(requestDto)
-        .andExpect(status().isConflict());
+    resultActions.registrationResultActions(requestDto).andExpect(status().isConflict());
   }
 
   @Test

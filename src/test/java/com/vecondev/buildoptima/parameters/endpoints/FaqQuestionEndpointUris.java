@@ -21,32 +21,32 @@ public class FaqQuestionEndpointUris implements EndpointUris {
   @Override
   public String getDeleteByIdUri() {
     return baseUri + deleteByIdUri;
-    }
+  }
 
   @Override
   public String getUpdateUri() {
     return baseUri + updateUri;
-    }
+  }
 
   @Override
   public String getCreationUri() {
     return baseUri;
-    }
+  }
 
   @Override
   public String getFetchUri() {
     return baseUri + fetchUri;
-    }
+  }
 
   @Override
   public String getRetrieveByIdUri() {
     return baseUri + retrieveByIdUri;
-    }
+  }
 
   @Override
   public String getAllUri() {
     return baseUri;
-    }
+  }
 
   @Override
   public String getExportInCsvUri() {

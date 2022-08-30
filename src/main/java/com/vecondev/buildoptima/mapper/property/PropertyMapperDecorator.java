@@ -4,11 +4,10 @@ import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.model.property.Address;
 import com.vecondev.buildoptima.model.property.Locations;
 import com.vecondev.buildoptima.model.property.Property;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public abstract class PropertyMapperDecorator implements PropertyMapper {
 

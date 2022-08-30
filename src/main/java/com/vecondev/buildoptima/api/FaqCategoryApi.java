@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.vecondev.buildoptima.dto.Metadata;
 import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.faq.response.FaqCategoryResponseDto;
@@ -15,13 +17,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-
 import java.util.List;
 import java.util.UUID;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 @Tag(
     name = "FAQ Category",
@@ -164,8 +163,9 @@ public interface FaqCategoryApi extends SecuredApi {
                     schema = @Schema(implementation = ApiError.class))),
         @ApiResponse(
             responseCode = "409",
-            description =
-                "There are dependent FAQ questions, so category can only be deleted after deleting that questions.",
+            description = """
+                          There are dependent FAQ questions, so category
+                          can only be deleted after deleting that questions.""",
             content =
                 @Content(
                     mediaType = APPLICATION_JSON_VALUE,

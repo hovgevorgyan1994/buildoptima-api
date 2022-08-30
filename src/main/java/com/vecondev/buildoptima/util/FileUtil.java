@@ -1,16 +1,15 @@
 package com.vecondev.buildoptima.util;
 
+import static com.vecondev.buildoptima.exception.Error.FAILED_FILE_DELETION;
+import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_CONVERTING;
+import static com.vecondev.buildoptima.exception.Error.FAILED_IMAGE_RESIZING;
+import static com.vecondev.buildoptima.exception.Error.FAILED_MULTIPART_CONVERTING;
+
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.vecondev.buildoptima.exception.ConvertingFailedException;
 import com.vecondev.buildoptima.exception.FailedFileOperationException;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.imgscalr.Scalr;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,15 +20,18 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
-
-import static com.vecondev.buildoptima.exception.Error.*;
+import javax.imageio.ImageIO;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.imgscalr.Scalr;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @UtilityClass
 public class FileUtil {
 
-  private final Integer THUMBNAIL_WIDTH = 100;
-  private final Integer THUMBNAIL_HEIGHT = 100;
+  private static final Integer THUMBNAIL_WIDTH = 100;
+  private static final Integer THUMBNAIL_HEIGHT = 100;
 
   public File convertMultipartFileToFile(MultipartFile multipartFile) {
     File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
@@ -45,7 +47,7 @@ public class FileUtil {
   }
 
   /**
-   * resizes original photo to get thumbnail version with size of 100X100
+   * Resizes original photo to get thumbnail version with size of 100X100.
    *
    * @param originalFile the original version of photo
    * @return File the thumbnail version of original photo
@@ -84,7 +86,9 @@ public class FileUtil {
     }
   }
 
-  /** deletes file from classpath */
+  /**
+   * Deletes file from source directory.
+   */
   public void deleteFile(File file) {
     try {
       Files.deleteIfExists(file.toPath());

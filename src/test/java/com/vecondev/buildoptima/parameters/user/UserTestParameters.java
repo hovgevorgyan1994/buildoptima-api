@@ -1,15 +1,14 @@
 package com.vecondev.buildoptima.parameters.user;
 
-import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
-import com.vecondev.buildoptima.filter.model.Criteria;
-import com.vecondev.buildoptima.filter.model.SortDto;
-
-import java.util.List;
-import java.util.Map;
-
 import static com.vecondev.buildoptima.filter.model.SearchOperation.EQ;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
 import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
+
+import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.filter.model.Criteria;
+import com.vecondev.buildoptima.filter.model.SortDto;
+import java.util.List;
+import java.util.Map;
 
 public class UserTestParameters {
 

@@ -1,11 +1,10 @@
 package com.vecondev.buildoptima.validation.validator;
 
 import com.vecondev.buildoptima.validation.constraint.Phone;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 public class PhoneValidator implements ConstraintValidator<Phone, String> {
 

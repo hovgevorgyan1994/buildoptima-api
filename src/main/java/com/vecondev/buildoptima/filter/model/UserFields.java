@@ -1,17 +1,14 @@
 package com.vecondev.buildoptima.filter.model;
 
-import com.vecondev.buildoptima.filter.converter.InstantConverter;
-import com.vecondev.buildoptima.filter.converter.RoleConverter;
-import com.vecondev.buildoptima.model.user.User;
-
-import java.util.Map;
-
 import static com.vecondev.buildoptima.filter.model.FieldType.DATETIME;
 import static com.vecondev.buildoptima.filter.model.FieldType.STRING;
 
-public class UserFields {
+import com.vecondev.buildoptima.filter.converter.InstantConverter;
+import com.vecondev.buildoptima.filter.converter.RoleConverter;
+import com.vecondev.buildoptima.model.user.User;
+import java.util.Map;
 
-  private UserFields() {}
+public class UserFields {
 
   public static final Map<String, FieldDefinition<User, ?>> userPageSortingFieldsMap;
   private static final String FIRST_NAME = "firstName";
@@ -40,4 +37,6 @@ public class UserFields {
             UPDATED_AT,
             new FieldDefinition<>(UPDATED_AT, DATETIME, UPDATED_AT, new InstantConverter()));
   }
+
+  private UserFields() {}
 }

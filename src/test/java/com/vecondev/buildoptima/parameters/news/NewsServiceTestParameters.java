@@ -1,5 +1,8 @@
 package com.vecondev.buildoptima.parameters.news;
 
+import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
+import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
+
 import com.vecondev.buildoptima.csv.news.NewsRecord;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
@@ -13,14 +16,10 @@ import com.vecondev.buildoptima.model.news.NewsCategory;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.util.TestUtil;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.vecondev.buildoptima.filter.model.SearchOperation.GT;
-import static com.vecondev.buildoptima.filter.model.SearchOperation.LIKE;
 
 public class NewsServiceTestParameters extends TestUtil {
 

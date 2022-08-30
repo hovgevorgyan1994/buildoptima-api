@@ -1,15 +1,11 @@
 package com.vecondev.buildoptima.manager;
 
+import static com.vecondev.buildoptima.exception.Error.FAILED_KEY_READ;
+
 import com.vecondev.buildoptima.config.properties.JwtConfigProperties;
 import com.vecondev.buildoptima.exception.KeypairException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
-import org.springframework.util.FileCopyUtils;
-
 import java.io.IOException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -19,8 +15,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.function.Function;
-
-import static com.vecondev.buildoptima.exception.Error.FAILED_KEY_READ;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
 
 @Data
 @Component

@@ -6,9 +6,8 @@ import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
 import com.vecondev.buildoptima.dto.news.response.NewsResponseDto;
-import org.springframework.core.io.InputStreamResource;
-
 import java.util.UUID;
+import org.springframework.core.io.InputStreamResource;
 
 public interface NewsService {
 

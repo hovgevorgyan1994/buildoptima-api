@@ -1,18 +1,17 @@
 package com.vecondev.buildoptima.mapper.user;
 
+import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.List;
-
-import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 
 public abstract class UserMapperDecorator implements UserMapper {
 
@@ -34,9 +33,7 @@ public abstract class UserMapperDecorator implements UserMapper {
 
   @Override
   public UserResponseDto mapToResponseDto(User user) {
-    return mapper.mapToResponseDto(user).toBuilder()
-            .id(user.getId())
-            .build();
+    return mapper.mapToResponseDto(user).toBuilder().id(user.getId()).build();
   }
 
   public List<UserResponseDto> mapToResponseList(Page<User> users) {

@@ -3,14 +3,13 @@ package com.vecondev.buildoptima.csv.news;
 import com.vecondev.buildoptima.csv.CsvRecord;
 import com.vecondev.buildoptima.csv.Header;
 import com.vecondev.buildoptima.model.news.NewsCategory;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Setter
 @Builder(toBuilder = true)

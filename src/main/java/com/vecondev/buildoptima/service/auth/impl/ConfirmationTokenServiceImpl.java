@@ -1,22 +1,20 @@
 package com.vecondev.buildoptima.service.auth.impl;
 
+import static com.vecondev.buildoptima.exception.Error.CONFIRM_TOKEN_NOT_FOUND;
+
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.auth.ConfirmationTokenService;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.CONFIRM_TOKEN_NOT_FOUND;
 
 @Slf4j
 @Service

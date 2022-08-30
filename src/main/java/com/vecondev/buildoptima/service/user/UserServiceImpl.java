@@ -1,5 +1,13 @@
 package com.vecondev.buildoptima.service.user;
 
+import static com.vecondev.buildoptima.exception.Error.IMAGE_IS_REQUIRED;
+import static com.vecondev.buildoptima.exception.Error.PROVIDED_SAME_PASSWORD;
+import static com.vecondev.buildoptima.exception.Error.PROVIDED_WRONG_PASSWORD;
+import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
+import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
+import static com.vecondev.buildoptima.util.RestPreconditions.*;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
+
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
@@ -15,6 +23,8 @@ import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,17 +35,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.UUID;
-
-import static com.vecondev.buildoptima.exception.Error.IMAGE_IS_REQUIRED;
-import static com.vecondev.buildoptima.exception.Error.PROVIDED_SAME_PASSWORD;
-import static com.vecondev.buildoptima.exception.Error.PROVIDED_WRONG_PASSWORD;
-import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
-import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
-import static com.vecondev.buildoptima.util.RestPreconditions.*;
-import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 @Slf4j
 @Service
@@ -107,8 +106,8 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * uploads new image or updates existing one, saves the original one 'and' it's thumbnail version
-   * as well
+   * Uploads new image or updates existing one, saves the original one 'and' it's thumbnail version
+   * as well.
    *
    * @param multipartFile file representing the image
    */
@@ -124,7 +123,7 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * downloads image
+   * Downloads image.
    *
    * @param ownerId the image owner
    * @param isOriginal flag that shows if image is original or not (thumbnail)

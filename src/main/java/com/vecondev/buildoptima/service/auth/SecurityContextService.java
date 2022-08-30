@@ -5,11 +5,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 public interface SecurityContextService {
 
-    AppUserDetails getUserDetails();
+  AppUserDetails getUserDetails();
 
-    void setAuthentication(final UsernamePasswordAuthenticationToken auth);
+  void setAuthentication(final UsernamePasswordAuthenticationToken auth);
 
-    void clearAuthentication();
-
-
+  void clearAuthentication();
 }

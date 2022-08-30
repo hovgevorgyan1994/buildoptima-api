@@ -1,12 +1,11 @@
 package com.vecondev.buildoptima.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
-
-import java.time.Instant;
 
 @NoArgsConstructor
 @AllArgsConstructor

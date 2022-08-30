@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.parameters.user;
 
+import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
@@ -9,15 +11,12 @@ import com.vecondev.buildoptima.model.user.RefreshToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.PageableTest;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class UserServiceTestParameters extends UserTestParameters implements PageableTest {
   private final PasswordEncoder encoder = new BCryptPasswordEncoder(12);
@@ -117,13 +116,13 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
     return new ConfirmationToken(uuid.toString(), LocalDateTime.now().plusDays(1), savedUser);
   }
 
-  public AppUserDetails userDetails(){
+  public AppUserDetails userDetails() {
     User user = getSavedUser();
     return AppUserDetails.builder()
-            .id(user.getId())
-            .username(user.getEmail())
-            .authorities(user.getRole().getAuthorities())
-            .enabled(true)
-            .build();
+        .id(user.getId())
+        .username(user.getEmail())
+        .authorities(user.getRole().getAuthorities())
+        .enabled(true)
+        .build();
   }
 }
