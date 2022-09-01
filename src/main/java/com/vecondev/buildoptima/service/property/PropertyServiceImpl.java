@@ -4,18 +4,21 @@ import static com.vecondev.buildoptima.util.FileUtil.*;
 import static com.vecondev.buildoptima.util.JsonUtil.*;
 
 import com.amazonaws.services.s3.model.S3Object;
-import com.google.common.collect.Lists;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.dto.property.PropertyListDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
+import com.vecondev.buildoptima.exception.Error;
+import com.vecondev.buildoptima.exception.OpenSearchException;
+import com.vecondev.buildoptima.mapper.property.AddressMapper;
 import com.vecondev.buildoptima.mapper.property.PropertyMapper;
 import com.vecondev.buildoptima.model.property.Address;
 import com.vecondev.buildoptima.model.property.Property;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import com.vecondev.buildoptima.repository.property.PropertyRepository;
+import com.vecondev.buildoptima.service.property.address.OpenSearchService;
 import com.vecondev.buildoptima.service.property.migration.MigrationHistoryService;
 import com.vecondev.buildoptima.service.property.migration.MigrationMetadataService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
@@ -35,17 +38,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = Exception.class)
 public class PropertyServiceImpl implements PropertyService {
 
   private final PropertyMapper propertyMapper;
+  private final AddressMapper addressMapper;
   private final PropertyRepository propertyRepository;
   private final MigrationHistoryService migrationHistoryService;
   private final MigrationMetadataService migrationMetadataService;
   private final AmazonS3Service amazonS3Service;
+  private final OpenSearchService openSearchService;
   private final S3ConfigProperties s3ConfigProperties;
 
   @Override
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = Exception.class)
   public List<MigrationHistory> migrateFromS3() {
     List<S3Object> unprocessedFiles =
         amazonS3Service.getObjects(s3ConfigProperties.getDataBucketName()).stream()
@@ -60,7 +65,6 @@ public class PropertyServiceImpl implements PropertyService {
     } else {
       log.info("No new property files were found in S3 bucket");
     }
-
     return processedFilesBefore;
   }
 
@@ -83,14 +87,13 @@ public class PropertyServiceImpl implements PropertyService {
                 .size()),
         propertyRepository.findAll().size());
   }
-
   /**
    * Reprocess all the files that have been failed before.
    *
    * @return the all files that have been failed to process before
    */
+
   @Override
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = Exception.class)
   public List<MigrationHistory> reprocessFailedFiles() {
     List<MigrationHistory> failedToProcessFiles =
         migrationHistoryService.findAllByFailedAtNotNull();
@@ -151,31 +154,27 @@ public class PropertyServiceImpl implements PropertyService {
     int sizeOfUnprocessedFiles = unprocessedFiles.size();
     ExecutorService executorService = Executors.newFixedThreadPool(sizeOfUnprocessedFiles);
     CountDownLatch countDownLatch = new CountDownLatch(sizeOfUnprocessedFiles);
-    Lists.partition(unprocessedFiles, sizeOfUnprocessedFiles)
-        .forEach(
-            s3Objects -> {
-              Runnable runnable =
-                  () ->
-                      s3Objects.forEach(
-                          s3Object -> {
-                            try {
-                              saveProperty(
-                                  readFromJson(convertS3ObjectToPath(s3Object).toFile()),
-                                  migrationHistoryService.saveSucceededHistory(s3Object.getKey()));
-                              log.info("""
-                                      {} file from S3 was successfully processed
-                                      and removed from local storage""",
-                                  s3Object.getKey());
-                            } catch (Exception e) {
-                              migrationHistoryService
-                                  .saveFailedHistory(s3Object.getKey(), e.getMessage());
-                              log.info("""
-                                      Failed processing {} file from S3.
-                                      See failed reason in migration metadata""",
-                                  s3Object.getKey());
-                            }
-                            countDownLatch.countDown();
-                          });
+    unprocessedFiles.forEach(
+            s3Object -> {
+              Runnable runnable = () -> {
+                try {
+                  saveProperty(
+                      readFromJson(convertS3ObjectToPath(s3Object).toFile()),
+                      migrationHistoryService.saveSucceededHistory(s3Object.getKey()));
+                  log.info("""
+                            {} file from S3 was successfully processed
+                            and removed from local storage""",
+                      s3Object.getKey());
+                } catch (Exception e) {
+                  migrationHistoryService
+                      .saveFailedHistory(s3Object.getKey(), e.getMessage());
+                  log.info("""
+                            Failed processing {} file from S3.
+                            See failed reason in migration metadata""",
+                      s3Object.getKey());
+                }
+                countDownLatch.countDown();
+              };
               executorService.submit(runnable);
             });
     try {
@@ -184,9 +183,11 @@ public class PropertyServiceImpl implements PropertyService {
       ex.printStackTrace();
       Thread.currentThread().interrupt();
     }
-    log.info("{} property files from S3 were processed", unprocessedFiles.size());
   }
 
+  /**
+   * Saves the whole property data in database and the property addresses in OpenSearch.
+   */
   private void saveProperty(PropertyListDto propertyListDto, MigrationHistory migrationHistory) {
     List<PropertyReadDto> properties = propertyListDto.getProperties();
     properties.forEach(
@@ -196,13 +197,15 @@ public class PropertyServiceImpl implements PropertyService {
             Property savedProperty;
             if (fromDb.isEmpty()) {
               savedProperty =
-                  propertyRepository.saveAndFlush(propertyMapper.mapToEntity(propertyDto));
+                  propertyRepository.save(propertyMapper.mapToEntity(propertyDto));
             } else {
               savedProperty = update(propertyDto, fromDb.get());
             }
+            openSearchService.bulk(addressMapper.mapToDocumentList(savedProperty.getAddresses()));
             migrationMetadataService.save(migrationHistory, savedProperty);
           } catch (Exception e) {
             migrationMetadataService.save(migrationHistory, propertyDto, e.getMessage());
+            throw new OpenSearchException(Error.FAILED_BULK_DOCUMENT);
           }
         });
   }
@@ -211,7 +214,9 @@ public class PropertyServiceImpl implements PropertyService {
     return migrationHistories.stream()
         .filter(history -> history.getFailedAt() != null)
         .collect(
-            Collectors.toMap(MigrationHistory::getFilePath, MigrationHistory::getFailedReason));
+            Collectors.toMap(MigrationHistory::getFilePath,
+                migration ->
+                    (migration.getFailedReason() == null) ? " - " : migration.getFailedReason()));
   }
 
   private Property update(PropertyReadDto propertyDto, Property toUpdate) {
@@ -224,6 +229,7 @@ public class PropertyServiceImpl implements PropertyService {
     toUpdate.setDetails(property.getDetails());
     toUpdate.setHazards(property.getHazards());
     toUpdate.setZoningDetails(property.getZoningDetails());
+    openSearchService.bulk(addressMapper.mapToDocumentList(property.getAddresses()));
     return propertyRepository.saveAndFlush(toUpdate);
   }
 }

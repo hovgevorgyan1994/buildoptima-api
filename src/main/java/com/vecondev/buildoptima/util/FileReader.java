@@ -1,7 +1,6 @@
 package com.vecondev.buildoptima.util;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
 
@@ -9,21 +8,19 @@ import lombok.experimental.UtilityClass;
 public class FileReader {
 
   /**
-   * Reads a json file in given path, for open api config, to show in swagger ui the right request
-   * json while searching and filtering.
+   * Reads a json file in given path.
    *
    * @param path the given json file path
    * @return on Object of json file
    */
-  public Object fetchRequestExample(String path) {
-    File file = new File(path);
-    try (BufferedReader reader = new BufferedReader(new java.io.FileReader(file))) {
+  public Object readFromJson(String path) {
+    try (BufferedReader reader = new BufferedReader(new java.io.FileReader(path))) {
       StringBuilder builder = new StringBuilder();
       String read;
       while ((read = reader.readLine()) != null) {
         builder.append(read);
       }
-      return builder;
+      return builder.toString();
     } catch (IOException e) {
       throw new IllegalStateException("Could not read file");
     }

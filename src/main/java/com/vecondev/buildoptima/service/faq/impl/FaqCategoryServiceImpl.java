@@ -147,9 +147,7 @@ public class FaqCategoryServiceImpl implements FaqCategoryService {
         .build();
   }
 
-  /**
-   * Exports all faq categories in csv file.
-   */
+  /** Exports all faq categories in csv file. */
   @Override
   public ResponseEntity<Resource> exportInCsv() {
     List<FaqCategory> categories = faqCategoryRepository.findAll();

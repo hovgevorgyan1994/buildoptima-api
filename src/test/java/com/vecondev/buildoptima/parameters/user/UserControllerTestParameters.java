@@ -163,9 +163,6 @@ public class UserControllerTestParameters extends UserTestParameters {
 
   public FetchRequestDto getInvalidFetchRequest() {
     return new FetchRequestDto(
-        0,
-        10,
-        List.of(new SortDto("firstName", SortDto.Direction.ASC)),
         Map.of(
             "and",
             List.of(
@@ -174,7 +171,10 @@ public class UserControllerTestParameters extends UserTestParameters {
                     "or",
                     List.of(
                         new Criteria(LIKE, "lastNam", "Smith"),
-                        new Criteria(GT, "creationDat", "2018-11-30T18:35:24.00Z"))))));
+                        new Criteria(GT, "creationDat", "2018-11-30T18:35:24.00Z"))))),
+        0,
+        10,
+        List.of(new SortDto("firstName", SortDto.Direction.ASC)));
   }
 
   public ChangePasswordRequestDto getChangePasswordRequestDto(User user) {

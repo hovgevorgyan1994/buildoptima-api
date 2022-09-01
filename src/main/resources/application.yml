@@ -84,8 +84,20 @@ logging:
         util:
           EC2MetadataUtils: error
 
+
 host:
   address: http://localhost:3000
+
+opensearch:
+  properties:
+    username: buildoptima
+    password: Buildoptima2022.
+    hostname: search-buildoptima-qlgtbnqklfvdvcdj576ghisvmu.us-east-1.es.amazonaws.com
+    port: 443
+    schema: https
+    indexName: buildoptima
+    indexMappingPath: src/main/resources/opensearch/mappings.json
+    indexSettingsPath: src/main/resources/opensearch/settings.json
 
 page:
   skip: 0

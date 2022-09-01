@@ -103,9 +103,6 @@ public class FaqQuestionControllerTestParameters extends FaqQuestionTestParamete
 
   public FetchRequestDto getInvalidFetchRequest() {
     return new FetchRequestDto(
-        0,
-        10,
-        List.of(new SortDto("question", SortDto.Direction.ASC)),
         Map.of(
             "and",
             List.of(
@@ -114,6 +111,9 @@ public class FaqQuestionControllerTestParameters extends FaqQuestionTestParamete
                     "or",
                     List.of(
                         new Criteria(LIKE, "answer", "password"),
-                        new Criteria(GT, "creationDate", "2018-11-30T18:35:24.00Z"))))));
+                        new Criteria(GT, "creationDate", "2018-11-30T18:35:24.00Z"))))),
+        0,
+        10,
+        List.of(new SortDto("question", SortDto.Direction.ASC)));
   }
 }

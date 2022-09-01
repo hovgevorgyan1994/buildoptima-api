@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +15,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -38,4 +36,10 @@ public abstract class AbstractEntity implements Serializable {
   @UpdateTimestamp
   @Column(name = "updated_at")
   protected Instant updatedAt;
+
+  protected AbstractEntity(UUID id, Instant createdAt, Instant updatedAt) {
+    this.id = id;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
 }

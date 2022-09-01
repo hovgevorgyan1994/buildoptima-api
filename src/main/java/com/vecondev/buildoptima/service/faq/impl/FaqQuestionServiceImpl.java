@@ -151,9 +151,7 @@ public class FaqQuestionServiceImpl implements FaqQuestionService {
         .build();
   }
 
-  /**
-   * Exports all faq questions in csv file.
-   */
+  /** Exports all faq questions in csv file. */
   public ResponseEntity<Resource> exportInCsv() {
     List<FaqQuestion> questions = faqQuestionRepository.findAll();
     List<FaqQuestionRecord> questionRecords = faqQuestionMapper.mapToRecordList(questions);

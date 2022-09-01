@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Schema(name = "Fetch Request DTO")
 public class FetchRequestDto {
 
+  Map<String, Object> filter;
   private Integer skip;
   private Integer take;
   private List<@Valid SortDto> sort;
-  Map<String, Object> filter;
 }

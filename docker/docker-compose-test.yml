@@ -15,3 +15,16 @@ services:
       - AWS_DEFAULT_REGION=eu-west-1
       - AWS_ACCESS_KEY_ID=localstack
       - AWS_SECRET_ACCESS_KEY=localstack
+
+  opensearch:
+    container_name: opensearch
+    image: opensearchproject/opensearch:2.2.0
+    environment:
+      - discovery.type=single-node
+      - "DISABLE_SECURITY_PLUGIN=true"
+    ports:
+      - "9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1

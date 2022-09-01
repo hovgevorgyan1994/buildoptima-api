@@ -39,6 +39,14 @@ public class Property implements Serializable {
 
   @Serial private static final long serialVersionUID = -1708400421457836238L;
 
+  @CreationTimestamp
+  @Column(name = "created_at")
+  protected Instant createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  protected Instant updatedAt;
+
   @Id
   @Column(name = "ain")
   private String ain;
@@ -69,14 +77,6 @@ public class Property implements Serializable {
   @Version
   @Column(name = "version", columnDefinition = "integer DEFAULT 0")
   private Integer version;
-
-  @CreationTimestamp
-  @Column(name = "created_at")
-  protected Instant createdAt;
-
-  @UpdateTimestamp
-  @Column(name = "updated_at")
-  protected Instant updatedAt;
 
   public void addAddresses(List<Address> addresses) {
     this.addresses = new ArrayList<>();

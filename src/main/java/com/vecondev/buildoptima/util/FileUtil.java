@@ -86,9 +86,7 @@ public class FileUtil {
     }
   }
 
-  /**
-   * Deletes file from source directory.
-   */
+  /** Deletes file from source directory. */
   public void deleteFile(File file) {
     try {
       Files.deleteIfExists(file.toPath());

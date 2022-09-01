@@ -23,6 +23,17 @@ spring:
     password: buildoptima
     username: managementstaffing09@gmail.com
 
+opensearch:
+  properties:
+    username:
+    password:
+    hostname: localhost
+    port: 9200
+    schema: http
+    indexName: buildoptima
+    indexMappingPath: src/test/resources/opensearch/mappings.json
+    indexSettingsPath: src/test/resources/opensearch/settings.json
+
 config:
   aws:
     s3:

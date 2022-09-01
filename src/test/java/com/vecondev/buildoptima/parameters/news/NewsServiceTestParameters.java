@@ -100,14 +100,14 @@ public class NewsServiceTestParameters extends TestUtil {
 
   public FetchRequestDto getFetchRequest() {
     return new FetchRequestDto(
-        0,
-        10,
-        List.of(new SortDto("title", SortDto.Direction.ASC)),
         Map.of(
             "and",
             List.of(
                 new Criteria(LIKE, "title", "Summer"),
-                Map.of("or", List.of(new Criteria(GT, "createdAt", "2018-11-30T18:35:24.00Z"))))));
+                Map.of("or", List.of(new Criteria(GT, "createdAt", "2018-11-30T18:35:24.00Z"))))),
+        0,
+        10,
+        List.of(new SortDto("title", SortDto.Direction.ASC)));
   }
 
   public News getSavedNews(NewsCreateRequestDto dto, User user) {

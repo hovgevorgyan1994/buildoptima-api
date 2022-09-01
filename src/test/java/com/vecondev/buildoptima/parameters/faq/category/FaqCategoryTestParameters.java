@@ -13,9 +13,6 @@ public class FaqCategoryTestParameters {
 
   public FetchRequestDto getFetchRequest() {
     return new FetchRequestDto(
-        0,
-        10,
-        List.of(new SortDto("name", SortDto.Direction.ASC)),
         Map.of(
             "and",
             List.of(
@@ -24,6 +21,9 @@ public class FaqCategoryTestParameters {
                     "or",
                     List.of(
                         new Criteria(GT, "createdAt", "2018-11-30T18:35:24.00Z"),
-                        new Criteria(GT, "updatedAt", "2018-11-30T18:35:24.00Z"))))));
+                        new Criteria(GT, "updatedAt", "2018-11-30T18:35:24.00Z"))))),
+        0,
+        10,
+        List.of(new SortDto("name", SortDto.Direction.ASC)));
   }
 }

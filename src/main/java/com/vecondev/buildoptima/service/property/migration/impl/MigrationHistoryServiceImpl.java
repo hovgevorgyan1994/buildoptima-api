@@ -61,7 +61,7 @@ public class MigrationHistoryServiceImpl implements MigrationHistoryService {
                   .failedAt(failedAt)
                   .failedReason(failedReason)
                   .build());
-      log.info("Successfully saved failed processing history of file {}", filePath);
+      log.info("Successfully saved processing history of file {}", filePath);
     } else {
       migrationHistory =
           historyRepository.saveAndFlush(

@@ -8,8 +8,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
  * code. HTTP STATUS the response status code MESSAGE the error message
  */
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum Error {
   PROVIDED_WRONG_PASSWORD(4001, BAD_REQUEST, "Provided Wrong Password In Change Password Request"),
   INVALID_PAGEABLE(4002, BAD_REQUEST, "The `skip` Value Should Be Divisible To `take`Value"),
@@ -38,8 +38,7 @@ public enum Error {
   ACCESS_TOKEN_EXPIRED(4014, UNAUTHORIZED, "Expired Access Token"),
   NOT_ACTIVE_ACCOUNT(4015, UNAUTHORIZED, "User Email Is Not Verified"),
 
-  ACCESS_DENIED(
-      4031, FORBIDDEN, "Permission Denied To Requested Resource"),
+  ACCESS_DENIED(4031, FORBIDDEN, "Permission Denied To Requested Resource"),
 
   CONFIRM_TOKEN_NOT_FOUND(4041, NOT_FOUND, "Confirmation Token Not Found"),
   USER_NOT_FOUND(4042, NOT_FOUND, "There Is No User With Such Id"),
@@ -60,18 +59,14 @@ public enum Error {
   FAQ_QUESTION_ALREADY_EXIST(
       4095, CONFLICT, "There Is a FAQ Question Created With Such Question Content"),
   CATEGORY_HAS_QUESTIONS(
-      4096,
-      CONFLICT,
-      "The Category Has Questions, To Delete It First Delete It's Questions"),
+      4096, CONFLICT, "The Category Has Questions, To Delete It First Delete It's Questions"),
 
   INVALID_IMAGE_FORMAT(4121, PRECONDITION_FAILED, "Cannot Upload The Image"),
   INVALID_IMAGE_SIZE(
       4122, PRECONDITION_FAILED, "Image Has Smaller Size Than It's Required (600x600)"),
   INVALID_FILE_SIZE(4123, PRECONDITION_FAILED, "File Size Should Be Between 70KB and 30MB"),
   INVALID_IMAGE_EXTENSION(
-      4124,
-      PRECONDITION_FAILED,
-      "The Extension Of The Image Should Be Either 'jpg/jpeg' or 'png'"),
+      4124, PRECONDITION_FAILED, "The Extension Of The Image Should Be Either 'jpg/jpeg' or 'png'"),
 
   SEND_EMAIL_FAILED(5001, INTERNAL_SERVER_ERROR, "Failed To Send An Email"),
   FAILED_MULTIPART_CONVERTING(
@@ -86,7 +81,11 @@ public enum Error {
   FAILED_READ_FROM_JSON(50010, INTERNAL_SERVER_ERROR, "Error Occurred While Reading From Json"),
   FAILED_KEY_READ(5008, INTERNAL_SERVER_ERROR, "Error Occurred While Retrieving Security Keys"),
   FAILED_FILE_DELETION(5009, INTERNAL_SERVER_ERROR, "Error Occurred While Deleting The File"),
-  FAILED_DATA_DOWNLOAD(50011, INTERNAL_SERVER_ERROR, "Error Occurred While Downloading The Data");
+  FAILED_DATA_DOWNLOAD(50011, INTERNAL_SERVER_ERROR, "Error Occurred While Downloading The Data"),
+  FAILED_INDEX_CREATION(
+      50012, INTERNAL_SERVER_ERROR, "Error Occurred While Creating AWS OpenSearch Index"),
+  FAILED_BULK_DOCUMENT(
+      50013, INTERNAL_SERVER_ERROR, "Error Occurred While Adding Data To OpenSearch Index");
 
   private final Integer code;
   private final HttpStatus httpStatus;

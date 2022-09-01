@@ -6,7 +6,7 @@ import static com.vecondev.buildoptima.exception.Error.PROVIDED_WRONG_PASSWORD;
 import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
 import static com.vecondev.buildoptima.util.RestPreconditions.*;
-import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.*;
 
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;

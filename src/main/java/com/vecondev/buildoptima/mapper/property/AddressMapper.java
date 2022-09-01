@@ -2,6 +2,7 @@ package com.vecondev.buildoptima.mapper.property;
 
 import com.vecondev.buildoptima.dto.property.AddressDto;
 import com.vecondev.buildoptima.model.property.Address;
+import com.vecondev.buildoptima.model.property.AddressDocument;
 import java.util.List;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
@@ -14,4 +15,8 @@ public interface AddressMapper {
   AddressDto mapToDto(Address address);
 
   List<AddressDto> mapToDtoList(List<Address> addresses);
+
+  AddressDocument mapToDocument(Address address);
+
+  List<AddressDocument> mapToDocumentList(List<Address> addresses);
 }

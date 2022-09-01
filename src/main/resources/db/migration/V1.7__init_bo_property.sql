@@ -15,7 +15,7 @@ create table bo_prop_address
 (
     id                      uuid primary key,
     property_ain            varchar(12) not null references bo_property (ain) on delete cascade,
-    house_number            varchar(7),
+    house_number            varchar(10),
     fraction                varchar(20),
     direction               varchar(50),
     street_name             varchar(50),
@@ -24,7 +24,7 @@ create table bo_prop_address
     unit                    varchar(15),
     city                    varchar(25),
     state                   varchar(5),
-    zip                     varchar(7),
+    zip                     varchar(10),
     is_primary              boolean      not null
 )
 

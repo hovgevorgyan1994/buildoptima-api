@@ -34,6 +34,8 @@
         <commons-io.version>2.11.0</commons-io.version>
         <jacoco.version>0.8.8</jacoco.version>
         <hibernate.types.version>2.17.1</hibernate.types.version>
+        <google.guava.version>31.1-jre</google.guava.version>
+        <rest.high.level.client.version>2.2.0</rest.high.level.client.version>
     </properties>
     <dependencies>
 
@@ -188,7 +190,13 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
+            <version>${google.guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opensearch.client</groupId>
+            <artifactId>opensearch-rest-high-level-client</artifactId>
+            <version>${rest.high.level.client.version}</version>
         </dependency>
 
     </dependencies>

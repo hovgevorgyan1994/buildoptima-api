@@ -25,7 +25,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Run LocalStack Container
+    - name: Run Localstack And OpenSearch Containers
       run: docker-compose -f docker/docker-compose-test.yml up -d
     - name: Run Tests
       run: |
@@ -45,7 +45,7 @@ jobs:
         default_author: github_actions
         message: 'Commit badge'
         add: '*.svg'
-    - name: Build with Maven
+    - name: Build With Maven
       run: mvn package -DskipTests
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -53,15 +53,15 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
-    - name: Login to Amazon ECR
+    - name: Login To Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
-    - name: Build, tag, and push image to Amazon ECR
+    - name: Build, Tag, And Push Image To Amazon ECR
       run: |
         docker build -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY .
         docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY
         IMAGES_TO_DELETE=$( aws ecr list-images --repository-name $AWS_ECR_REPOSITORY --filter "tagStatus=UNTAGGED" --query 'imageIds[*]' --output json )
         aws ecr batch-delete-image --repository-name $AWS_ECR_REPOSITORY --image-ids "$IMAGES_TO_DELETE" || true
-    - name: Configure EC2 environment and deploy the application
+    - name: Configure EC2 Environment And Deploy The Application
       run: |
         echo "$AWS_EC2_PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
         ssh -o StrictHostKeyChecking=no -i "private_key.pem" $AWS_EC2_USER@$AWS_EC2_IP_ADDRESS mkdir -p /home/ubuntu/buildoptima/data 
@@ -81,7 +81,7 @@ jobs:
         sudo apt install awscli
         echo -e "[default]\naws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\naws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}" > /home/ubuntu/.aws/credentials
         echo -e "[default]\nregion = us-east-1\noutput = json" > /home/ubuntu/.aws/config
-        fi;
+        fi
         sudo docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) $AWS_ECR_REGISTRY
         cd /home/ubuntu/buildoptima
         sudo docker-compose pull

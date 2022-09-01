@@ -73,8 +73,8 @@ public class SwaggerConfig {
                                                                 .example("""
                                                                          Invalid password! The password
                                                                          should have 8 up to 32 characters
-                                                                         at least one uppercase character, 
-                                                                         one lowercase character, one digit, 
+                                                                         at least one uppercase character,
+                                                                         one lowercase character, one digit,
                                                                          one special symbol and no whitespaces!""")))))))
                 .addRequestBodies(
                         "fetchUsersRequestExample",
@@ -84,8 +84,7 @@ public class SwaggerConfig {
                                                 .addMediaType(
                                                         APPLICATION_JSON_VALUE,
                                                         new io.swagger.v3.oas.models.media.MediaType()
-                                                                .schema(new MapSchema()
-                                                                    .example(fetchRequestExample("docs/json/user-filter-sorting-example.json"))))))
+                                                                .schema(new MapSchema().example(readFromJson("docs/json/user-filter-sorting-example.json"))))))
                 .addRequestBodies(
                     "fetchFaqCategoriesRequestExample",
                     new RequestBody()
@@ -94,8 +93,7 @@ public class SwaggerConfig {
                                             .addMediaType(
                                                     APPLICATION_JSON_VALUE,
                                                     new io.swagger.v3.oas.models.media.MediaType()
-                                                            .schema(new MapSchema()
-                                                                .example(fetchRequestExample("docs/json/faq_category-filter-sorting-example.json"))))))
+                                                            .schema(new MapSchema().example(readFromJson("docs/json/faq_category-filter-sorting-example.json"))))))
                 .addRequestBodies(
                         "fetchFaqQuestionsRequestExample",
                         new RequestBody()
@@ -104,8 +102,7 @@ public class SwaggerConfig {
                                                 .addMediaType(
                                                         APPLICATION_JSON_VALUE,
                                                         new io.swagger.v3.oas.models.media.MediaType()
-                                                                .schema(new MapSchema()
-                                                                    .example(fetchRequestExample("docs/json/faq_question-filter-sorting-example.json"))))))
+                                                                .schema(new MapSchema().example(readFromJson("docs/json/faq_question-filter-sorting-example.json"))))))
                 .addRequestBodies(
                         "fetchNewsRequestExample",
                         new RequestBody()
@@ -114,7 +111,6 @@ public class SwaggerConfig {
                                                 .addMediaType(
                                                         APPLICATION_JSON_VALUE,
                                                         new io.swagger.v3.oas.models.media.MediaType()
-                                                                .schema(new MapSchema()
-                                                                    .example(fetchRequestExample("docs/json/news-filter-sorting-example.json")))))));
+                                                                .schema(new MapSchema().example(readFromJson("docs/json/news-filter-sorting-example.json")))))));
   }
 }

@@ -17,20 +17,28 @@ public class FaqQuestionRecord implements CsvRecord {
 
   @Header("ID")
   private UUID id;
+
   @Header("Question")
   private String question;
+
   @Header("Answer")
   private String answer;
+
   @Header("Status")
   private Status status;
+
   @Header("Category")
   private String category;
+
   @Header("Created by")
   private String createdBy;
+
   @Header("Created at")
   private Instant createdAt;
+
   @Header("Updated by")
   private String updatedBy;
+
   @Header("Created at")
   private Instant updatedAt;
 
