@@ -3,6 +3,8 @@ package com.vecondev.buildoptima.parameters.property;
 import com.amazonaws.services.s3.model.S3Object;
 import com.vecondev.buildoptima.dto.property.PropertyListDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
+import com.vecondev.buildoptima.model.property.Property;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,5 +41,13 @@ public class PropertyServiceTestParameters {
     List<PropertyReadDto> propertyReadDtoList =
         List.of(new PropertyReadDto(), new PropertyReadDto(), new PropertyReadDto());
     return new PropertyListDto(propertyReadDtoList);
+  }
+
+  public Property getByAin() {
+    return Property.builder().ain("123456").build();
+  }
+
+  public PropertyResponseDto mapToResponseDto() {
+    return PropertyResponseDto.builder().ain("123456").build();
   }
 }

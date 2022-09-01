@@ -90,3 +90,4 @@ config:
       migrationUri: /migrate
       reprocessUri: /re-process
       trackProgressUri: /progress
+      findByAinUri: /{ain}

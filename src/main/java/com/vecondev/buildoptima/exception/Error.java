@@ -50,6 +50,7 @@ public enum Error {
       4047, NOT_FOUND, "There Is No Migration History With Such Id/File_Path."),
   MIGRATION_METADATA_NOT_FOUND(
       4048, NOT_FOUND, "There Is No Migration Metadata With Such Id/Property_AIN."),
+  PROPERTY_NOT_FOUND(4049, NOT_FOUND, "There Is No Property Data With Such Ain"),
 
   PROVIDED_SAME_PASSWORD(4091, CONFLICT, "Provided The Same Password In Change Password Request"),
   USER_ALREADY_EXIST_WITH_EMAIL(4092, CONFLICT, "There Is a User Registered With Such Email"),

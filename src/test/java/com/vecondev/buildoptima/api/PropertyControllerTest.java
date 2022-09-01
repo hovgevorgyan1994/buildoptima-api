@@ -1,6 +1,7 @@
 package com.vecondev.buildoptima.api;
 
 import static com.vecondev.buildoptima.exception.Error.ACCESS_DENIED;
+import static com.vecondev.buildoptima.model.user.Role.ADMIN;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
 import static org.junit.Assume.assumeNotNull;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.amazonaws.services.s3.AmazonS3;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
+import com.vecondev.buildoptima.model.property.Property;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
@@ -30,15 +32,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.opensearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
@@ -67,6 +69,7 @@ class PropertyControllerTest {
                 amazonS3.putObject(
                     s3ConfigProperties.getDataBucketName(), file, testParameters.getFile(file)));
     userRepository.saveAll(testParameters.users());
+    propertyRepository.save(testParameters.getProperty());
   }
 
   @AfterEach
@@ -155,11 +158,33 @@ class PropertyControllerTest {
         .andExpect(jsonPath("$.allProcessedProperties").value(getProcessedPropertiesCount()));
   }
 
+  @Test
+  void getByAinSuccess() throws Exception {
+    User moderator = getUserByRole(MODERATOR);
+    String ain = "123456";
+    assumeNotNull(moderator);
+
+    propertyResultActions.getByAin(moderator, ain)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.ain").value("123456"))
+        .andExpect(jsonPath("$.municipality").value("Los Angeles"));
+  }
+
+  @Test
+  void getByAinFailedAsPropertyNotFound() throws Exception {
+    User moderator = getUserByRole(MODERATOR);
+    String ain = "645321";
+    assumeNotNull(moderator);
+
+    propertyResultActions.getByAin(moderator, ain)
+        .andExpect(status().isNotFound());
+  }
+
   private User getUserByRole(Role role) {
     return userRepository.findByRole(role).orElse(null);
   }
 
   private int getProcessedPropertiesCount() {
-    return migrationHistoryRepository.findAllByFailedAtIsNull().size() * PROPERTIES_PER_FILE;
+    return migrationHistoryRepository.findAllByFailedAtIsNull().size() * PROPERTIES_PER_FILE + 1;
   }
 }

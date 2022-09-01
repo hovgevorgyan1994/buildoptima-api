@@ -1,6 +1,7 @@
 package com.vecondev.buildoptima.mapper.property;
 
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
 import com.vecondev.buildoptima.model.property.Property;
 import java.util.List;
 import org.mapstruct.DecoratedWith;
@@ -16,4 +17,7 @@ public interface PropertyMapper {
   Property mapToEntity(PropertyReadDto dto);
 
   List<Property> mapToEntityList(List<PropertyReadDto> list);
+
+  @Mapping(target = "addresses", ignore = true)
+  PropertyResponseDto mapToResponseDto(Property property);
 }

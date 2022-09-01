@@ -61,16 +61,17 @@ Below is the sample structure of payload of API error
 
 #### Errors for 404 NOT FOUND
 
-| Error Name                       | Code   | Message                                   |
-|:---------------------------------|:-------|:------------------------------------------|
-| `CONFIRM_TOKEN_NOT_FOUND`        | 4041   | `Confirmation Token Not Found`            |
-| `USER_NOT_FOUND`                 | 4042   | `There Is No User With Such Id`           |
-| `FAQ_QUESTION_NOT_FOUND`         | 4043   | `There Is No FAQ Question With Such Id`   |
-| `FAQ_CATEGORY_NOT_FOUND `        | 4044   | `There Is No FAQ Category With Such Id`   |
-| `IMAGE_NOT_FOUND  `              | 4045   | `There Is No Image For The Given User`    |
-| `NEWS_ITEM_NOT_FOUND   `         | 4046   | `News Item Not Found`                     |
-| `MIGRATION_HISTORY_NOT_FOUND`    | 4047   | `Migration History Not Found`             |
-| `MIGRATION_METADATA_NOT_FOUND`   | 4048   | `Migration Metadata Not Found`            |
+| Error Name                     | Code  | Message                                 |
+|:-------------------------------|:------|:----------------------------------------|
+| `CONFIRM_TOKEN_NOT_FOUND`      | 4041  | `Confirmation Token Not Found`          |
+| `USER_NOT_FOUND`               | 4042  | `There Is No User With Such Id`         |
+| `FAQ_QUESTION_NOT_FOUND`       | 4043  | `There Is No FAQ Question With Such Id` |
+| `FAQ_CATEGORY_NOT_FOUND `      | 4044  | `There Is No FAQ Category With Such Id` |
+| `IMAGE_NOT_FOUND  `            | 4045  | `There Is No Image For The Given User`  |
+| `NEWS_ITEM_NOT_FOUND   `       | 4046  | `News Item Not Found`                   |
+| `MIGRATION_HISTORY_NOT_FOUND`  | 4047  | `Migration History Not Found`           |
+| `MIGRATION_METADATA_NOT_FOUND` | 4048  | `Migration Metadata Not Found`          |
+| `PROPERTY_NOT_FOUND`           | 4049  | `Property Data Not Found`               |
 
 #### Errors for 409 CONFLICT
 

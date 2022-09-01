@@ -52,6 +52,13 @@ public class PropertyResultActions extends EntityResultActions<PropertyEndpointU
             .accept(APPLICATION_JSON_VALUE));
   }
 
+  public ResultActions getByAin(User user, String ain) throws Exception {
+    return mockMvc.perform(
+        get(endpointUris.getByAinUri(), ain)
+            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            .accept(APPLICATION_JSON_VALUE));
+  }
+
   private ResultActions getPostRequest(User user, String uri) throws Exception {
     return mockMvc.perform(
         post(uri)

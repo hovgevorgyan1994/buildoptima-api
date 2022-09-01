@@ -4,6 +4,7 @@ import com.vecondev.buildoptima.api.PropertyApi;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import com.vecondev.buildoptima.service.property.PropertyService;
 import java.util.List;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,5 +45,11 @@ public class PropertyController implements PropertyApi {
   @GetMapping("/progress")
   public ResponseEntity<PropertyMigrationProgressResponseDto> trackMigrationProgress() {
     return ResponseEntity.ok(propertyService.getMigrationProgress());
+  }
+
+  @Override
+  @GetMapping("/{ain}")
+  public ResponseEntity<PropertyResponseDto> getByAin(@PathVariable String ain) {
+    return ResponseEntity.ok(propertyService.getByAin(ain));
   }
 }

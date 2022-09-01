@@ -18,7 +18,9 @@ public abstract class AddressMapperDecorator implements AddressMapper {
 
   @Override
   public AddressDto mapToDto(Address address) {
-    return mapper.mapToDto(address);
+    AddressDto addressDto = mapper.mapToDto(address);
+    addressDto.setPrimary(address.isPrimary());
+    return addressDto;
   }
 
   @Override

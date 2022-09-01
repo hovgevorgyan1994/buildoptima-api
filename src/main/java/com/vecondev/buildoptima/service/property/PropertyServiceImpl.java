@@ -10,8 +10,9 @@ import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
 import com.vecondev.buildoptima.exception.Error;
-import com.vecondev.buildoptima.exception.OpenSearchException;
+import com.vecondev.buildoptima.exception.ResourceNotFoundException;
 import com.vecondev.buildoptima.mapper.property.AddressMapper;
 import com.vecondev.buildoptima.mapper.property.PropertyMapper;
 import com.vecondev.buildoptima.model.property.Address;
@@ -150,6 +151,13 @@ public class PropertyServiceImpl implements PropertyService {
         allProcessedFiles.size(), allFailedFilesToProcess, allProperties.size());
   }
 
+  @Override
+  public PropertyResponseDto getByAin(String ain) {
+    return propertyMapper.mapToResponseDto(
+        propertyRepository.findById(ain).orElseThrow(
+            () -> new ResourceNotFoundException(Error.PROPERTY_NOT_FOUND)));
+  }
+
   private void processFiles(List<S3Object> unprocessedFiles) {
     int sizeOfUnprocessedFiles = unprocessedFiles.size();
     ExecutorService executorService = Executors.newFixedThreadPool(sizeOfUnprocessedFiles);
@@ -205,7 +213,6 @@ public class PropertyServiceImpl implements PropertyService {
             migrationMetadataService.save(migrationHistory, savedProperty);
           } catch (Exception e) {
             migrationMetadataService.save(migrationHistory, propertyDto, e.getMessage());
-            throw new OpenSearchException(Error.FAILED_BULK_DOCUMENT);
           }
         });
   }

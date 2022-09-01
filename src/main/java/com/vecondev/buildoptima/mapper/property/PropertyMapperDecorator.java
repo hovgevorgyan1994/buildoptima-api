@@ -1,6 +1,8 @@
 package com.vecondev.buildoptima.mapper.property;
 
+import com.vecondev.buildoptima.dto.property.AddressDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
 import com.vecondev.buildoptima.model.property.Address;
 import com.vecondev.buildoptima.model.property.Locations;
 import com.vecondev.buildoptima.model.property.Property;
@@ -14,6 +16,8 @@ public abstract class PropertyMapperDecorator implements PropertyMapper {
   @Autowired
   @Qualifier("delegate")
   private PropertyMapper mapper;
+
+  @Autowired private AddressMapper addressMapper;
 
   @Override
   public Property mapToEntity(PropertyReadDto dto) {
@@ -36,5 +40,12 @@ public abstract class PropertyMapperDecorator implements PropertyMapper {
     List<Property> properties = new ArrayList<>();
     list.forEach(p -> properties.add(mapToEntity(p)));
     return properties;
+  }
+
+  @Override
+  public PropertyResponseDto mapToResponseDto(Property property) {
+    PropertyResponseDto responseDto = mapper.mapToResponseDto(property);
+    responseDto.setAddresses(addressMapper.mapToDtoList(property.getAddresses()));
+    return responseDto;
   }
 }

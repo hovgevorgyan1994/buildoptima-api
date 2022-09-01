@@ -23,8 +23,8 @@ The project is about information management of properties based on the USA, Cali
 - [Jira Project](https://vecondev.atlassian.net/jira/software/projects/BO/boards/1)
 
 ## *Contributors*
-| Name                                                     | Position              | 
-|:---------------------------------------------------------|:----------------------|
-| [Vache Khachatryan](https://github.com/VacheKhachatryan) | Java Backend Engineer |                           
-| [Hovhannes Gevorgyan](https://github.com/Hovo33651)      | Java Backend Engineer |     
+| Name                                                                                   | Position              | 
+|:---------------------------------------------------------------------------------------|:----------------------|
+| [Vache Khachatryan](https://github.com/VacheKhachatryan)                               | Java Backend Engineer |                           
+| [Hovhannes Gevorgyan](https://www.linkedin.com/in/hovhannes-gevorgyan-458b16167/)      | Java Backend Engineer |     
 

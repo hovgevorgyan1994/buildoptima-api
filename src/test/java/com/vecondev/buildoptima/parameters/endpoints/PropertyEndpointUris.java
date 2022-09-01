@@ -13,6 +13,7 @@ public class PropertyEndpointUris implements EndpointUris {
   private String migrationUri;
   private String reprocessUri;
   private String trackProgressUri;
+  private String findByAinUri;
 
   @Override
   public String getDeleteByIdUri() {
@@ -60,6 +61,10 @@ public class PropertyEndpointUris implements EndpointUris {
 
   public String getReprocessUri() {
     return baseUri + reprocessUri;
+  }
+
+  public String getByAinUri() {
+    return baseUri + findByAinUri;
   }
 
   public String getTrackProgressUri() {

@@ -1,8 +1,11 @@
 package com.vecondev.buildoptima.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +15,10 @@ import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
+import com.vecondev.buildoptima.exception.ResourceNotFoundException;
+import com.vecondev.buildoptima.mapper.property.PropertyMapper;
+import com.vecondev.buildoptima.model.property.Property;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import com.vecondev.buildoptima.parameters.property.PropertyServiceTestParameters;
 import com.vecondev.buildoptima.repository.property.PropertyRepository;
@@ -25,6 +32,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +54,7 @@ class PropertyServiceTest {
   @Mock private MigrationMetadataService migrationMetadataService;
   @Mock private S3ConfigProperties s3ConfigProperties;
   @Mock private PropertyRepository propertyRepository;
+  @Mock private PropertyMapper propertyMapper;
 
   @Test
   void successfulPropertiesMigration() {
@@ -127,5 +136,28 @@ class PropertyServiceTest {
     assertEquals(
         failedMigrationHistoriesBefore.size(), response.getAllFailedFilesToProcess().size());
     verify(propertyRepository).findAll();
+  }
+
+  @Test
+  void getPropertyByAinSuccess() {
+    String ain = "123456";
+    Property property = testParameters.getByAin();
+    PropertyResponseDto responseDto = testParameters.mapToResponseDto();
+
+    when(propertyRepository.findById(ain)).thenReturn(Optional.of(property));
+    when(propertyMapper.mapToResponseDto(any(Property.class))).thenReturn(responseDto);
+
+    PropertyResponseDto propertyResponseDto = propertyService.getByAin(ain);
+    assertNotNull(propertyResponseDto);
+    assertEquals(propertyResponseDto.getAin(), ain);
+  }
+
+  @Test
+  void getPropertyByAinFailedAsPropertyNotFound() {
+    String ain = "123456";
+
+    doThrow(ResourceNotFoundException.class).when(propertyRepository).findById(ain);
+
+    assertThrows(ResourceNotFoundException.class, () -> propertyService.getByAin(ain));
   }
 }

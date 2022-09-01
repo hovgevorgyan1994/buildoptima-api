@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -38,15 +39,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Property implements Serializable {
 
   @Serial private static final long serialVersionUID = -1708400421457836238L;
-
-  @CreationTimestamp
-  @Column(name = "created_at")
-  protected Instant createdAt;
-
-  @UpdateTimestamp
-  @Column(name = "updated_at")
-  protected Instant updatedAt;
-
   @Id
   @Column(name = "ain")
   private String ain;
@@ -78,6 +70,15 @@ public class Property implements Serializable {
   @Column(name = "version", columnDefinition = "integer DEFAULT 0")
   private Integer version;
 
+  @CreationTimestamp
+  @Column(name = "created_at")
+  protected Instant createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  protected Instant updatedAt;
+
+
   public void addAddresses(List<Address> addresses) {
     this.addresses = new ArrayList<>();
     this.addresses.addAll(addresses);
@@ -94,34 +95,15 @@ public class Property implements Serializable {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
       return false;
     }
     Property property = (Property) o;
-    return Objects.equals(ain, property.ain)
-        && Objects.equals(municipality, property.municipality)
-        && Objects.equals(addresses, property.addresses)
-        && Objects.equals(locations, property.locations)
-        && Objects.equals(details, property.details)
-        && Objects.equals(hazards, property.hazards)
-        && Objects.equals(zoningDetails, property.zoningDetails)
-        && Objects.equals(version, property.version)
-        && Objects.equals(createdAt, property.createdAt)
-        && Objects.equals(updatedAt, property.updatedAt);
+    return ain != null && Objects.equals(ain, property.ain);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        ain,
-        municipality,
-        //        addresses,
-        locations,
-        details,
-        hazards,
-        zoningDetails,
-        version,
-        createdAt,
-        updatedAt);
+    return getClass().hashCode();
   }
 }
