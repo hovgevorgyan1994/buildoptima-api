@@ -86,7 +86,9 @@ public enum Error {
   FAILED_INDEX_CREATION(
       50012, INTERNAL_SERVER_ERROR, "Error Occurred While Creating AWS OpenSearch Index"),
   FAILED_BULK_DOCUMENT(
-      50013, INTERNAL_SERVER_ERROR, "Error Occurred While Adding Data To OpenSearch Index");
+      50013, INTERNAL_SERVER_ERROR, "Error Occurred While Adding Data To OpenSearch Index"),
+  FAILED_SEARCH(
+      50014, INTERNAL_SERVER_ERROR, "Error Occurred While Performing Search In OpenSearch");
 
   private final Integer code;
   private final HttpStatus httpStatus;

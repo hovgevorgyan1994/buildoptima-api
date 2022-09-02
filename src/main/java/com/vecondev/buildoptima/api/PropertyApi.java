@@ -2,11 +2,9 @@ package com.vecondev.buildoptima.api;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyOverview;
 import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
-import com.vecondev.buildoptima.exception.ApiError;
+import com.vecondev.buildoptima.filter.model.PropertySearchCriteria;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,88 +12,44 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 @Tag(
     name = "Property",
     description = "Endpoints for managing properties",
     externalDocs =
-        @ExternalDocumentation(
-            description = "Click here to see a detailed explanation of application errors",
-            url =
-                "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
-public interface PropertyApi extends SecuredApi {
+    @ExternalDocumentation(
+        description = "Click here to see a detailed explanation of application errors",
+        url =
+            "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
+public interface PropertyApi {
 
   @Operation(
-      summary = "Migrate all unprocessed files",
-      description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4047, 4048, 5007",
-      security = @SecurityRequirement(name = "api-security"))
+      summary = "Search through properties by address or ain",
+      description = """
+                    Each request can return up to 10 property info that are 
+                    more similar to the search criteria than other ones. 
+                    Possible error codes: 50014""")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "All files were processed",
-            content =
-                @Content(
-                    schema = @Schema(implementation = PropertyMigrationResponseDto.class),
-                    mediaType = APPLICATION_JSON_VALUE)),
-        @ApiResponse(
-            responseCode = "404",
-            description =
-                "Migration metadata or Migration history not found with such id/property_ain",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiError.class),
-                    mediaType = APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "The search has been successfully done",
+              content =
+              @Content(schema = @Schema(implementation = PropertyOverview.class))),
       })
-  ResponseEntity<PropertyMigrationResponseDto> migrateUnprocessedFiles();
-
-  @Operation(
-      summary = "Re-process all failed files",
-      description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4047, 4048, 5007",
-      security = @SecurityRequirement(name = "api-security"))
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "All failed files were re-processed",
-            content =
-                @Content(
-                    schema = @Schema(implementation = PropertyReprocessResponseDto.class),
-                    mediaType = APPLICATION_JSON_VALUE)),
-        @ApiResponse(
-            responseCode = "404",
-            description =
-                "Migration metadata or Migration history not found with such id/property_ain",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiError.class),
-                    mediaType = APPLICATION_JSON_VALUE))
-      })
-  ResponseEntity<PropertyReprocessResponseDto> reprocessFailedToProcessFiles();
-
-  @Operation(
-      summary = "Track the migration progress",
-      description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 5007",
-      security = @SecurityRequirement(name = "api-security"))
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "The information about file migrations was got",
-            content =
-                @Content(
-                    schema = @Schema(implementation = PropertyMigrationProgressResponseDto.class),
-                    mediaType = APPLICATION_JSON_VALUE))
-      })
-  ResponseEntity<PropertyMigrationProgressResponseDto> trackMigrationProgress();
+  ResponseEntity<List<PropertyOverview>> search(
+      @Parameter(description = "The search criteria") String value,
+      @Parameter(description = """
+                               Parameter to mention in which criteria
+                               ('address' or 'ain') to search by""")
+      PropertySearchCriteria propertySearchCriteria);
 
   @Operation(
       summary = "Get property data by ain",
-      description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4049",
-      security = @SecurityRequirement(name = "api-security"))
+      description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4049")
   @ApiResponses(
       value = {
         @ApiResponse(

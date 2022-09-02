@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.actions;
+package com.vecondev.buildoptima.actions;
 
 import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -11,9 +11,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsCreateRequestDto;
 import com.vecondev.buildoptima.dto.news.request.NewsUpdateRequestDto;
+import com.vecondev.buildoptima.endpoints.NewsEndpointUris;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.endpoints.NewsEndpointUris;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -44,7 +44,7 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
   }
 
   @Override
-  public ResultActions creationResultActions(User user, Object requestDto) throws Exception {
+  public ResultActions create(User user, Object requestDto) throws Exception {
     NewsCreateRequestDto createRequestDto = (NewsCreateRequestDto) requestDto;
     return mockMvc.perform(
         multipart(getEndpointUris().getCreationUri())
@@ -58,8 +58,7 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
   }
 
   @Override
-  public ResultActions updateResultActions(UUID entityId, User user, Object requestDto)
-      throws Exception {
+  public ResultActions update(UUID entityId, User user, Object requestDto) throws Exception {
     NewsUpdateRequestDto updateRequestDto = (NewsUpdateRequestDto) requestDto;
     return mockMvc.perform(
         patch(getEndpointUris().getUpdateUri(), entityId)
@@ -73,13 +72,12 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
             .param("keywords", " "));
   }
 
-  public ResultActions getMetadataResultActions(User user) throws Exception {
+  public ResultActions getMetadata(User user) throws Exception {
     return mockMvc.perform(
         get(getEndpointUris().getMetadataUri()).header(AUTHORIZATION_HEADER, getAccessToken(user)));
   }
 
-  public ResultActions getExportCsvResultActions(FetchRequestDto fetchRequest, User user)
-      throws Exception {
+  public ResultActions getAllInCsv(FetchRequestDto fetchRequest, User user) throws Exception {
     return mockMvc.perform(
         post(getEndpointUris().getExportInCsvUri())
             .header(AUTHORIZATION_HEADER, getAccessToken(user))
@@ -88,7 +86,7 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
             .accept("application/csv"));
   }
 
-  public ResultActions getArchiveResultActions(UUID id, User user) throws Exception {
+  public ResultActions archive(UUID id, User user) throws Exception {
     return mockMvc.perform(
         patch(getEndpointUris().getArchiveUri(), id)
             .header(AUTHORIZATION_HEADER, getAccessToken(user)));

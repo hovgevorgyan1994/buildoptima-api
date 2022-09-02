@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableScheduling
 public class BuildoptimaApplication {
+
   public static void main(String[] args) {
     SpringApplication.run(BuildoptimaApplication.class, args);
   }

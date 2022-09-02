@@ -96,8 +96,10 @@ opensearch:
     port: 443
     schema: https
     indexName: buildoptima
-    indexMappingPath: src/main/resources/opensearch/mappings.json
-    indexSettingsPath: src/main/resources/opensearch/settings.json
+    requestBodiesPath: src/main/resources/opensearch/
+    indexMappingFileName: mappings.json
+    indexSettingsFileName: settings.json
+    searchByAddressFileName: search_by_address.json
 
 page:
   skip: 0

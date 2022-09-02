@@ -1,5 +1,6 @@
-package com.vecondev.buildoptima.service.property;
+package com.vecondev.buildoptima.service.property.impl;
 
+import static com.vecondev.buildoptima.filter.model.PropertySearchCriteria.ADDRESS;
 import static com.vecondev.buildoptima.util.FileUtil.*;
 import static com.vecondev.buildoptima.util.JsonUtil.*;
 
@@ -9,17 +10,20 @@ import com.vecondev.buildoptima.dto.property.PropertyListDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyOverview;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
 import com.vecondev.buildoptima.exception.Error;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
+import com.vecondev.buildoptima.filter.model.PropertySearchCriteria;
 import com.vecondev.buildoptima.mapper.property.AddressMapper;
 import com.vecondev.buildoptima.mapper.property.PropertyMapper;
 import com.vecondev.buildoptima.model.property.Address;
 import com.vecondev.buildoptima.model.property.Property;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import com.vecondev.buildoptima.repository.property.PropertyRepository;
-import com.vecondev.buildoptima.service.property.address.OpenSearchService;
+import com.vecondev.buildoptima.service.opensearch.OpenSearchService;
+import com.vecondev.buildoptima.service.property.PropertyMigrationService;
 import com.vecondev.buildoptima.service.property.migration.MigrationHistoryService;
 import com.vecondev.buildoptima.service.property.migration.MigrationMetadataService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
@@ -32,6 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opensearch.search.SearchHit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = Exception.class)
-public class PropertyServiceImpl implements PropertyService {
+public class PropertyMigrationServiceImpl implements PropertyMigrationService {
 
   private final PropertyMapper propertyMapper;
   private final AddressMapper addressMapper;
@@ -88,12 +93,12 @@ public class PropertyServiceImpl implements PropertyService {
                 .size()),
         propertyRepository.findAll().size());
   }
+
   /**
    * Reprocess all the files that have been failed before.
    *
    * @return the all files that have been failed to process before
    */
-
   @Override
   public List<MigrationHistory> reprocessFailedFiles() {
     List<MigrationHistory> failedToProcessFiles =
@@ -149,13 +154,6 @@ public class PropertyServiceImpl implements PropertyService {
 
     return new PropertyMigrationProgressResponseDto(
         allProcessedFiles.size(), allFailedFilesToProcess, allProperties.size());
-  }
-
-  @Override
-  public PropertyResponseDto getByAin(String ain) {
-    return propertyMapper.mapToResponseDto(
-        propertyRepository.findById(ain).orElseThrow(
-            () -> new ResourceNotFoundException(Error.PROPERTY_NOT_FOUND)));
   }
 
   private void processFiles(List<S3Object> unprocessedFiles) {
@@ -236,7 +234,6 @@ public class PropertyServiceImpl implements PropertyService {
     toUpdate.setDetails(property.getDetails());
     toUpdate.setHazards(property.getHazards());
     toUpdate.setZoningDetails(property.getZoningDetails());
-    openSearchService.bulk(addressMapper.mapToDocumentList(property.getAddresses()));
     return propertyRepository.saveAndFlush(toUpdate);
   }
 }

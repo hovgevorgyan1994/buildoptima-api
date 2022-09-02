@@ -21,7 +21,7 @@ spring:
     host: 127.0.0.1
     port: 3025
     password: buildoptima
-    username: managementstaffing09@gmail.com
+    username: buildoptima-test@gmail.com
 
 opensearch:
   properties:
@@ -85,9 +85,12 @@ config:
       exportCsvUri: /csv
       fetchUri: /fetch
       archiveUri: /{id}/archive
-    property:
+    property-migration:
       baseUri: /properties
       migrationUri: /migrate
       reprocessUri: /re-process
       trackProgressUri: /progress
+    property:
+      baseUri: /properties
       findByAinUri: /{ain}
+      searchUri: /search

@@ -3,11 +3,6 @@ package com.vecondev.buildoptima.parameters.property;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
 
-import com.vecondev.buildoptima.model.property.Details;
-import com.vecondev.buildoptima.model.property.Hazards;
-import com.vecondev.buildoptima.model.property.Locations;
-import com.vecondev.buildoptima.model.property.Property;
-import com.vecondev.buildoptima.model.property.ZoningDetails;
 import com.vecondev.buildoptima.model.user.User;
 import java.io.File;
 import java.nio.file.Files;
@@ -31,17 +26,5 @@ public class PropertyControllerTestParameters {
       return new File(String.valueOf(path));
     }
     return null;
-  }
-
-  public Property getProperty() {
-    return Property.builder()
-        .ain("123456")
-        .municipality("Los Angeles")
-        .addresses(List.of())
-        .locations(new Locations())
-        .zoningDetails(new ZoningDetails())
-        .hazards(new Hazards())
-        .details(new Details())
-        .build();
   }
 }

@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.endpoints;
+package com.vecondev.buildoptima.endpoints;
 
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

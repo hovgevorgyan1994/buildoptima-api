@@ -21,7 +21,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  private static final String[] PERMITTED_URIS = {"/auth/**", "/swagger-ui/**", "/api-docs/**"};
+  private static final String[] PERMITTED_URIS = {
+    "/auth/**", "/swagger-ui/**", "/api-docs/**", "/properties/**", "/properties/search/**"
+  };
   private final JwtTokenAuthenticationEntryPoint entryPoint;
   private final RestAuthorizationFilter restAuthorizationFilter;
   private final ApiAccessDeniedHandler accessDeniedHandler;

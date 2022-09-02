@@ -195,16 +195,17 @@ class UserServiceTest {
     UUID ownerId = UUID.randomUUID();
     String contentType = IMAGE_JPEG_VALUE;
     boolean isOriginal = true;
+    String className = User.class.getSimpleName().toLowerCase();
 
     when(userRepository.findById(any())).thenReturn(Optional.of(testParameters.getSavedUser()));
-    when(imageService.downloadImage("user", ownerId, 1, isOriginal)).thenReturn(new byte[] {});
-    when(imageService.getContentTypeOfObject("user", ownerId, 1, isOriginal))
+    when(imageService.downloadImage(className, ownerId, 1, isOriginal)).thenReturn(new byte[] {});
+    when(imageService.getContentTypeOfObject(className, ownerId, 1, isOriginal))
         .thenReturn(contentType);
     ResponseEntity<byte[]> response = userService.downloadImage(ownerId, isOriginal);
 
     assertEquals(
         contentType, Objects.requireNonNull(response.getHeaders().get("Content-type")).get(0));
-    verify(imageService).downloadImage("user", ownerId, 1, isOriginal);
+    verify(imageService).downloadImage(className, ownerId, 1, isOriginal);
   }
 
   @Test

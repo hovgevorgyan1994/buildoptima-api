@@ -11,17 +11,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
+import com.vecondev.buildoptima.actions.UserResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.actions.UserResultActions;
-import com.vecondev.buildoptima.parameters.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
@@ -53,20 +53,25 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @Import({AmazonS3Config.class, UserEndpointUris.class, UserResultActions.class})
 class AuthControllerTest {
 
+  private static final String MAIL_EXAMPLE = "Example@mail.ru";
+  private static final String GREENMAIL_EMAIL_ADDRESS = "buildoptima-test@gmail.com";
+  private static final String GREENMAIL_EMAIL_PASSWORD = "buildoptima";
+
   @RegisterExtension
   private static final GreenMailExtension greenMail =
       new GreenMailExtension(ServerSetupTest.SMTP)
           .withConfiguration(
               GreenMailConfiguration.aConfig()
-                  .withUser("managementstaffing09@gmail.com", "buildoptima"))
+                  .withUser(GREENMAIL_EMAIL_ADDRESS, GREENMAIL_EMAIL_PASSWORD))
           .withPerMethodLifecycle(true);
 
+  private UserControllerTestParameters userControllerTestParameters;
   @Autowired private UserRepository userRepository;
   @Autowired private ConfirmationTokenRepository confirmationTokenRepository;
   @Autowired private RefreshTokenRepository refreshTokenRepository;
   @Autowired private PasswordEncoder encoder;
   @Autowired private UserResultActions resultActions;
-  private UserControllerTestParameters userControllerTestParameters;
+
 
   @BeforeEach
   void setUp() {
@@ -94,7 +99,7 @@ class AuthControllerTest {
     UserRegistrationRequestDto requestDto = userControllerTestParameters.getUserToSave();
 
     resultActions
-        .registrationResultActions(requestDto)
+        .register(requestDto)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.firstName").exists());
 
@@ -109,7 +114,7 @@ class AuthControllerTest {
         userControllerTestParameters.getUserToSaveWithInvalidFields();
 
     resultActions
-        .registrationResultActions(requestDto)
+        .register(requestDto)
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors").exists());
   }
@@ -119,7 +124,7 @@ class AuthControllerTest {
     UserRegistrationRequestDto requestDto =
         userControllerTestParameters.getUserToSaveWithDuplicatedEmail();
 
-    resultActions.registrationResultActions(requestDto).andExpect(status().isConflict());
+    resultActions.register(requestDto).andExpect(status().isConflict());
   }
 
   @Test
@@ -130,12 +135,11 @@ class AuthControllerTest {
     assumeTrue(confirmationToken.getExpiresAt().isAfter(LocalDateTime.now()));
 
     resultActions
-        .activationResultActions(confirmationToken.getToken())
+        .activate(confirmationToken.getToken())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(userId.toString()));
 
-    assertEquals(
-        true,
+    assertTrue(
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND))
@@ -146,7 +150,7 @@ class AuthControllerTest {
   void failedActivationAsTokenDoesntExist() throws Exception {
     String token = UUID.randomUUID().toString();
 
-    resultActions.activationResultActions(token).andExpect(status().isNotFound());
+    resultActions.activate(token).andExpect(status().isNotFound());
   }
 
   @Test
@@ -154,7 +158,7 @@ class AuthControllerTest {
     AuthRequestDto requestDto = userControllerTestParameters.getUserCredentialsToLogin();
 
     resultActions
-        .loginResultActions(requestDto)
+        .login(requestDto)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.accessToken").exists())
         .andExpect(jsonPath("$.refreshToken").exists());
@@ -165,14 +169,14 @@ class AuthControllerTest {
     AuthRequestDto requestDto = userControllerTestParameters.getUserInvalidCredentialsToLogin();
     assumeFalse(userRepository.existsByEmailIgnoreCase(requestDto.getUsername()));
 
-    resultActions.loginResultActions(requestDto).andExpect(status().isUnauthorized());
+    resultActions.login(requestDto).andExpect(status().isUnauthorized());
   }
 
   @Test
   void successfulRefreshmentOfTokens() throws Exception {
     RefreshTokenRequestDto requestDto = userControllerTestParameters.getRefreshToken();
 
-    resultActions.refreshTokenResultActions(requestDto).andExpect(status().isOk());
+    resultActions.refresh(requestDto).andExpect(status().isOk());
   }
 
   @Test
@@ -180,7 +184,7 @@ class AuthControllerTest {
     User user = userControllerTestParameters.getSavedUser();
     ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto(user.getEmail());
 
-    resultActions.passwordVerificationResultActions(requestDto).andExpect(status().isOk());
+    resultActions.verify(requestDto).andExpect(status().isOk());
     MimeMessage[] messages = greenMail.getReceivedMessages();
     assertEquals(1, messages.length);
     assertEquals(user.getEmail(), messages[0].getAllRecipients()[0].toString());
@@ -188,10 +192,10 @@ class AuthControllerTest {
 
   @Test
   void failedPasswordVerificationAsEmailDoesntExist() throws Exception {
-    ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto("Example@mail.ru");
+    ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto(MAIL_EXAMPLE);
     assumeFalse(userRepository.existsByEmailIgnoreCase(requestDto.getEmail()));
 
-    resultActions.passwordVerificationResultActions(requestDto).andExpect(status().isNotFound());
+    resultActions.verify(requestDto).andExpect(status().isNotFound());
   }
 
   @Test
@@ -206,7 +210,7 @@ class AuthControllerTest {
         new RestorePasswordRequestDto(
             confirmationToken.getToken(), userWithoutEncodedPassword.getPassword() + ".a");
 
-    resultActions.passwordRestoringResultActions(requestDto).andExpect(status().isOk());
+    resultActions.restorePassword(requestDto).andExpect(status().isOk());
     assertTrue(
         encoder.matches(
             userWithoutEncodedPassword.getPassword() + ".a",

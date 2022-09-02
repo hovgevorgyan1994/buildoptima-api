@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.endpoints;
+package com.vecondev.buildoptima.endpoints;
 
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 
 @Setter
 @TestConfiguration
-@ConfigurationProperties(prefix = "config.uris.property")
-public class PropertyEndpointUris implements EndpointUris {
+@ConfigurationProperties(prefix = "config.uris.property-migration")
+public class PropertyMigrationEndpointUris implements EndpointUris {
 
   private String baseUri;
   private String migrationUri;

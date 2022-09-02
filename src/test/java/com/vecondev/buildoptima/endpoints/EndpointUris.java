@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.endpoints;
+package com.vecondev.buildoptima.endpoints;
 
 public interface EndpointUris {
 

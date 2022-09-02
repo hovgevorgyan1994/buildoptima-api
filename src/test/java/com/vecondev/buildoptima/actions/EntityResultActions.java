@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.actions;
+package com.vecondev.buildoptima.actions;
 
 import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -9,9 +9,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.endpoints.EndpointUris;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.endpoints.EndpointUris;
 import java.util.UUID;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,7 +27,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
 
   protected abstract JwtTokenManager getTokenManager();
 
-  public ResultActions deleteByIdResultActions(UUID idToDelete, User user) throws Exception {
+  public ResultActions deleteById(UUID idToDelete, User user) throws Exception {
     return getMockMvc()
         .perform(
             delete(getEndpointUris().getDeleteByIdUri(), idToDelete)
@@ -36,8 +36,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept(APPLICATION_JSON_VALUE));
   }
 
-  public ResultActions updateResultActions(UUID entityId, User user, Object requestDto)
-      throws Exception {
+  public ResultActions update(UUID entityId, User user, Object requestDto) throws Exception {
     return getMockMvc()
         .perform(
             put(getEndpointUris().getUpdateUri(), entityId.toString())
@@ -47,7 +46,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept(APPLICATION_JSON_VALUE));
   }
 
-  public ResultActions creationResultActions(User user, Object requestDto) throws Exception {
+  public ResultActions create(User user, Object requestDto) throws Exception {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getCreationUri())
@@ -57,8 +56,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept(APPLICATION_JSON_VALUE));
   }
 
-  public ResultActions fetchingResultActions(FetchRequestDto requestDto, User user)
-      throws Exception {
+  public ResultActions fetch(FetchRequestDto requestDto, User user) throws Exception {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getFetchUri())
@@ -68,7 +66,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions getByIdResultActions(UUID entityId, User user) throws Exception {
+  public ResultActions getById(UUID entityId, User user) throws Exception {
     return getMockMvc()
         .perform(
             get(getEndpointUris().getRetrieveByIdUri(), entityId.toString())
@@ -77,7 +75,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept(APPLICATION_JSON_VALUE));
   }
 
-  public ResultActions getAllResultActions(User user) throws Exception {
+  public ResultActions getAll(User user) throws Exception {
     return getMockMvc()
         .perform(
             get(getEndpointUris().getAllUri())
@@ -86,7 +84,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept(APPLICATION_JSON_VALUE));
   }
 
-  public ResultActions getAllInCsvResultActions(User user) throws Exception {
+  public ResultActions getAllInCsv(User user) throws Exception {
     return getMockMvc()
         .perform(
             get(getEndpointUris().getExportInCsvUri())
@@ -95,7 +93,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
                 .accept("application/csv"));
   }
 
-  public ResultActions getMetadataResultActions(User user) throws Exception {
+  public ResultActions getMetadata(User user) throws Exception {
     return getMockMvc()
         .perform(
             get(getEndpointUris().getMetadataUri())

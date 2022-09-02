@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.endpoints;
+package com.vecondev.buildoptima.endpoints;
 
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -6,22 +6,20 @@ import org.springframework.boot.test.context.TestConfiguration;
 
 @Setter
 @TestConfiguration
-@ConfigurationProperties(prefix = "config.uris.news")
-public class NewsEndpointUris implements EndpointUris {
+@ConfigurationProperties(prefix = "config.uris.faq-category")
+public class FaqCategoryEndpointUris implements EndpointUris {
 
   private String baseUri;
-  private String deleteUri;
+  private String deleteByIdUri;
   private String updateUri;
-  private String getByIdUri;
-  private String getMetadataUri;
-  private String exportCsvUri;
   private String fetchUri;
-
-  private String archiveUri;
+  private String retrieveByIdUri;
+  private String exportInCsvUri;
+  private String metadataUri;
 
   @Override
   public String getDeleteByIdUri() {
-    return baseUri + deleteUri;
+    return baseUri + deleteByIdUri;
   }
 
   @Override
@@ -41,25 +39,21 @@ public class NewsEndpointUris implements EndpointUris {
 
   @Override
   public String getRetrieveByIdUri() {
-    return baseUri + getByIdUri;
+    return baseUri + retrieveByIdUri;
   }
 
   @Override
   public String getAllUri() {
-    return null;
+    return baseUri;
   }
 
   @Override
   public String getExportInCsvUri() {
-    return baseUri + exportCsvUri;
+    return baseUri + exportInCsvUri;
   }
 
   @Override
   public String getMetadataUri() {
-    return baseUri + getMetadataUri;
-  }
-
-  public String getArchiveUri() {
-    return baseUri + archiveUri;
+    return baseUri + metadataUri;
   }
 }

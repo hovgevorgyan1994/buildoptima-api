@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.endpoints;
+package com.vecondev.buildoptima.endpoints;
 
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 
 @Setter
 @TestConfiguration
-@ConfigurationProperties(prefix = "config.uris.faq-category")
-public class FaqCategoryEndpointUris implements EndpointUris {
+@ConfigurationProperties(prefix = "config.uris.faq-question")
+public class FaqQuestionEndpointUris implements EndpointUris {
 
   private String baseUri;
   private String deleteByIdUri;
@@ -16,6 +16,7 @@ public class FaqCategoryEndpointUris implements EndpointUris {
   private String retrieveByIdUri;
   private String exportInCsvUri;
   private String metadataUri;
+  private String lookupUri;
 
   @Override
   public String getDeleteByIdUri() {
@@ -55,5 +56,9 @@ public class FaqCategoryEndpointUris implements EndpointUris {
   @Override
   public String getMetadataUri() {
     return baseUri + metadataUri;
+  }
+
+  public String getLookupUri() {
+    return baseUri + lookupUri;
   }
 }

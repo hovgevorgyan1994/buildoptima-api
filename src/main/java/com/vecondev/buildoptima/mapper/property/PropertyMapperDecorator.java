@@ -1,6 +1,5 @@
 package com.vecondev.buildoptima.mapper.property;
 
-import com.vecondev.buildoptima.dto.property.AddressDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
 import com.vecondev.buildoptima.model.property.Address;

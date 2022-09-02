@@ -1,23 +1,13 @@
 package com.vecondev.buildoptima.service.property;
 
-import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
+import com.vecondev.buildoptima.dto.property.response.PropertyOverview;
 import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
-import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
+import com.vecondev.buildoptima.filter.model.PropertySearchCriteria;
 import java.util.List;
 
 public interface PropertyService {
 
-  List<MigrationHistory> migrateFromS3();
-
-  List<MigrationHistory> reprocessFailedFiles();
-
-  PropertyMigrationResponseDto getMigrationResults(List<MigrationHistory> processedFilesBefore);
-
-  PropertyReprocessResponseDto getReprocessResults(List<MigrationHistory> failedFilesBefore);
-
-  PropertyMigrationProgressResponseDto getMigrationProgress();
+  List<PropertyOverview> search(String value, PropertySearchCriteria criteria);
 
   PropertyResponseDto getByAin(String ain);
 }

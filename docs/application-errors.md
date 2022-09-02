@@ -110,4 +110,4 @@ Below is the sample structure of payload of API error
 | `FAILED_DATA_DOWNLOAD  `      | 50011 | `Error Occurred While Downloading The Data`               |
 | `FAILED_INDEX_CREATION `      | 50012 | `Error Occurred While Creating AWS OpenSearch Index`      |
 | `FAILED_BULK_DOCUMENT `       | 50013 | `Error Occurred While Adding Data To OpenSearch Index`    |
-
+| `FAILED_SEARCH`               | 50014 | `Error Occurred While Performing Search In OpenSearch`    |

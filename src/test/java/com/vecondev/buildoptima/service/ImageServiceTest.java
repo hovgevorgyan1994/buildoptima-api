@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.s3.AmazonS3;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.exception.ResourceNotFoundException;
+import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.service.s3.AmazonS3ServiceImpl;
 import com.vecondev.buildoptima.util.FileUtil;
 import com.vecondev.buildoptima.validation.ImageValidator;
@@ -42,7 +43,8 @@ class ImageServiceTest {
       fileUtil.when(() -> FileUtil.resizePhoto(any())).thenReturn(Files.newTemporaryFile());
       when(s3Client.doesBucketExistV2(any())).thenReturn(true);
       when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
-      imageService.uploadImagesToS3("user", userId, 1, null, userId);
+      imageService.uploadImagesToS3(
+          User.class.getSimpleName().toLowerCase(), userId, 1, null, userId);
     }
 
     verify(s3Client, times(2)).putObject(any(), any(), any(File.class));
@@ -60,7 +62,8 @@ class ImageServiceTest {
       fileUtil.when(() -> FileUtil.resizePhoto(any())).thenReturn(Files.newTemporaryFile());
       when(s3Client.doesBucketExistV2(any())).thenReturn(true);
       when(s3Client.doesObjectExist(any(), any())).thenReturn(true);
-      imageService.uploadImagesToS3("user", userId, 1, null, userId);
+      imageService.uploadImagesToS3(
+          User.class.getSimpleName().toLowerCase(), userId, 1, null, userId);
     }
 
     verify(s3Client, times(2)).putObject(any(), any(), any(File.class));
@@ -70,23 +73,25 @@ class ImageServiceTest {
   @Test
   void failedImageUploading() {
     UUID userId = UUID.randomUUID();
+    String className = User.class.getSimpleName().toLowerCase();
 
     when(s3Client.doesBucketExistV2(any())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> imageService.uploadImagesToS3("user", userId, 1, null, userId));
+        () -> imageService.uploadImagesToS3(className, userId, 1, null, userId));
   }
 
   @Test
   void failedImageDownloadingAsImageDoesntExist() {
     UUID userId = UUID.randomUUID();
+    String className = User.class.getSimpleName().toLowerCase();
 
     when(s3Client.doesObjectExist(any(), any())).thenReturn(false);
 
     assertThrows(
         ResourceNotFoundException.class,
-        () -> imageService.downloadImage("user", userId, 1, false));
+        () -> imageService.downloadImage(className, userId, 1, false));
     verify(configProperties).getImageBucketName();
   }
 
@@ -94,7 +99,7 @@ class ImageServiceTest {
   void successfulImageDeletion() {
     UUID userId = UUID.randomUUID();
 
-    imageService.deleteImagesFromS3("user", userId, 1);
+    imageService.deleteImagesFromS3(User.class.getSimpleName().toLowerCase(), userId, 1);
 
     verify(s3Client, times(2)).deleteObject(any(), any());
   }

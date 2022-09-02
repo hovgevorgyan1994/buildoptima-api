@@ -9,14 +9,14 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.vecondev.buildoptima.actions.FaqCategoryResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.faq.request.FaqCategoryRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.endpoints.FaqCategoryEndpointUris;
 import com.vecondev.buildoptima.model.faq.FaqCategory;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.actions.FaqCategoryResultActions;
-import com.vecondev.buildoptima.parameters.endpoints.FaqCategoryEndpointUris;
 import com.vecondev.buildoptima.parameters.faq.category.FaqCategoryControllerTestParameters;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
@@ -69,7 +69,8 @@ class FaqCategoryControllerTest  {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions.getAllResultActions(moderatorUser)
+    resultActions
+        .getAll(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.*", hasSize(faqCategoryRepository.findAll().size())));
   }
@@ -79,7 +80,7 @@ class FaqCategoryControllerTest  {
     User clientUser = getUserByRole(CLIENT);
     assumeFalse(clientUser == null);
 
-    resultActions.getAllResultActions(clientUser).andExpect(status().isForbidden());
+    resultActions.getAll(clientUser).andExpect(status().isForbidden());
   }
 
   @Test
@@ -89,7 +90,8 @@ class FaqCategoryControllerTest  {
     FaqCategory faqCategory = faqCategoryRepository.findAll().stream().findAny().orElse(null);
     assumeFalse(faqCategory == null);
 
-    resultActions.getByIdResultActions(faqCategory.getId(), moderatorUser)
+    resultActions
+        .getById(faqCategory.getId(), moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(faqCategory.getId().toString()))
         .andExpect(jsonPath("$.name").value(faqCategory.getName()));
@@ -100,9 +102,7 @@ class FaqCategoryControllerTest  {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions
-        .getByIdResultActions(UUID.randomUUID(), moderatorUser)
-        .andExpect(status().isNotFound());
+    resultActions.getById(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
   }
 
   @Test
@@ -111,7 +111,8 @@ class FaqCategoryControllerTest  {
     assumeFalse(moderatorUser == null);
     FaqCategoryRequestDto requestDto = testParameters.getFaqCategoryToSave();
 
-    resultActions.creationResultActions(moderatorUser, requestDto)
+    resultActions
+        .create(moderatorUser, requestDto)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty());
   }
@@ -122,7 +123,7 @@ class FaqCategoryControllerTest  {
     assumeFalse(moderatorUser == null);
     FaqCategoryRequestDto requestDto = testParameters.getFaqCategoryWithDuplicatedNameToSave();
 
-    resultActions.creationResultActions(moderatorUser, requestDto).andExpect(status().isConflict());
+    resultActions.create(moderatorUser, requestDto).andExpect(status().isConflict());
   }
 
   @Test
@@ -131,9 +132,7 @@ class FaqCategoryControllerTest  {
     assumeFalse(moderatorUser == null);
     FaqCategoryRequestDto requestDto = new FaqCategoryRequestDto();
 
-    resultActions
-        .creationResultActions(moderatorUser, requestDto)
-        .andExpect(status().isBadRequest());
+    resultActions.create(moderatorUser, requestDto).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -142,7 +141,7 @@ class FaqCategoryControllerTest  {
     assumeFalse(clientUser == null);
     FaqCategoryRequestDto requestDto = testParameters.getFaqCategoryToSave();
 
-    resultActions.creationResultActions(clientUser, requestDto).andExpect(status().isForbidden());
+    resultActions.create(clientUser, requestDto).andExpect(status().isForbidden());
   }
 
   @Test
@@ -154,7 +153,8 @@ class FaqCategoryControllerTest  {
     FaqCategoryRequestDto requestDto =
         testParameters.getFaqCategoryToSave().toBuilder().name("Payment").build();
 
-    resultActions.updateResultActions(faqCategory.getId(), moderatorUser, requestDto)
+    resultActions
+        .update(faqCategory.getId(), moderatorUser, requestDto)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value(requestDto.getName()));
   }
@@ -166,8 +166,8 @@ class FaqCategoryControllerTest  {
     FaqCategoryRequestDto requestDto =
         testParameters.getFaqCategoryToSave().toBuilder().name("Payment").build();
 
-
-    resultActions.updateResultActions(UUID.randomUUID(), moderatorUser, requestDto)
+    resultActions
+        .update(UUID.randomUUID(), moderatorUser, requestDto)
         .andExpect(status().isNotFound());
   }
 
@@ -178,9 +178,7 @@ class FaqCategoryControllerTest  {
     FaqCategory faqCategory = faqCategoryRepository.findAll().stream().findAny().orElse(null);
     assumeFalse(faqCategory == null);
 
-    resultActions
-        .deleteByIdResultActions(faqCategory.getId(), moderatorUser)
-        .andExpect(status().isOk());
+    resultActions.deleteById(faqCategory.getId(), moderatorUser).andExpect(status().isOk());
     assertFalse(faqCategoryRepository.existsById(faqCategory.getId()));
   }
 
@@ -189,9 +187,7 @@ class FaqCategoryControllerTest  {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions
-        .deleteByIdResultActions(UUID.randomUUID(), moderatorUser)
-        .andExpect(status().isNotFound());
+    resultActions.deleteById(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
   }
 
   @Test
@@ -200,7 +196,7 @@ class FaqCategoryControllerTest  {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions.fetchingResultActions(requestDto, moderatorUser).andExpect(status().isOk());
+    resultActions.fetch(requestDto, moderatorUser).andExpect(status().isOk());
   }
 
   @Test
@@ -208,7 +204,7 @@ class FaqCategoryControllerTest  {
     FetchRequestDto requestDto = testParameters.getFetchRequest();
     User clientUser = getUserByRole(CLIENT);
 
-    resultActions.fetchingResultActions(requestDto, clientUser).andExpect(status().isForbidden());
+    resultActions.fetch(requestDto, clientUser).andExpect(status().isForbidden());
   }
 
   @Test
@@ -216,16 +212,15 @@ class FaqCategoryControllerTest  {
     FetchRequestDto requestDto = testParameters.getInvalidFetchRequest();
     User moderatorUser = getUserByRole(MODERATOR);
 
-    resultActions
-        .fetchingResultActions(requestDto, moderatorUser)
-        .andExpect(status().isBadRequest());
+    resultActions.fetch(requestDto, moderatorUser).andExpect(status().isBadRequest());
   }
 
   @Test
   void successfulExportingOfCategoriesInCsv() throws Exception {
     User moderatorUser = getUserByRole(MODERATOR);
 
-    resultActions.getAllInCsvResultActions(moderatorUser)
+    resultActions
+        .getAllInCsv(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", notNullValue()));
   }
@@ -238,7 +233,7 @@ class FaqCategoryControllerTest  {
     assumeFalse(lastUpdatedCategory == null);
 
     resultActions
-        .getMetadataResultActions(moderatorUser)
+        .getMetadata(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedCategory.getUpdatedAt().toString()))
         .andExpect(jsonPath("$.allActiveCount").value(faqCategoryRepository.count()));

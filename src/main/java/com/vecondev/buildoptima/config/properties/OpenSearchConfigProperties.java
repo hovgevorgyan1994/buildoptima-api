@@ -15,6 +15,8 @@ public class OpenSearchConfigProperties {
   private Integer port;
   private String schema;
   private String indexName;
-  private String indexMappingPath;
-  private String indexSettingsPath;
+  private String requestBodiesPath;
+  private String indexMappingFileName;
+  private String indexSettingsFileName;
+  private String searchByAddressFileName;
 }

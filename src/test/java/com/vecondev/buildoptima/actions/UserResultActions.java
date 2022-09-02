@@ -1,4 +1,4 @@
-package com.vecondev.buildoptima.parameters.actions;
+package com.vecondev.buildoptima.actions;
 
 import static com.vecondev.buildoptima.util.TestUtil.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -15,9 +15,9 @@ import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
+import com.vecondev.buildoptima.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.endpoints.UserEndpointUris;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -48,7 +48,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
     return tokenManager;
   }
 
-  public ResultActions imageDeletionResultActions(UUID ownerId, User user) throws Exception {
+  public ResultActions deleteImage(UUID ownerId, User user) throws Exception {
     return getMockMvc()
         .perform(
             delete(getEndpointUris().getImageDeletionUri(), ownerId.toString())
@@ -57,8 +57,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions imageDownloadingResultActions(String imageType, UUID ownerId, User user)
-      throws Exception {
+  public ResultActions downloadImage(String imageType, UUID ownerId, User user) throws Exception {
     return getMockMvc()
         .perform(
             get(getEndpointUris().getImageDownloadingUri() + imageType, ownerId.toString())
@@ -67,7 +66,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept("*/*"));
   }
 
-  public ResultActions imageUploadingResultActions(MockMultipartFile file, UUID ownerId, User user)
+  public ResultActions uploadImage(MockMultipartFile file, UUID ownerId, User user)
       throws Exception {
     return getMockMvc()
         .perform(
@@ -78,8 +77,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept("*/*"));
   }
 
-  public ResultActions passwordRestoringResultActions(RestorePasswordRequestDto requestDto)
-      throws Exception {
+  public ResultActions restorePassword(RestorePasswordRequestDto requestDto) throws Exception {
     return getMockMvc()
         .perform(
             put(getEndpointUris().getPasswordRestoringUri())
@@ -88,8 +86,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions passwordVerificationResultActions(ConfirmEmailRequestDto requestDto)
-      throws Exception {
+  public ResultActions verify(ConfirmEmailRequestDto requestDto) throws Exception {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getPasswordVerificationUri())
@@ -98,7 +95,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions passwordChangingResultActions(ChangePasswordRequestDto requestDto, User user)
+  public ResultActions changePassword(ChangePasswordRequestDto requestDto, User user)
       throws Exception {
     return getMockMvc()
         .perform(
@@ -109,8 +106,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions refreshTokenResultActions(RefreshTokenRequestDto requestDto)
-      throws Exception {
+  public ResultActions refresh(RefreshTokenRequestDto requestDto) throws Exception {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getRefreshTokenUri())
@@ -119,7 +115,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions loginResultActions(AuthRequestDto requestDto) throws Exception {
+  public ResultActions login(AuthRequestDto requestDto) throws Exception {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getLoginUri())
@@ -128,7 +124,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions activationResultActions(String token) throws Exception {
+  public ResultActions activate(String token) throws Exception {
     return getMockMvc()
         .perform(
             put(getEndpointUris().getActivationUri())
@@ -137,8 +133,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
                 .accept(APPLICATION_JSON));
   }
 
-  public ResultActions registrationResultActions(UserRegistrationRequestDto requestDto)
-      throws Exception {
+  public ResultActions register(UserRegistrationRequestDto requestDto) throws Exception {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getRegistrationUri())

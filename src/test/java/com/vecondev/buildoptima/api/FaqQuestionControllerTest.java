@@ -13,15 +13,15 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.vecondev.buildoptima.actions.FaqQuestionResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.faq.request.FaqQuestionRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
+import com.vecondev.buildoptima.endpoints.FaqQuestionEndpointUris;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.faq.FaqQuestion;
 import com.vecondev.buildoptima.model.user.Role;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.actions.FaqQuestionResultActions;
-import com.vecondev.buildoptima.parameters.endpoints.FaqQuestionEndpointUris;
 import com.vecondev.buildoptima.parameters.faq.question.FaqQuestionControllerTestParameters;
 import com.vecondev.buildoptima.repository.faq.FaqCategoryRepository;
 import com.vecondev.buildoptima.repository.faq.FaqQuestionRepository;
@@ -80,7 +80,7 @@ class FaqQuestionControllerTest {
     assumeFalse(moderatorUser == null);
 
     resultActions
-        .getAllResultActions(moderatorUser)
+        .getAll(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.*", hasSize(faqQuestionRepository.findAll().size())));
   }
@@ -90,7 +90,7 @@ class FaqQuestionControllerTest {
     User clientUser = getUserByRole(CLIENT);
     assumeFalse(clientUser == null);
 
-    resultActions.getAllResultActions(clientUser).andExpect(status().isForbidden());
+    resultActions.getAll(clientUser).andExpect(status().isForbidden());
   }
 
   @Test
@@ -101,7 +101,7 @@ class FaqQuestionControllerTest {
     assumeFalse(faqQuestion == null);
 
     resultActions
-        .getByIdResultActions(faqQuestion.getId(), moderatorUser)
+        .getById(faqQuestion.getId(), moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.category.id").value(faqQuestion.getCategory().getId().toString()))
         .andExpect(jsonPath("$.question").value(faqQuestion.getQuestion()));
@@ -112,9 +112,7 @@ class FaqQuestionControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions
-        .getByIdResultActions(UUID.randomUUID(), moderatorUser)
-        .andExpect(status().isNotFound());
+    resultActions.getById(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
   }
 
   @Test
@@ -124,7 +122,7 @@ class FaqQuestionControllerTest {
     FaqQuestionRequestDto requestDto = testParameters.getFaqQuestionToSave();
 
     resultActions
-        .creationResultActions(moderatorUser, requestDto)
+        .create(moderatorUser, requestDto)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNotEmpty());
   }
@@ -135,7 +133,7 @@ class FaqQuestionControllerTest {
     assumeFalse(moderatorUser == null);
     FaqQuestionRequestDto requestDto = testParameters.getFaqQuestionWithDuplicatedQuestion();
 
-    resultActions.creationResultActions(moderatorUser, requestDto).andExpect(status().isConflict());
+    resultActions.create(moderatorUser, requestDto).andExpect(status().isConflict());
   }
 
   @Test
@@ -144,9 +142,7 @@ class FaqQuestionControllerTest {
     assumeFalse(moderatorUser == null);
     FaqQuestionRequestDto requestDto = new FaqQuestionRequestDto();
 
-    resultActions
-        .creationResultActions(moderatorUser, requestDto)
-        .andExpect(status().isBadRequest());
+    resultActions.create(moderatorUser, requestDto).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -158,7 +154,7 @@ class FaqQuestionControllerTest {
     FaqQuestionRequestDto requestDto = testParameters.getFaqQuestionToSave();
 
     resultActions
-        .updateResultActions(faqQuestion.getId(), moderatorUser, requestDto)
+        .update(faqQuestion.getId(), moderatorUser, requestDto)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.question").value(requestDto.getQuestion()));
   }
@@ -170,7 +166,7 @@ class FaqQuestionControllerTest {
     FaqQuestionRequestDto requestDto = testParameters.getFaqQuestionToSave();
 
     resultActions
-        .updateResultActions(UUID.randomUUID(), moderatorUser, requestDto)
+        .update(UUID.randomUUID(), moderatorUser, requestDto)
         .andExpect(status().isNotFound());
   }
 
@@ -181,9 +177,7 @@ class FaqQuestionControllerTest {
     FaqQuestion faqQuestion = faqQuestionRepository.findAll().stream().findAny().orElse(null);
     assumeFalse(faqQuestion == null);
 
-    resultActions
-        .deleteByIdResultActions(faqQuestion.getId(), moderatorUser)
-        .andExpect(status().isOk());
+    resultActions.deleteById(faqQuestion.getId(), moderatorUser).andExpect(status().isOk());
     assertFalse(faqQuestionRepository.existsById(faqQuestion.getId()));
   }
 
@@ -192,9 +186,7 @@ class FaqQuestionControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions
-        .deleteByIdResultActions(UUID.randomUUID(), moderatorUser)
-        .andExpect(status().isNotFound());
+    resultActions.deleteById(UUID.randomUUID(), moderatorUser).andExpect(status().isNotFound());
   }
 
   @Test
@@ -203,7 +195,7 @@ class FaqQuestionControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
     assumeFalse(moderatorUser == null);
 
-    resultActions.fetchingResultActions(requestDto, moderatorUser).andExpect(status().isOk());
+    resultActions.fetch(requestDto, moderatorUser).andExpect(status().isOk());
   }
 
   @Test
@@ -211,7 +203,7 @@ class FaqQuestionControllerTest {
     FetchRequestDto requestDto = testParameters.getFetchRequest();
     User clientUser = getUserByRole(CLIENT);
 
-    resultActions.fetchingResultActions(requestDto, clientUser).andExpect(status().isForbidden());
+    resultActions.fetch(requestDto, clientUser).andExpect(status().isForbidden());
   }
 
   @Test
@@ -219,7 +211,7 @@ class FaqQuestionControllerTest {
     FetchRequestDto requestDto = testParameters.getInvalidFetchRequest();
     User adminUser = getUserByRole(MODERATOR);
 
-    resultActions.fetchingResultActions(requestDto, adminUser).andExpect(status().isBadRequest());
+    resultActions.fetch(requestDto, adminUser).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -227,7 +219,7 @@ class FaqQuestionControllerTest {
     User moderatorUser = getUserByRole(MODERATOR);
 
     resultActions
-        .getAllInCsvResultActions(moderatorUser)
+        .getAllInCsv(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", notNullValue()));
   }
@@ -240,7 +232,7 @@ class FaqQuestionControllerTest {
     assumeFalse(lastUpdatedQuestion == null);
 
     resultActions
-        .getMetadataResultActions(moderatorUser)
+        .getMetadata(moderatorUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lastUpdatedAt").value(lastUpdatedQuestion.getUpdatedAt().toString()))
         .andExpect(jsonPath("$.allActiveCount").value(faqQuestionRepository.countByStatus(ACTIVE)))
@@ -254,7 +246,7 @@ class FaqQuestionControllerTest {
     Status status = ACTIVE;
 
     resultActions
-        .lookupResultActions(status, UPDATED_BY, moderatorUser)
+        .lookup(status, UPDATED_BY, moderatorUser)
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$", hasSize(faqQuestionRepository.findDistinctModifiers(status).size())));
@@ -266,7 +258,7 @@ class FaqQuestionControllerTest {
     Status status = ARCHIVED;
 
     resultActions
-        .lookupResultActions(status, CATEGORY, moderatorUser)
+        .lookup(status, CATEGORY, moderatorUser)
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$", hasSize(faqQuestionRepository.findDistinctCategories(status).size())));

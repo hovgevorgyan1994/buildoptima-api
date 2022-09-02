@@ -1,7 +1,7 @@
-package com.vecondev.buildoptima.parameters.actions;
+package com.vecondev.buildoptima.actions;
 
+import com.vecondev.buildoptima.endpoints.FaqCategoryEndpointUris;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
-import com.vecondev.buildoptima.parameters.endpoints.FaqCategoryEndpointUris;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.web.servlet.MockMvc;

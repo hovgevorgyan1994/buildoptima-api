@@ -13,13 +13,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.vecondev.buildoptima.actions.UserResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.model.user.User;
-import com.vecondev.buildoptima.parameters.actions.UserResultActions;
-import com.vecondev.buildoptima.parameters.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
@@ -96,7 +96,7 @@ class UserControllerTest {
             .getFetchRequest();
     User admin = userControllerTestParameters.getSavedUser(ADMIN);
 
-    resultActions.fetchingResultActions(requestDto, admin).andExpect(status().isOk());
+    resultActions.fetch(requestDto, admin).andExpect(status().isOk());
   }
 
   @Test
@@ -105,7 +105,7 @@ class UserControllerTest {
             .getFetchRequest();
     User client = userControllerTestParameters.getSavedUser(CLIENT);
 
-    resultActions.fetchingResultActions(requestDto, client).andExpect(status().isForbidden());
+    resultActions.fetch(requestDto, client).andExpect(status().isForbidden());
   }
 
   @Test
@@ -114,7 +114,7 @@ class UserControllerTest {
             .getInvalidFetchRequest();
     User admin = userControllerTestParameters.getSavedUser(ADMIN);
 
-    resultActions.fetchingResultActions(requestDto, admin).andExpect(status().isBadRequest());
+    resultActions.fetch(requestDto, admin).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -125,7 +125,7 @@ class UserControllerTest {
     ChangePasswordRequestDto requestDto = userControllerTestParameters
             .getChangePasswordRequestDto(savedUser);
 
-    resultActions.passwordChangingResultActions(requestDto, savedUser).andExpect(status().isOk());
+    resultActions.changePassword(requestDto, savedUser).andExpect(status().isOk());
   }
 
   @Test
@@ -135,7 +135,7 @@ class UserControllerTest {
     User adminUser = userControllerTestParameters.getSavedUser(ADMIN);
 
     resultActions
-        .getByIdResultActions(user.getId(), adminUser)
+        .getById(user.getId(), adminUser)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(user.getId().toString()));
   }
@@ -145,7 +145,7 @@ class UserControllerTest {
     User user = userControllerTestParameters
             .getSavedUser();
 
-    resultActions.getByIdResultActions(UUID.randomUUID(), user).andExpect(status().isForbidden());
+    resultActions.getById(UUID.randomUUID(), user).andExpect(status().isForbidden());
   }
 
 
@@ -155,6 +155,8 @@ class UserControllerTest {
 
     private static final String ORIGINAL_IMAGES_PATH = "user/%s/original/%s";
     private static final String THUMBNAIL_IMAGES_PATH = "user/%s/thumbnail/%s";
+    private static final String ORIGINAL_IMAGE_TYPE_NAME = "image";
+    private static final String THUMBNAIL_IMAGE_TYPE_NAME = "thumbnail-image";
     private static final String[] TEST_IMAGES = {"valid_image.jpg", "invalid_image_size.jpg"};
 
     @BeforeEach
@@ -177,9 +179,7 @@ class UserControllerTest {
       MockMultipartFile file =
           userControllerTestParameters.getMultiPartFile(TEST_IMAGES[0], IMAGE_JPEG_VALUE);
 
-      resultActions
-          .imageUploadingResultActions(file, userId, user)
-          .andExpect(status().isOk());
+      resultActions.uploadImage(file, userId, user).andExpect(status().isOk());
       assertTrue(
           amazonS3.doesObjectExist(
               s3ConfigProperties.getImageBucketName(),
@@ -198,9 +198,7 @@ class UserControllerTest {
       MockMultipartFile file =
           userControllerTestParameters.getMultiPartFile(filename, IMAGE_JPEG_VALUE);
 
-      resultActions
-          .imageUploadingResultActions(file, userId, user)
-          .andExpect(status().isPreconditionFailed());
+      resultActions.uploadImage(file, userId, user).andExpect(status().isPreconditionFailed());
       assertFalse(
           amazonS3.doesObjectExist(
               s3ConfigProperties.getImageBucketName(),
@@ -227,15 +225,17 @@ class UserControllerTest {
       userRepository.saveAndFlush(savedUser);
 
       resultActions
-          .imageDownloadingResultActions("image", userId, savedUser)
+          .downloadImage(ORIGINAL_IMAGE_TYPE_NAME, userId, savedUser)
           .andExpect(status().isOk());
     }
 
     @Test
     void failedOriginalImageDownloadingAsPermissionDenied() throws Exception {
       resultActions
-          .imageDownloadingResultActions(
-              "image", UUID.randomUUID(), userControllerTestParameters.getSavedUser())
+          .downloadImage(
+              ORIGINAL_IMAGE_TYPE_NAME,
+              UUID.randomUUID(),
+              userControllerTestParameters.getSavedUser())
           .andExpect(status().isForbidden());
     }
 
@@ -252,7 +252,7 @@ class UserControllerTest {
       userRepository.saveAndFlush(savedUser);
 
       resultActions
-          .imageDownloadingResultActions("thumbnail-image", savedUser.getId(), savedUser)
+          .downloadImage(THUMBNAIL_IMAGE_TYPE_NAME, savedUser.getId(), savedUser)
           .andExpect(status().isOk());
     }
 
@@ -280,7 +280,7 @@ class UserControllerTest {
               s3ConfigProperties.getImageBucketName(),
               String.format(THUMBNAIL_IMAGES_PATH, userId, imageVersion)));
 
-      resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNoContent());
+      resultActions.deleteImage(userId, savedUser).andExpect(status().isNoContent());
       assertFalse(
           amazonS3.doesObjectExist(
               s3ConfigProperties.getImageBucketName(),
@@ -305,12 +305,15 @@ class UserControllerTest {
               s3ConfigProperties.getImageBucketName(),
               String.format(THUMBNAIL_IMAGES_PATH, userId, savedUser.getImageVersion())));
 
-      resultActions.imageDeletionResultActions(userId, savedUser).andExpect(status().isNotFound());
+      resultActions.deleteImage(userId, savedUser).andExpect(status().isNotFound());
     }
 
     private void cleanS3Folder() {
       String bucketName = s3ConfigProperties.getImageBucketName();
-      for (S3ObjectSummary file : amazonS3.listObjects(bucketName, "user").getObjectSummaries()) {
+      for (S3ObjectSummary file :
+          amazonS3
+              .listObjects(bucketName, User.class.getSimpleName().toLowerCase())
+              .getObjectSummaries()) {
         amazonS3.deleteObject(bucketName, file.getKey());
       }
     }

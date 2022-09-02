@@ -62,9 +62,15 @@ public class OpenSearchConfig {
       if (!client.indices().exists(getIndexRequest, RequestOptions.DEFAULT)) {
         CreateIndexRequest createIndexRequest = new CreateIndexRequest(properties.getIndexName());
         createIndexRequest.mapping(
-            (String) FileReader.readFromJson(properties.getIndexMappingPath()), XContentType.JSON);
+            (String)
+                FileReader.readFromJson(
+                    properties.getRequestBodiesPath() + properties.getIndexMappingFileName()),
+            XContentType.JSON);
         createIndexRequest.settings(
-            (String) FileReader.readFromJson(properties.getIndexSettingsPath()), XContentType.JSON);
+            (String)
+                FileReader.readFromJson(
+                    properties.getRequestBodiesPath() + properties.getIndexSettingsFileName()),
+            XContentType.JSON);
         client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
         log.info("Created new index named {} in AWS OpenSearch cluster", properties.getIndexName());
       }

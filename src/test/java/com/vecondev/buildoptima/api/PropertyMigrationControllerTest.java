@@ -1,21 +1,22 @@
 package com.vecondev.buildoptima.api;
 
-import static com.vecondev.buildoptima.exception.Error.PROPERTY_NOT_FOUND;
-import static com.vecondev.buildoptima.filter.model.PropertySearchCriteria.ADDRESS;
-import static com.vecondev.buildoptima.filter.model.PropertySearchCriteria.AIN;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static com.vecondev.buildoptima.exception.Error.ACCESS_DENIED;
+import static com.vecondev.buildoptima.model.user.Role.CLIENT;
+import static com.vecondev.buildoptima.model.user.Role.MODERATOR;
+import static org.junit.Assume.assumeNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.vecondev.buildoptima.actions.PropertyResultActions;
+import com.vecondev.buildoptima.actions.PropertyMigrationResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.OpenSearchConfigProperties;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
-import com.vecondev.buildoptima.endpoints.PropertyEndpointUris;
-import com.vecondev.buildoptima.exception.ResourceNotFoundException;
-import com.vecondev.buildoptima.model.property.Address;
-import com.vecondev.buildoptima.model.property.Property;
+import com.vecondev.buildoptima.endpoints.PropertyMigrationEndpointUris;
+import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
+import com.vecondev.buildoptima.model.user.Role;
+import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.property.PropertyControllerTestParameters;
 import com.vecondev.buildoptima.repository.property.AddressRepository;
 import com.vecondev.buildoptima.repository.property.MigrationHistoryRepository;
@@ -24,9 +25,9 @@ import com.vecondev.buildoptima.repository.property.PropertyRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.property.PropertyMigrationService;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,24 +48,28 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
-@Import({PropertyEndpointUris.class, PropertyResultActions.class, AmazonS3Config.class})
-class PropertyControllerTest {
+@Import({
+  PropertyMigrationEndpointUris.class,
+  PropertyMigrationResultActions.class,
+  AmazonS3Config.class
+})
+class PropertyMigrationControllerTest {
 
   private static final String[] TEST_FILES = {"100.json.gz", "101.json.gz", "invalid.json"};
+  private static final int PROPERTIES_PER_FILE = 500;
   private final PropertyControllerTestParameters testParameters =
       new PropertyControllerTestParameters();
-
-  @Autowired private PropertyMigrationService propertyMigrationService;
   @Autowired private AmazonS3 amazonS3;
+  @Autowired private PropertyMigrationService propertyMigrationService;
+  @Autowired private S3ConfigProperties s3ConfigProperties;
   @Autowired private UserRepository userRepository;
   @Autowired private PropertyRepository propertyRepository;
   @Autowired private AddressRepository addressRepository;
   @Autowired private MigrationMetadataRepository migrationMetadataRepository;
   @Autowired private MigrationHistoryRepository migrationHistoryRepository;
+  @Autowired private PropertyMigrationResultActions propertyMigrationResultActions;
   @Autowired private RestHighLevelClient restHighLevelClient;
   @Autowired private OpenSearchConfigProperties openSearchConfigProperties;
-  @Autowired private S3ConfigProperties s3ConfigProperties;
-  @Autowired private PropertyResultActions propertyResultActions;
 
   @BeforeEach
   void setUp() {
@@ -73,7 +78,6 @@ class PropertyControllerTest {
             file ->
                 amazonS3.putObject(
                     s3ConfigProperties.getDataBucketName(), file, testParameters.getFile(file)));
-    propertyMigrationService.migrateFromS3();
     userRepository.saveAll(testParameters.users());
   }
 
@@ -98,54 +102,80 @@ class PropertyControllerTest {
   }
 
   @Test
-  void getByAinSuccess() throws Exception {
-    Property property =
-        propertyRepository.findAll().stream()
-            .findAny()
-            .orElseThrow(() -> new ResourceNotFoundException(PROPERTY_NOT_FOUND));
+  void successfulPropertiesMigration() throws Exception {
+    User moderator = getUserByRole(MODERATOR);
+    assumeNotNull(moderator);
 
-    propertyResultActions
-        .getByAin(property.getAin())
+    propertyMigrationResultActions
+        .migrate(moderator)
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.ain").value(property.getAin()))
-        .andExpect(jsonPath("$.municipality").value(property.getMunicipality()));
+        .andExpect(jsonPath("$.allProcessedFiles").value(TEST_FILES.length))
+        .andExpect(jsonPath("$.allProcessedProperties").value(getProcessedPropertiesCount()));
   }
 
   @Test
-  void getByAinFailedAsPropertyNotFound() throws Exception {
-    String ain = String.valueOf(new Random().nextInt());
-    assumeFalse(propertyRepository.existsByAin(ain));
+  void successfulPropertiesMigrationWithNoNewFiles() throws Exception {
+    User moderator = getUserByRole(MODERATOR);
+    assumeNotNull(moderator);
 
-    propertyResultActions.getByAin(ain).andExpect(status().isNotFound());
+    propertyMigrationService.migrateFromS3();
+    assumeTrue(migrationHistoryRepository.count() == TEST_FILES.length);
+
+    propertyMigrationResultActions
+        .migrate(moderator)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.allProcessedFiles").value(TEST_FILES.length))
+        .andExpect(jsonPath("$.allProcessedProperties").value(getProcessedPropertiesCount()));
   }
 
   @Test
-  void successfulSearchByAddress() throws Exception {
-    List<Address> addresses =
-        propertyRepository.findAll().stream()
-            .findAny()
-            .orElseThrow(() -> new ResourceNotFoundException(PROPERTY_NOT_FOUND))
-            .getAddresses();
-    assumeFalse(addresses.isEmpty());
-    Address address = addresses.stream().findAny().orElseThrow();
+  void failedPropertiesMigrationAsPermissionDenied() throws Exception {
+    User client = getUserByRole(CLIENT);
+    assumeNotNull(client);
 
-    propertyResultActions
-        .search(address.getHouseNumber(), ADDRESS)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isNotEmpty());
+    propertyMigrationResultActions
+        .migrate(client)
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.errorCode").value(ACCESS_DENIED.getCode()))
+        .andExpect(jsonPath("$.message").value(ACCESS_DENIED.getMessage()))
+        .andExpect(jsonPath("$.timestamp").isNotEmpty());
   }
 
   @Test
-  void successfulSearchByAin() throws Exception {
-    Property property =
-        propertyRepository.findAll().stream()
-            .findAny()
-            .orElseThrow(() -> new ResourceNotFoundException(PROPERTY_NOT_FOUND));
-    assumeFalse(property.getAddresses().isEmpty());
+  void successfulReprocessOfFailedFiles() throws Exception {
+    User moderator = getUserByRole(MODERATOR);
+    assumeNotNull(moderator);
 
-    propertyResultActions
-        .search(property.getAin(), AIN)
+    migrationHistoryRepository.save(
+        new MigrationHistory(
+            UUID.randomUUID(), TEST_FILES[0], Instant.now(), Instant.now(), "Not in GZIP format."));
+    int failedMigrationHistories = migrationHistoryRepository.findAllByFailedAtNotNull().size();
+
+    propertyMigrationResultActions
+        .reprocess(moderator)
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isNotEmpty());
+        .andExpect(jsonPath("$.allSuccessfullyReprocessedFiles").value(failedMigrationHistories));
+  }
+
+  @Test
+  void successfulMigrationTracking() throws Exception {
+    User moderator = getUserByRole(MODERATOR);
+    assumeNotNull(moderator);
+
+    propertyMigrationService.migrateFromS3();
+
+    propertyMigrationResultActions
+        .trackProgress(moderator)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.allProcessedFiles").value(TEST_FILES.length))
+        .andExpect(jsonPath("$.allProcessedProperties").value(getProcessedPropertiesCount()));
+  }
+
+  private User getUserByRole(Role role) {
+    return userRepository.findByRole(role).orElse(null);
+  }
+
+  private int getProcessedPropertiesCount() {
+    return migrationHistoryRepository.findAllByFailedAtIsNull().size() * PROPERTIES_PER_FILE;
   }
 }
