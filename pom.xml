@@ -226,6 +226,14 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>com/vecondev/buildoptima/util/**</exclude>
+                        <exclude>com/vecondev/buildoptima/dto/**</exclude>
+                        <exclude>com/vecondev/buildoptima/config/**</exclude>
+                        <exclude>com/vecondev/buildoptima/model/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
