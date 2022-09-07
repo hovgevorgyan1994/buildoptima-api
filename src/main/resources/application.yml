@@ -35,13 +35,7 @@ springdoc:
 
 
 server:
-  port: 443
-  ssl:
-    key-store-type: PKCS12
-    key-store: classpath:keystore.p12
-    key-store-password: 123456
-    key-alias: tomcat
-    enabled: true
+  port: 80
   servlet:
     context-path: /api/v1
 
@@ -51,8 +45,11 @@ cloud:
       auto: false
       static: us-east-1
       use-default-aws-region-chain: true
-    stack: false
-    stack.auto: false
+    stack:
+      auto: false
+    credentials:
+      access-key: AKIA2AHFPMZSNI2KGCUN
+      secret-key: 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
 
 
 platform:
@@ -99,7 +96,6 @@ opensearch:
     requestBodiesPath: src/main/resources/opensearch/
     indexMappingFileName: mappings.json
     indexSettingsFileName: settings.json
-    searchByAddressFileName: search_by_address.json
 
 page:
   skip: 0

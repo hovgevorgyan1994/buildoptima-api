@@ -23,7 +23,7 @@ services:
     image: 687676024420.dkr.ecr.us-east-1.amazonaws.com/buildoptima
     container_name: Buildoptima_API
     ports:
-      - "443:443"
+      - "80:80"
     depends_on:
       - postgresql
       - adminer

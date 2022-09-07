@@ -18,5 +18,4 @@ public class OpenSearchConfigProperties {
   private String requestBodiesPath;
   private String indexMappingFileName;
   private String indexSettingsFileName;
-  private String searchByAddressFileName;
 }
