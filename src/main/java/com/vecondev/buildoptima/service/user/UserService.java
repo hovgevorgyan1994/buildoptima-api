@@ -18,6 +18,8 @@ public interface UserService {
 
   UserResponseDto getById(UUID userId);
 
+  UserResponseDto getCurrentUser();
+
   ImageOverview uploadImage(UUID userId, MultipartFile multipartFile);
 
   ResponseEntity<byte[]> downloadImage(UUID ownerId, boolean isOriginal);

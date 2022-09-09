@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
             description = "Click here to see a detailed explanation of application errors",
             url =
                 "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
-public interface FaqQuestionApi extends SecuredApi {
+public interface FaqQuestionApi extends SecuredApi, FetchingApi {
 
   @Operation(
       summary = "Create new FAQ Question",

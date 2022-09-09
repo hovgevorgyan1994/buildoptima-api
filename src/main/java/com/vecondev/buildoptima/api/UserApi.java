@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
         description = "Click here to see a detailed explanation of application errors",
         url =
                 "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
-public interface UserApi extends SecuredApi {
+public interface UserApi extends SecuredApi, FetchingApi {
 
   @Operation(
       summary = "Get user profile",
@@ -55,6 +55,19 @@ public interface UserApi extends SecuredApi {
       })
   ResponseEntity<UserResponseDto> getById(@PathVariable("id") UUID id,
       @Parameter(hidden = true) AppUserDetails user);
+
+  @Operation(
+      summary = "Get current user",
+      description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 4042, 5007",
+      security = @SecurityRequirement(name = "api-security"))
+  @ApiResponse(
+      responseCode = "200",
+      description = "Fetched a user from DB",
+      content =
+      @Content(
+          schema = @Schema(implementation = UserResponseDto.class),
+          mediaType = APPLICATION_JSON_VALUE))
+  ResponseEntity<UserResponseDto> getCurrentUser();
 
   @RequestBody(ref = "#/components/requestBodies/fetchUsersRequestExample")
   ResponseEntity<FetchResponseDto> fetch(

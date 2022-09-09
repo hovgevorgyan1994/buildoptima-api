@@ -28,7 +28,7 @@ import org.springframework.http.ResponseEntity;
         description = "Click here to see a detailed explanation of application errors",
         url =
                 "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
-public interface NewsApi extends SecuredApi {
+public interface NewsApi extends SecuredApi, FetchingApi {
 
   @Operation(
       summary = "Add news item",

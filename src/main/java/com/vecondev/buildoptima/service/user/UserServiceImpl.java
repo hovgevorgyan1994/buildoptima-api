@@ -6,7 +6,7 @@ import static com.vecondev.buildoptima.exception.Error.PROVIDED_WRONG_PASSWORD;
 import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
 import static com.vecondev.buildoptima.util.RestPreconditions.*;
-import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.*;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
 
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
@@ -21,6 +21,7 @@ import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import java.util.List;
@@ -103,6 +104,16 @@ public class UserServiceImpl implements UserService {
     log.info("Fetched user {} profile", user.getEmail());
 
     return userMapper.mapToResponseDto(user);
+  }
+
+  @Override
+  public UserResponseDto getCurrentUser() {
+    AppUserDetails userDetails = securityContextService.getUserDetails();
+
+    return userMapper.mapToResponseDto(
+        userRepository
+            .findById(userDetails.getId())
+            .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND)));
   }
 
   /**

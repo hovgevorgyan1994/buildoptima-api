@@ -47,9 +47,6 @@ cloud:
       use-default-aws-region-chain: true
     stack:
       auto: false
-    credentials:
-      access-key: AKIA2AHFPMZSNI2KGCUN
-      secret-key: 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
 
 
 platform:

@@ -30,7 +30,7 @@ import org.springframework.http.ResponseEntity;
             description = "Click here to see a detailed explanation of application errors",
             url =
                 "https://github.com/vecondev/buildoptima-api/blob/develop/docs/application-errors.md"))
-public interface FaqCategoryApi extends SecuredApi {
+public interface FaqCategoryApi extends SecuredApi, FetchingApi {
 
   @Operation(
       summary = "Create new FAQ category",

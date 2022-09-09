@@ -24,6 +24,10 @@ services:
     container_name: Buildoptima_API
     ports:
       - "80:80"
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIA2AHFPMZSMHWKHZO6
+      - AWS_SECRET_ACCESS_KEY=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
+      - AWS_DEFAULT_REGION=us-east-1
     depends_on:
       - postgresql
       - adminer
