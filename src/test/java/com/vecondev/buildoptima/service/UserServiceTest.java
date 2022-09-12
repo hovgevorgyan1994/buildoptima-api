@@ -2,15 +2,19 @@ package com.vecondev.buildoptima.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.configuration.GlobalConfiguration.validate;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
@@ -19,11 +23,13 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.UserRepository;
+import com.vecondev.buildoptima.service.auth.AuthService;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import com.vecondev.buildoptima.service.user.UserServiceImpl;
 import com.vecondev.buildoptima.util.RestPreconditions;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,6 +56,7 @@ class UserServiceTest {
   @InjectMocks private UserServiceImpl userService;
   @Mock private AmazonS3Service imageService;
   @Mock private UserMapper userMapper;
+  @Mock AuthService authService;
   @Mock private UserRepository userRepository;
   @Mock private PasswordEncoder encoder;
   @Mock private PageableConverter pageableConverter;
@@ -110,11 +117,12 @@ class UserServiceTest {
     when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     when(encoder.matches(any(), any())).thenReturn(true);
-    when(encoder.encode(any()))
-        .thenReturn(testParameters.getPasswordEncoded(newPassword));
+    when(encoder.encode(any())).thenReturn(testParameters.getPasswordEncoded(newPassword));
 
-    assertDoesNotThrow(() -> userService
-        .changePassword(testParameters.getChangePasswordRequestDto(oldPassword, newPassword)));
+    assertDoesNotThrow(
+        () ->
+            userService.changePassword(
+                testParameters.getChangePasswordRequestDto(oldPassword, newPassword)));
     verify(encoder).encode(any());
   }
 
@@ -123,15 +131,14 @@ class UserServiceTest {
     String oldPassword = "oldPassword";
     User user = testParameters.getSavedUser();
     user.setPassword(testParameters.getPasswordEncoded(oldPassword + 1));
-    final ChangePasswordRequestDto requestDto = testParameters
-        .getChangePasswordRequestDto(oldPassword, "newPassword");
+    final ChangePasswordRequestDto requestDto =
+        testParameters.getChangePasswordRequestDto(oldPassword, "newPassword");
 
     when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     when(encoder.matches(any(), any())).thenReturn(false);
 
-    assertThrows(AuthenticationException.class, () -> userService
-        .changePassword(requestDto));
+    assertThrows(AuthenticationException.class, () -> userService.changePassword(requestDto));
   }
 
   @Test
@@ -139,15 +146,14 @@ class UserServiceTest {
     String password = "oldPassword";
     User user = testParameters.getSavedUser();
     user.setPassword(testParameters.getPasswordEncoded(password));
-    final ChangePasswordRequestDto requestDto = testParameters
-        .getChangePasswordRequestDto(password, password);
+    final ChangePasswordRequestDto requestDto =
+        testParameters.getChangePasswordRequestDto(password, password);
 
     when(securityContextService.getUserDetails()).thenReturn(testParameters.userDetails());
     when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     when(encoder.matches(any(), any())).thenReturn(true);
 
-    assertThrows(AuthenticationException.class, () -> userService
-        .changePassword(requestDto));
+    assertThrows(AuthenticationException.class, () -> userService.changePassword(requestDto));
   }
 
   @Test
@@ -222,5 +228,40 @@ class UserServiceTest {
     when(userRepository.findById(any())).thenReturn(Optional.empty());
 
     assertThrows(UserNotFoundException.class, () -> userService.deleteImage(userId));
+  }
+
+  @Test
+  void editUserSuccess() {
+    User userToEdit = testParameters.getSavedUser();
+    UUID userId = userToEdit.getId();
+    EditUserDto editUserDto = testParameters.editUserDto();
+    UserResponseDto responseDto =
+        testParameters.getUserResponseDto(testParameters.editedUser(editUserDto));
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(userToEdit));
+    when(userMapper.mapToResponseDto(any(User.class))).thenReturn(responseDto);
+
+    UserResponseDto editedUserDto = userService.edit(userId, editUserDto, new Locale("en"));
+    assertNotNull(editedUserDto);
+    verify(authService).sendEmail(any(Locale.class), any(User.class));
+    assertEquals(editedUserDto.getFirstName(), editUserDto.getFirstName());
+  }
+
+  @Test
+  void editUserSuccessSameEmail() {
+    User userToEdit = testParameters.getSavedUser();
+    UUID userId = userToEdit.getId();
+    EditUserDto editUserDto = testParameters.editUserDto();
+    editUserDto.setEmail(userToEdit.getEmail());
+    UserResponseDto responseDto =
+        testParameters.getUserResponseDto(testParameters.editedUser(editUserDto));
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(userToEdit));
+    when(userMapper.mapToResponseDto(any(User.class))).thenReturn(responseDto);
+
+    UserResponseDto editedUserDto = userService.edit(userId, editUserDto, new Locale("en"));
+    assertNotNull(editedUserDto);
+    verify(authService, times(0)).sendEmail(any(Locale.class), any(User.class));
+    assertEquals(editedUserDto.getFirstName(), editUserDto.getFirstName());
   }
 }

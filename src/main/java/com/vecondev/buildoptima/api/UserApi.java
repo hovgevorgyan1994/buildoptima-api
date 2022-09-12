@@ -6,6 +6,7 @@ import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.exception.ApiError;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -107,11 +109,44 @@ public interface UserApi extends SecuredApi, FetchingApi {
   ResponseEntity<Void> changePassword(ChangePasswordRequestDto request);
 
   @Operation(
+      summary = """
+          Edit User info. If any field is not to be changed,
+          please provide the present user state
+          """,
+      description =
+          "Possible error codes: 4001, 40011, 4011, 4012, 4013, 4014, 4031, 4042, 4091,  5007",
+      security = @SecurityRequirement(name = "api-security"))
+  @RequestBody(
+      content =
+          @Content(
+              schema = @Schema(implementation = EditUserDto.class),
+              mediaType = APPLICATION_JSON_VALUE))
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "User info successfully edited",
+            content = @Content(schema = @Schema(implementation = UserResponseDto.class),
+            mediaType = APPLICATION_JSON_VALUE)),
+        @ApiResponse(
+            responseCode = "400",
+            ref = "#/components/responses/methodArgumentNotValidResponse"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "User not found",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
+      })
+  ResponseEntity<UserResponseDto> editUser(UUID userId,
+      @Parameter(hidden = true) AppUserDetails user,
+      EditUserDto editUserDto, Locale locale);
+
+  @Operation(
       summary = "Upload new image or update the previous one of given user",
       description = """
               Possible error codes: 4004, 4011, 4012, 4013, 4014, 4031, 4121,
               4122, 4123, 4124, 5002, 5003, 5005, 5006, 5007, 5009.
-              The image has following requirements (extension: jpeg/jpg/png, 
+              The image has following requirements (extension: jpeg/jpg/png,
               min_width: 600px, max_width: 600px, size: 70KB-30MB).
               To get the uploaded image urls: original image url: 
               'https://buildoptima.s3.amazonaws.com/user/{user_id}/original/{version}' 

@@ -4,6 +4,7 @@ import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.ConfirmationToken;
@@ -124,5 +125,32 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
         .authorities(user.getRole().getAuthorities())
         .enabled(true)
         .build();
+  }
+
+  public EditUserDto editUserDto() {
+    return EditUserDto.builder()
+        .firstName("Jamila")
+        .lastName("Ahmed")
+        .email("jamilahmed@gmail.com")
+        .phone("+37493776694")
+        .build();
+  }
+
+  public EditUserDto editUserDtoInvalid() {
+    return EditUserDto.builder()
+        .firstName("J")
+        .lastName("A")
+        .email("jam")
+        .phone("+374")
+        .build();
+  }
+
+  public User editedUser(EditUserDto editUserDto) {
+    User savedUser = getSavedUser();
+    savedUser.setFirstName(editUserDto.getFirstName());
+    savedUser.setLastName(editUserDto.getLastName());
+    savedUser.setEmail(editUserDto.getEmail());
+    savedUser.setPhone(editUserDto.getPhone());
+    return savedUser;
   }
 }

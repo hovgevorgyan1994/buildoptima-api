@@ -8,10 +8,13 @@ import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.dto.user.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.user.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
+import com.vecondev.buildoptima.model.user.User;
 import java.util.Locale;
 
 public interface AuthService {
   UserResponseDto register(UserRegistrationRequestDto dto, Locale locale);
+
+  void sendEmail(Locale locale, User user);
 
   UserResponseDto activate(String token);
 

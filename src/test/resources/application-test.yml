@@ -68,6 +68,7 @@ config:
       retrieveByIdUri: /{id}
       deleteImageByIdUri: /{id}/image
       downloadImageUri: /{id}/
+      editUserUri: /{id}
       uploadImageUri: /{id}/image
       restorePasswordUri: /auth/password/restore
       verifyPasswordUri: /auth/verification

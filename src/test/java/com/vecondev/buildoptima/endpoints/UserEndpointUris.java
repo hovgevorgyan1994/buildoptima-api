@@ -13,6 +13,7 @@ public class UserEndpointUris implements EndpointUris {
   private String fetchUri;
   private String retrieveByIdUri;
   private String deleteImageByIdUri;
+  private String editUserUri;
   private String downloadImageUri;
   private String uploadImageUri;
   private String restorePasswordUri;
@@ -101,5 +102,9 @@ public class UserEndpointUris implements EndpointUris {
 
   public String getRegistrationUri() {
     return registrationUri;
+  }
+
+  public String getEditUserUri() {
+    return baseUri + editUserUri;
   }
 }

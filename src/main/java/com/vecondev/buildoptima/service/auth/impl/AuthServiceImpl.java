@@ -54,15 +54,18 @@ public class AuthServiceImpl implements AuthService {
     User user = userMapper.mapToEntity(dto);
     userValidator.validateUserRegistration(user);
     user = userRepository.saveAndFlush(user);
+    sendEmail(locale, user);
+    return userMapper.mapToResponseDto(user);
+  }
+
+  public void sendEmail(Locale locale, User user) {
     ConfirmationToken confirmationToken = confirmationTokenService.create(user);
-    log.info("New user registered.");
     try {
       mailService.sendConfirm(locale, confirmationToken);
     } catch (MessagingException e) {
       throw new AuthenticationException(SEND_EMAIL_FAILED);
     }
     log.info("Verification email was sent to user {}", user.getEmail());
-    return userMapper.mapToResponseDto(user);
   }
 
   @Override

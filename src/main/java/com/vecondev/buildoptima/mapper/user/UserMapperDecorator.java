@@ -33,7 +33,10 @@ public abstract class UserMapperDecorator implements UserMapper {
 
   @Override
   public UserResponseDto mapToResponseDto(User user) {
-    return mapper.mapToResponseDto(user).toBuilder().id(user.getId()).build();
+    UserResponseDto responseDto =
+        mapper.mapToResponseDto(user).toBuilder().id(user.getId()).build();
+    responseDto.setUpdatedAt(user.getUpdatedAt());
+    return responseDto;
   }
 
   public List<UserResponseDto> mapToResponseList(Page<User> users) {

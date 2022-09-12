@@ -6,18 +6,21 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RestorePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.UserRegistrationRequestDto;
 import com.vecondev.buildoptima.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
+import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -137,6 +140,17 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
     return getMockMvc()
         .perform(
             post(getEndpointUris().getRegistrationUri())
+                .content(asJsonString(requestDto))
+                .contentType(APPLICATION_JSON)
+                .accept(APPLICATION_JSON));
+  }
+
+  public ResultActions editUser(UUID id, EditUserDto requestDto, Locale locale, User user)
+      throws Exception {
+    return getMockMvc()
+        .perform(
+            patch(getEndpointUris().getEditUserUri(), id, locale)
+                .header(AUTHORIZATION_HEADER, getAccessToken(user))
                 .content(asJsonString(requestDto))
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON));

@@ -18,13 +18,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      - name: Run LocalStack Container
-        run: docker-compose -f docker/docker-compose-test.yml up -d
-      - name: Run Tests
-        run: |
-          mvn clean test --batch-mode
-        
-        
-      
-
-    
+      - name: Build The Application
+        run: mvn clean package -DskipTests

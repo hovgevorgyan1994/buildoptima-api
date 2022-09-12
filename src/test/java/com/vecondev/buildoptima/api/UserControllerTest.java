@@ -3,6 +3,7 @@ package com.vecondev.buildoptima.api;
 import static com.vecondev.buildoptima.model.user.Role.ADMIN;
 import static com.vecondev.buildoptima.model.user.Role.CLIENT;
 import static com.vecondev.buildoptima.util.FileUtil.convertMultipartFileToFile;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -13,14 +14,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.icegreen.greenmail.configuration.GreenMailConfiguration;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import com.vecondev.buildoptima.actions.UserResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.config.properties.S3ConfigProperties;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.endpoints.UserEndpointUris;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserControllerTestParameters;
+import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.ConfirmationTokenRepository;
 import com.vecondev.buildoptima.repository.user.RefreshTokenRepository;
 import com.vecondev.buildoptima.repository.user.UserRepository;
@@ -28,7 +34,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import javax.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -36,6 +44,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -63,9 +72,20 @@ class UserControllerTest {
   @Autowired private S3ConfigProperties s3ConfigProperties;
   @Autowired private UserResultActions resultActions;
 
+  private static final String GREENMAIL_EMAIL_ADDRESS = "buildoptima-test@gmail.com";
+  private static final String GREENMAIL_EMAIL_PASSWORD = "buildoptima";
+
+  @RegisterExtension
+  private static final GreenMailExtension greenMail =
+      new GreenMailExtension(ServerSetupTest.SMTP)
+          .withConfiguration(
+              GreenMailConfiguration.aConfig()
+                  .withUser(GREENMAIL_EMAIL_ADDRESS, GREENMAIL_EMAIL_PASSWORD))
+          .withPerMethodLifecycle(true);
+
+  private final UserServiceTestParameters userServiceTestParameters =
+      new UserServiceTestParameters();
   private UserControllerTestParameters userControllerTestParameters;
-
-
 
   @BeforeEach
   void setUp() {
@@ -88,12 +108,9 @@ class UserControllerTest {
     userRepository.deleteAll();
   }
 
-
-
   @Test
   void successfulFetchingOfUsers() throws Exception {
-    FetchRequestDto requestDto = userControllerTestParameters
-            .getFetchRequest();
+    FetchRequestDto requestDto = userControllerTestParameters.getFetchRequest();
     User admin = userControllerTestParameters.getSavedUser(ADMIN);
 
     resultActions.fetch(requestDto, admin).andExpect(status().isOk());
@@ -101,8 +118,7 @@ class UserControllerTest {
 
   @Test
   void failedFetchingOfUsersAsPermissionDenied() throws Exception {
-    FetchRequestDto requestDto = userControllerTestParameters
-            .getFetchRequest();
+    FetchRequestDto requestDto = userControllerTestParameters.getFetchRequest();
     User client = userControllerTestParameters.getSavedUser(CLIENT);
 
     resultActions.fetch(requestDto, client).andExpect(status().isForbidden());
@@ -110,8 +126,7 @@ class UserControllerTest {
 
   @Test
   void failedFetchingOfUsersAsRequestDtoIsInvalid() throws Exception {
-    FetchRequestDto requestDto = userControllerTestParameters
-            .getInvalidFetchRequest();
+    FetchRequestDto requestDto = userControllerTestParameters.getInvalidFetchRequest();
     User admin = userControllerTestParameters.getSavedUser(ADMIN);
 
     resultActions.fetch(requestDto, admin).andExpect(status().isBadRequest());
@@ -122,16 +137,15 @@ class UserControllerTest {
     User savedUser = userControllerTestParameters.getSavedUser();
     savedUser.setPassword(
         userControllerTestParameters.getUserByEmail(savedUser.getEmail()).getPassword());
-    ChangePasswordRequestDto requestDto = userControllerTestParameters
-            .getChangePasswordRequestDto(savedUser);
+    ChangePasswordRequestDto requestDto =
+        userControllerTestParameters.getChangePasswordRequestDto(savedUser);
 
     resultActions.changePassword(requestDto, savedUser).andExpect(status().isOk());
   }
 
   @Test
   void successfulGettingUser() throws Exception {
-    User user = userControllerTestParameters
-            .getSavedUser();
+    User user = userControllerTestParameters.getSavedUser();
     User adminUser = userControllerTestParameters.getSavedUser(ADMIN);
 
     resultActions
@@ -142,13 +156,57 @@ class UserControllerTest {
 
   @Test
   void failedGettingUserAsPermissionDenied() throws Exception {
-    User user = userControllerTestParameters
-            .getSavedUser();
+    User user = userControllerTestParameters.getSavedUser();
 
     resultActions.getById(UUID.randomUUID(), user).andExpect(status().isForbidden());
   }
 
+  @Test
+  void editUserSuccess() throws Exception {
+    User savedUser = userControllerTestParameters.getSavedUser();
+    EditUserDto editUserDto = userServiceTestParameters.editUserDto();
 
+    resultActions
+        .editUser(savedUser.getId(), editUserDto, new Locale("en"), savedUser)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.firstName").value(editUserDto.getFirstName()));
+
+    MimeMessage[] messages = greenMail.getReceivedMessages();
+    assertEquals(1, messages.length);
+    assertEquals(editUserDto.getEmail(), messages[0].getAllRecipients()[0].toString());
+  }
+
+  @Test
+  void editUserFailedAsUserNotFound() throws Exception {
+    User savedUser = userControllerTestParameters.getSavedUser();
+    UUID id = UUID.randomUUID();
+    savedUser.setId(id);
+    EditUserDto editUserDto = userServiceTestParameters.editUserDto();
+
+    resultActions
+        .editUser(id, editUserDto, new Locale("en"), savedUser)
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void editUserFailedAsForbidden() throws Exception {
+    User savedUser = userControllerTestParameters.getSavedUser();
+    EditUserDto editUserDto = userServiceTestParameters.editUserDto();
+
+    resultActions
+        .editUser(UUID.randomUUID(), editUserDto, new Locale("en"), savedUser)
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void editUserFailedAsInvalidFields() throws Exception {
+    User savedUser = userControllerTestParameters.getSavedUser();
+    EditUserDto editUserDto = userServiceTestParameters.editUserDtoInvalid();
+
+    resultActions
+        .editUser(savedUser.getId(), editUserDto, new Locale("en"), savedUser)
+        .andExpect(status().isBadRequest());
+  }
 
   @Nested
   class ImageTest {
@@ -257,7 +315,6 @@ class UserControllerTest {
     }
 
     @Test
-
     void successfulImageDeletion() throws Exception {
       User savedUser = userControllerTestParameters.getSavedUser();
       UUID userId = savedUser.getId();

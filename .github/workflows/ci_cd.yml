@@ -3,8 +3,11 @@ name: CI/CD
 on:
   push:
     branches: [ "develop" ]
-    
+
 env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
   AWS_EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
   AWS_EC2_USER : ${{ secrets.EC2_USER }}
   AWS_EC2_IP_ADDRESS: ${{ secrets.EC2_IP_ADDRESS }}
@@ -32,7 +35,6 @@ jobs:
         mvn clean test --batch-mode
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
       with:
         junit_files: "target/surefire-reports/*.xml"
     - name: Generate JaCoCo Badge
@@ -57,14 +59,14 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
     - name: Build, Tag, And Push Image To Amazon ECR
       run: |
-        docker build -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY .
+        docker build -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY --build-arg AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION .
         docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY
         IMAGES_TO_DELETE=$( aws ecr list-images --repository-name $AWS_ECR_REPOSITORY --filter "tagStatus=UNTAGGED" --query 'imageIds[*]' --output json )
         aws ecr batch-delete-image --repository-name $AWS_ECR_REPOSITORY --image-ids "$IMAGES_TO_DELETE" || true
     - name: Configure EC2 Environment And Deploy The Application
       run: |
         echo "$AWS_EC2_PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
-        ssh -o StrictHostKeyChecking=no -i "private_key.pem" $AWS_EC2_USER@$AWS_EC2_IP_ADDRESS mkdir -p /home/ubuntu/buildoptima/data 
+        ssh -o StrictHostKeyChecking=no -i "private_key.pem" $AWS_EC2_USER@$AWS_EC2_IP_ADDRESS mkdir -p /home/ubuntu/buildoptima/data
         scp -o StrictHostKeyChecking=no -i "private_key.pem" src/main/resources/db/init.sql $AWS_EC2_USER@$AWS_EC2_IP_ADDRESS:/home/ubuntu/buildoptima/init.sql
         scp -o StrictHostKeyChecking=no -i "private_key.pem" docker/docker-compose.yml $AWS_EC2_USER@$AWS_EC2_IP_ADDRESS:/home/ubuntu/buildoptima/docker-compose.yml
         ssh -o StrictHostKeyChecking=no -i "private_key.pem" $AWS_EC2_USER@$AWS_EC2_IP_ADDRESS /bin/bash <<EOT
@@ -79,10 +81,10 @@ jobs:
         fi
         if ! aws --version>/dev/null; then
         sudo apt install awscli
-        echo -e "[default]\naws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}\naws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}" > /home/ubuntu/.aws/credentials
-        echo -e "[default]\nregion = us-east-1\noutput = json" > /home/ubuntu/.aws/config
+        echo -e "[default]\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY" > /home/ubuntu/.aws/credentials
+        echo -e "[default]\nregion = $AWS_DEFAULT_REGION\noutput = json" > /home/ubuntu/.aws/config
         fi
-        sudo docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) $AWS_ECR_REGISTRY
+        sudo docker login -u AWS -p $(aws ecr get-login-password --region $AWS_DEFAULT_REGION) $AWS_ECR_REGISTRY
         cd /home/ubuntu/buildoptima
         sudo docker-compose pull
         sudo docker-compose up -d

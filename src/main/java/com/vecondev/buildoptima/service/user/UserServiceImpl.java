@@ -6,12 +6,14 @@ import static com.vecondev.buildoptima.exception.Error.PROVIDED_WRONG_PASSWORD;
 import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
 import static com.vecondev.buildoptima.util.RestPreconditions.*;
-import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.validateFieldNames;
+import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.*;
+import static java.lang.Boolean.FALSE;
 
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
@@ -22,9 +24,11 @@ import com.vecondev.buildoptima.mapper.user.UserMapper;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
+import com.vecondev.buildoptima.service.auth.AuthService;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +40,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.util.StringUtils;
 
 @Slf4j
 @Service
@@ -47,6 +52,7 @@ public class UserServiceImpl implements UserService {
   private final UserMapper userMapper;
   private final PasswordEncoder passwordEncoder;
   private final AmazonS3Service imageService;
+  private final AuthService authService;
   private final PageableConverter pageableConverter;
   private final SecurityContextService securityContextService;
 
@@ -95,6 +101,20 @@ public class UserServiceImpl implements UserService {
     }
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
     log.info("User {} password was successfully changed", user.getEmail());
+  }
+
+  @Override
+  public UserResponseDto edit(UUID id, EditUserDto editUserDto, Locale locale) {
+    User user =
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
+    user.setFirstName(editUserDto.getFirstName());
+    user.setLastName(editUserDto.getLastName());
+    user.setPhone(editUserDto.getPhone());
+    if (FALSE.equals(StringUtils.equals(editUserDto.getEmail(), user.getEmail()))) {
+      user.setEmail(editUserDto.getEmail());
+      authService.sendEmail(locale, user);
+    }
+    return userMapper.mapToResponseDto(user);
   }
 
   @Override

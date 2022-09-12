@@ -5,10 +5,12 @@ import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
+import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.user.UserService;
+import java.util.Locale;
 import java.util.UUID;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -64,6 +67,17 @@ public class UserController implements UserApi {
   public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequestDto request) {
     userService.changePassword(request);
     return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @PatchMapping("/{id}")
+  @PreAuthorize("#user.id == #id")
+  public ResponseEntity<UserResponseDto> editUser(
+      @PathVariable UUID id,
+      @AuthenticationPrincipal AppUserDetails user,
+      @RequestBody @Valid EditUserDto editUserDto,
+      Locale locale) {
+    return ResponseEntity.ok(userService.edit(id, editUserDto, locale));
   }
 
   @Override
