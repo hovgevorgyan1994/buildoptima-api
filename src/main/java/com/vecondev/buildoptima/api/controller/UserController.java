@@ -41,7 +41,7 @@ public class UserController implements UserApi {
 
   @Override
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAuthority('resource_write')")
   public ResponseEntity<UserResponseDto> getById(
       @PathVariable("id") UUID id, @AuthenticationPrincipal AppUserDetails user) {
     return ResponseEntity.ok(userService.getById(id));
