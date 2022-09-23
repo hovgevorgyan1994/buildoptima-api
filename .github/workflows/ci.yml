@@ -18,5 +18,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      - name: Build The Application
-        run: mvn clean package -DskipTests
+      - name: Run Localstack And OpenSearch Containers
+        run: docker-compose -f docker/docker-compose-test.yml up -d
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: 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
+          SONAR_TOKEN: a06c47fe120860aaaa034ec883183d848b4ddb15
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=buildoptima
+
+
+
