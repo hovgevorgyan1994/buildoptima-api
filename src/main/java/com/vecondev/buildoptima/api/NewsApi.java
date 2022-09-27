@@ -44,7 +44,7 @@ public interface NewsApi extends SecuredApi, FetchingApi {
             content = @Content(schema = @Schema(implementation = UUID.class))),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "412",
             description =
@@ -84,7 +84,7 @@ public interface NewsApi extends SecuredApi, FetchingApi {
   ResponseEntity<NewsResponseDto> getById(
       @Parameter(description = "The news item id which should be fetched") UUID id);
 
-  @RequestBody(ref = "#/components/requestBodies/fetchNewsRequestExample")
+  @RequestBody(ref = "#/components/requestBodies/FetchNewsRequestExample")
   ResponseEntity<FetchResponseDto> fetch(
             FetchRequestDto fetchRequestDto);
 
@@ -102,7 +102,7 @@ public interface NewsApi extends SecuredApi, FetchingApi {
                     mediaType = APPLICATION_JSON_VALUE)),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "404",
             description = "News item not found by id",
@@ -127,7 +127,7 @@ public interface NewsApi extends SecuredApi, FetchingApi {
                   "Click here to see a detailed explanation of this endpoint requirements",
               url =
                   "https://github.com/vecondev/buildoptima-api/blob/develop/docs/filtering-sorting.md"))
-  @RequestBody(ref = "#/components/requestBodies/fetchNewsRequestExample")
+  @RequestBody(ref = "#/components/requestBodies/FetchNewsRequestExample")
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "200", description = "Successfully exported news csv"),
@@ -162,7 +162,8 @@ public interface NewsApi extends SecuredApi, FetchingApi {
           description = "Possible error codes: 4011, 4012, 4013, 4014, 4031, 5007.",
           security = @SecurityRequirement(name = "api-security"))
   @ApiResponses(
-      value = {@ApiResponse(responseCode = "200", description = "Successfully got news metadata")})
+      value = {@ApiResponse(responseCode = "200", description = "Successfully got news metadata",
+                            content = @Content(mediaType = APPLICATION_JSON_VALUE))})
   ResponseEntity<Metadata> getMetadata();
 
   @Operation(summary = "Archive news item",

@@ -15,9 +15,11 @@ import org.springframework.test.web.servlet.ResultActions;
 @RequiredArgsConstructor
 public class PropertyResultActions extends EntityResultActions<PropertyEndpointUris> {
 
+  public static final String SEARCH_VALUE_PARAM = "value";
+  public static final String SEARCH_BY_CRITERIA_PARAM = "by";
+
   private final PropertyEndpointUris endpointUris;
   private final MockMvc mockMvc;
-  private final JwtTokenManager jwtTokenManager;
 
   @Override
   protected PropertyEndpointUris getEndpointUris() {
@@ -29,16 +31,11 @@ public class PropertyResultActions extends EntityResultActions<PropertyEndpointU
     return mockMvc;
   }
 
-  @Override
-  protected JwtTokenManager getTokenManager() {
-    return jwtTokenManager;
-  }
-
   public ResultActions search(String value, PropertySearchCriteria by) throws Exception {
     return mockMvc.perform(
         get(endpointUris.getSearchUri())
-            .param("value", value)
-            .param("by", by.name())
+            .param(SEARCH_VALUE_PARAM, value)
+            .param(SEARCH_BY_CRITERIA_PARAM, by.name())
             .accept(APPLICATION_JSON_VALUE));
   }
 

@@ -5,9 +5,9 @@ import java.util.List;
 
 public interface MigrationHistoryService {
 
-  MigrationHistory saveSucceededHistory(String filePath);
+  MigrationHistory saveSucceededHistory(String filePath, boolean isDelta);
 
-  MigrationHistory saveFailedHistory(String filePath, String failedReason);
+  MigrationHistory saveFailedHistory(String filePath, String failedReason, boolean isDelta);
 
   boolean existsByKey(String key);
 

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "Authentication Request DTO")
 public class AuthRequestDto {
 
   @NotBlank

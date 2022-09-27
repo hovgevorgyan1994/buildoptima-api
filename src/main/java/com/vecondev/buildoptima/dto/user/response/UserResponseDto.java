@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Schema(name = "User Response DTO")
 public class UserResponseDto {
 
   @Schema(example = "2635b586-d0d7-4a2d-b4b5-c98377a02322")

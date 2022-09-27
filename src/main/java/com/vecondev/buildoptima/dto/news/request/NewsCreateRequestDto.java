@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "News Creation Request DTO")
 public class NewsCreateRequestDto {
 
   @Schema(

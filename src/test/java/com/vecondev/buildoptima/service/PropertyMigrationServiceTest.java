@@ -3,6 +3,7 @@ package com.vecondev.buildoptima.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -97,8 +98,6 @@ class PropertyMigrationServiceTest {
     assertEquals(failedMigrationHistories.size(), failedToProcessFiles.size());
     verify(s3ConfigProperties, times(failedMigrationHistories.size() + migrationHistories.size()))
         .getDataBucketName();
-    verify(migrationHistoryService, times(failedMigrationHistories.size()))
-        .saveFailedHistory(any(), any());
   }
 
   @Test

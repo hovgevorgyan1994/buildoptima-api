@@ -137,12 +137,7 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
   }
 
   public EditUserDto editUserDtoInvalid() {
-    return EditUserDto.builder()
-        .firstName("J")
-        .lastName("A")
-        .email("jam")
-        .phone("+374")
-        .build();
+    return EditUserDto.builder().firstName("J").lastName("A").email("jam").phone("+374").build();
   }
 
   public User editedUser(EditUserDto editUserDto) {
@@ -152,5 +147,14 @@ public class UserServiceTestParameters extends UserTestParameters implements Pag
     savedUser.setEmail(editUserDto.getEmail());
     savedUser.setPhone(editUserDto.getPhone());
     return savedUser;
+  }
+
+  public ConfirmationToken confirmationToken(User user) {
+    return ConfirmationToken.builder()
+        .id(UUID.randomUUID())
+        .user(user)
+        .token(UUID.randomUUID().toString())
+        .expiresAt(LocalDateTime.now().plusHours(5))
+        .build();
   }
 }

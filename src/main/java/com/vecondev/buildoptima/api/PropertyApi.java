@@ -38,7 +38,8 @@ public interface PropertyApi {
               responseCode = "200",
               description = "The search has been successfully done",
               content =
-              @Content(schema = @Schema(implementation = PropertyOverview.class))),
+              @Content(schema = @Schema(implementation = PropertyOverview.class),
+                        mediaType = APPLICATION_JSON_VALUE)),
       })
   ResponseEntity<List<PropertyOverview>> search(
       @Parameter(description = "The search criteria") String value,

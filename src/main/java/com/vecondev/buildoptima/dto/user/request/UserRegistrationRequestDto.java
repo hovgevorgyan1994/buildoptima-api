@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder(toBuilder = true)
-@Schema(name = "User Registration Request DTO")
 public class UserRegistrationRequestDto {
 
   @Name

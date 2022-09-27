@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Data
-@Schema(name = "FAQ Question Response DTO")
 public class FaqQuestionResponseDto {
 
   @Schema(example = "2635b586-d0d7-4a2d-b4b5-c98377a02322")

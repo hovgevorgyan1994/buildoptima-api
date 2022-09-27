@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Schema(name = "Error response")
 public class ApiError {
 
   @Schema(description = "Http response status", example = "CONFLICT")

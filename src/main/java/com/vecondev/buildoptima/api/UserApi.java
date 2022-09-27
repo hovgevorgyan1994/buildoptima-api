@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +70,7 @@ public interface UserApi extends SecuredApi, FetchingApi {
           mediaType = APPLICATION_JSON_VALUE))
   ResponseEntity<UserResponseDto> getCurrentUser();
 
-  @RequestBody(ref = "#/components/requestBodies/fetchUsersRequestExample")
+  @RequestBody(ref = "#/components/requestBodies/FetchUsersRequestExample")
   ResponseEntity<FetchResponseDto> fetch(
             FetchRequestDto fetchRequestDto);
 
@@ -90,7 +89,7 @@ public interface UserApi extends SecuredApi, FetchingApi {
         @ApiResponse(responseCode = "200", description = "User password was successfully changed"),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "404",
             description = "User not found",
@@ -128,7 +127,7 @@ public interface UserApi extends SecuredApi, FetchingApi {
             mediaType = APPLICATION_JSON_VALUE)),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "404",
             description = "User not found",
@@ -139,7 +138,7 @@ public interface UserApi extends SecuredApi, FetchingApi {
       })
   ResponseEntity<UserResponseDto> editUser(UUID userId,
       @Parameter(hidden = true) AppUserDetails user,
-      EditUserDto editUserDto, Locale locale);
+      EditUserDto editUserDto);
 
   @Operation(
       summary = "Upload new image or update the previous one of given user",
@@ -156,7 +155,8 @@ public interface UserApi extends SecuredApi, FetchingApi {
       value = {
           @ApiResponse(
               responseCode = "204",
-              description = "The image is successfully uploaded/updated"),
+              description = "The image is successfully uploaded/updated",
+              content = @Content(mediaType = APPLICATION_JSON_VALUE)),
           @ApiResponse(
               responseCode = "400",
               description =

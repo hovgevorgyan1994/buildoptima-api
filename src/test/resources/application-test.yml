@@ -43,6 +43,10 @@ config:
       dataBucketName: ${aws.properties.s3.dataBucketName}
       accessKey: localstack
       secretKey: localstack
+    sqs:
+      url: http://localhost:4567
+      accessKey: localstack
+      secretKey: localstack
 
   uris:
     faq-category:
@@ -95,3 +99,8 @@ config:
       baseUri: /properties
       findByAinUri: /{ain}
       searchUri: /search
+
+cloud:
+  aws:
+    sqs:
+      enabled: false

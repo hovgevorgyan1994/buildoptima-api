@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Property Migration Response DTO")
 public class PropertyMigrationResponseDto {
 
   @Schema(description = "All files' count that have been processed.", example = "4")

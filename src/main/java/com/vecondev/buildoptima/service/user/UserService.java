@@ -7,7 +7,6 @@ import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.model.user.User;
-import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +17,7 @@ public interface UserService {
 
   void changePassword(ChangePasswordRequestDto request);
 
-  UserResponseDto edit(UUID id, EditUserDto editUserDto, Locale locale);
+  UserResponseDto edit(UUID id, EditUserDto editUserDto);
 
   UserResponseDto getById(UUID userId);
 

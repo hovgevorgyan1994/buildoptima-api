@@ -20,7 +20,6 @@ public class FaqQuestionResultActions extends EntityResultActions<FaqQuestionEnd
 
   private final FaqQuestionEndpointUris endpointUris;
   private final MockMvc mvc;
-  private final JwtTokenManager tokenManager;
 
   @Override
   protected FaqQuestionEndpointUris getEndpointUris() {
@@ -32,17 +31,12 @@ public class FaqQuestionResultActions extends EntityResultActions<FaqQuestionEnd
     return mvc;
   }
 
-  @Override
-  protected JwtTokenManager getTokenManager() {
-    return tokenManager;
-  }
 
   public ResultActions lookup(Status status, DictionaryField dictionary, User user)
       throws Exception {
     return getMockMvc()
         .perform(
-            get(getEndpointUris().getLookupUri(), status, dictionary)
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(get(getEndpointUris().getLookupUri(), status, dictionary), user)
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
   }

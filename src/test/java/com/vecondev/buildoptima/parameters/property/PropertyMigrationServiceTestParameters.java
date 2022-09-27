@@ -3,8 +3,6 @@ package com.vecondev.buildoptima.parameters.property;
 import com.amazonaws.services.s3.model.S3Object;
 import com.vecondev.buildoptima.dto.property.PropertyListDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
-import com.vecondev.buildoptima.model.property.Property;
 import com.vecondev.buildoptima.model.property.migration.MigrationHistory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,17 +18,27 @@ public class PropertyMigrationServiceTestParameters {
   }
 
   public MigrationHistory getMigrationHistory() {
-    return new MigrationHistory(UUID.randomUUID(), "100.json.gz", Instant.now(), null, null);
+    return new MigrationHistory(UUID.randomUUID(), "100.json.gz", Instant.now(), true, null, null);
   }
 
   public List<MigrationHistory> getMigrationHistoryList() {
     return List.of(
-        new MigrationHistory(UUID.randomUUID(), "101.json.gz", Instant.now(), null, null),
-        new MigrationHistory(UUID.randomUUID(), "102.json.gz", Instant.now(), null, null),
+        new MigrationHistory(UUID.randomUUID(), "101.json.gz", Instant.now(), true, null, null),
+        new MigrationHistory(UUID.randomUUID(), "102.json.gz", Instant.now(), true, null, null),
         new MigrationHistory(
-            UUID.randomUUID(), "103.json", Instant.now(), Instant.now(), "Not in GZIP format"),
+            UUID.randomUUID(),
+            "103.json",
+            Instant.now(),
+            true,
+            Instant.now(),
+            "Not in GZIP format"),
         new MigrationHistory(
-            UUID.randomUUID(), "104.json", Instant.now(), Instant.now(), "Not in GZIP format"));
+            UUID.randomUUID(),
+            "104.json",
+            Instant.now(),
+            true,
+            Instant.now(),
+            "Not in GZIP format"));
   }
 
   public Path convertS3ObjectToPath() {

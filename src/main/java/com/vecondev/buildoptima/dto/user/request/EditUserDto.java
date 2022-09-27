@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "Edit User DTO")
 public class EditUserDto {
 
   @Name

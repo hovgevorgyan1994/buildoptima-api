@@ -148,7 +148,12 @@ class PropertyMigrationControllerTest {
 
     migrationHistoryRepository.save(
         new MigrationHistory(
-            UUID.randomUUID(), TEST_FILES[0], Instant.now(), Instant.now(), "Not in GZIP format."));
+            UUID.randomUUID(),
+            TEST_FILES[0],
+            Instant.now(),
+            true,
+            Instant.now(),
+            "Not in GZIP format."));
     int failedMigrationHistories = migrationHistoryRepository.findAllByFailedAtNotNull().size();
 
     propertyMigrationResultActions

@@ -15,7 +15,6 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Data
-@Schema(name = "FAQ Question Request DTO")
 public class FaqQuestionRequestDto {
 
   @NotBlank

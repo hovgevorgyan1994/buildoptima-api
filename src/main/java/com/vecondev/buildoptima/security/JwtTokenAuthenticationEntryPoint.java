@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -27,14 +26,7 @@ public class JwtTokenAuthenticationEntryPoint implements AuthenticationEntryPoin
       HttpServletResponse response,
       AuthenticationException authException)
       throws IOException {
-    String header = response.getHeader("error");
-    Error error;
-    if (Strings.isNotEmpty(header)) {
-      error = Error.valueOf(header);
-    } else {
-      error = Error.ACCESS_TOKEN_MISSING;
-    }
-    sendResponse(error, response);
+    sendResponse(Error.valueOf(response.getHeader("error")), response);
   }
 
   private void sendResponse(Error error, HttpServletResponse response) throws IOException {

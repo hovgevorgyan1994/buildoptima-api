@@ -47,7 +47,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
-@Import({PropertyEndpointUris.class, PropertyResultActions.class, AmazonS3Config.class})
+@Import({
+  PropertyEndpointUris.class,
+  PropertyResultActions.class,
+  AmazonS3Config.class
+})
 class PropertyControllerTest {
 
   private static final String[] TEST_FILES = {"100.json.gz", "101.json.gz", "invalid.json"};

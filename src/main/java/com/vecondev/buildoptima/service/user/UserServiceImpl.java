@@ -7,28 +7,32 @@ import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 import static com.vecondev.buildoptima.filter.model.UserFields.userPageSortingFieldsMap;
 import static com.vecondev.buildoptima.util.RestPreconditions.*;
 import static com.vecondev.buildoptima.validation.validator.FieldNameValidator.*;
-import static java.lang.Boolean.FALSE;
 
 import com.vecondev.buildoptima.dto.ImageOverview;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.dto.filter.FetchResponseDto;
+import com.vecondev.buildoptima.dto.user.ConfirmationMessage;
 import com.vecondev.buildoptima.dto.user.request.ChangePasswordRequestDto;
 import com.vecondev.buildoptima.dto.user.request.EditUserDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.exception.AuthenticationException;
+import com.vecondev.buildoptima.exception.Error;
+import com.vecondev.buildoptima.exception.UserAlreadyExistException;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.filter.model.SortDto;
 import com.vecondev.buildoptima.filter.specification.GenericSpecification;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
+import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
-import com.vecondev.buildoptima.service.auth.AuthService;
+import com.vecondev.buildoptima.service.auth.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
+import com.vecondev.buildoptima.service.sqs.SqsService;
+import com.vecondev.buildoptima.validation.UserValidator;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +44,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.thymeleaf.util.StringUtils;
 
 @Slf4j
 @Service
@@ -50,11 +53,14 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final UserMapper userMapper;
+  private final UserValidator userValidator;
   private final PasswordEncoder passwordEncoder;
   private final AmazonS3Service imageService;
-  private final AuthService authService;
   private final PageableConverter pageableConverter;
   private final SecurityContextService securityContextService;
+  private final SqsService sqsService;
+  private final ConfirmationTokenService confirmationTokenService;
+  private static final String CONFIRM_TEMPLATE = "confirm.html";
 
   @Override
   public FetchResponseDto fetch(FetchRequestDto fetchRequest) {
@@ -104,15 +110,23 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserResponseDto edit(UUID id, EditUserDto editUserDto, Locale locale) {
+  public UserResponseDto edit(UUID id, EditUserDto editUserDto) {
     User user =
         userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
+
+    validate(user, editUserDto);
+
     user.setFirstName(editUserDto.getFirstName());
     user.setLastName(editUserDto.getLastName());
     user.setPhone(editUserDto.getPhone());
-    if (FALSE.equals(StringUtils.equals(editUserDto.getEmail(), user.getEmail()))) {
-      user.setEmail(editUserDto.getEmail());
-      authService.sendEmail(locale, user);
+
+    String oldEmail = user.getEmail();
+    String newEmail = editUserDto.getEmail();
+
+    if (!oldEmail.equalsIgnoreCase(newEmail)) {
+      user.setEmail(newEmail);
+      user.setEnabled(false);
+      sendEmail(user, confirmationTokenService.create(user));
     }
     return userMapper.mapToResponseDto(user);
   }
@@ -203,5 +217,32 @@ public class UserServiceImpl implements UserService {
 
   private boolean isValidPassword(ChangePasswordRequestDto request, User user) {
     return passwordEncoder.matches(request.getOldPassword(), user.getPassword());
+  }
+
+  private void sendEmail(User user, ConfirmationToken confirmationToken) {
+    sqsService.sendMessage(
+        ConfirmationMessage.builder()
+            .template(CONFIRM_TEMPLATE)
+            .token(confirmationToken.getToken())
+            .userFirstName(user.getFirstName())
+            .userEmail(user.getEmail())
+            .build()
+            .toString());
+  }
+
+  private void validate(User user, EditUserDto editUserDto) {
+    String oldEmail = user.getEmail();
+    String newEmail = editUserDto.getEmail();
+
+    String oldPhone = user.getPhone();
+    String newPhone = editUserDto.getPhone();
+
+    if (!oldEmail.equalsIgnoreCase(newEmail)
+        && userRepository.existsByEmailIgnoreCase(editUserDto.getEmail())) {
+      throw new UserAlreadyExistException(Error.USER_ALREADY_EXIST_WITH_EMAIL);
+    }
+    if (!oldPhone.equals(newPhone) && userRepository.existsByPhone(editUserDto.getPhone())) {
+      throw new UserAlreadyExistException(Error.USER_ALREADY_EXIST_WITH_PHONE);
+    }
   }
 }

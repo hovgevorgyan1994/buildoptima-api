@@ -20,12 +20,15 @@ import com.vecondev.buildoptima.exception.AuthenticationException;
 import com.vecondev.buildoptima.exception.UserNotFoundException;
 import com.vecondev.buildoptima.filter.converter.PageableConverter;
 import com.vecondev.buildoptima.mapper.user.UserMapper;
+import com.vecondev.buildoptima.model.user.ConfirmationToken;
 import com.vecondev.buildoptima.model.user.User;
 import com.vecondev.buildoptima.parameters.user.UserServiceTestParameters;
 import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.auth.AuthService;
+import com.vecondev.buildoptima.service.auth.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.s3.AmazonS3Service;
+import com.vecondev.buildoptima.service.sqs.SqsService;
 import com.vecondev.buildoptima.service.user.UserServiceImpl;
 import com.vecondev.buildoptima.util.RestPreconditions;
 import com.vecondev.buildoptima.validation.validator.FieldNameValidator;
@@ -56,7 +59,9 @@ class UserServiceTest {
   @InjectMocks private UserServiceImpl userService;
   @Mock private AmazonS3Service imageService;
   @Mock private UserMapper userMapper;
-  @Mock AuthService authService;
+  @Mock private AuthService authService;
+  @Mock private SqsService sqsService;
+  @Mock private ConfirmationTokenService confirmationTokenService;
   @Mock private UserRepository userRepository;
   @Mock private PasswordEncoder encoder;
   @Mock private PageableConverter pageableConverter;
@@ -237,13 +242,14 @@ class UserServiceTest {
     EditUserDto editUserDto = testParameters.editUserDto();
     UserResponseDto responseDto =
         testParameters.getUserResponseDto(testParameters.editedUser(editUserDto));
+    ConfirmationToken confirmationToken = testParameters.confirmationToken(userToEdit);
 
     when(userRepository.findById(userId)).thenReturn(Optional.of(userToEdit));
     when(userMapper.mapToResponseDto(any(User.class))).thenReturn(responseDto);
+    when(confirmationTokenService.create(any(User.class))).thenReturn(confirmationToken);
 
-    UserResponseDto editedUserDto = userService.edit(userId, editUserDto, new Locale("en"));
+    UserResponseDto editedUserDto = userService.edit(userId, editUserDto);
     assertNotNull(editedUserDto);
-    verify(authService).sendEmail(any(Locale.class), any(User.class));
     assertEquals(editedUserDto.getFirstName(), editUserDto.getFirstName());
   }
 
@@ -259,9 +265,8 @@ class UserServiceTest {
     when(userRepository.findById(userId)).thenReturn(Optional.of(userToEdit));
     when(userMapper.mapToResponseDto(any(User.class))).thenReturn(responseDto);
 
-    UserResponseDto editedUserDto = userService.edit(userId, editUserDto, new Locale("en"));
+    UserResponseDto editedUserDto = userService.edit(userId, editUserDto);
     assertNotNull(editedUserDto);
-    verify(authService, times(0)).sendEmail(any(Locale.class), any(User.class));
     assertEquals(editedUserDto.getFirstName(), editUserDto.getFirstName());
   }
 }

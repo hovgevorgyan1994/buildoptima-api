@@ -10,7 +10,6 @@ import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.security.user.AppUserDetails;
 import com.vecondev.buildoptima.service.auth.SecurityContextService;
 import com.vecondev.buildoptima.service.user.UserService;
-import java.util.Locale;
 import java.util.UUID;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -75,9 +74,8 @@ public class UserController implements UserApi {
   public ResponseEntity<UserResponseDto> editUser(
       @PathVariable UUID id,
       @AuthenticationPrincipal AppUserDetails user,
-      @RequestBody @Valid EditUserDto editUserDto,
-      Locale locale) {
-    return ResponseEntity.ok(userService.edit(id, editUserDto, locale));
+      @RequestBody @Valid EditUserDto editUserDto) {
+    return ResponseEntity.ok(userService.edit(id, editUserDto));
   }
 
   @Override

@@ -8,30 +8,32 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vecondev.buildoptima.dto.filter.FetchRequestDto;
 import com.vecondev.buildoptima.endpoints.EndpointUris;
-import com.vecondev.buildoptima.manager.JwtTokenManager;
 import com.vecondev.buildoptima.model.user.User;
 import java.util.UUID;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 public abstract class EntityResultActions<T extends EndpointUris> {
 
-  protected static final String AUTHORIZATION_HEADER = "Authorization";
-  protected static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
+  protected static final String USER_ID_HEADER = "user_id";
+  protected static final String USERNAME_HEADER = "username";
+  protected static final String AUTHORITIES_HEADER = "authorities";
 
   protected abstract T getEndpointUris();
 
   protected abstract MockMvc getMockMvc();
 
-  protected abstract JwtTokenManager getTokenManager();
 
   public ResultActions deleteById(UUID idToDelete, User user) throws Exception {
     return getMockMvc()
         .perform(
-            delete(getEndpointUris().getDeleteByIdUri(), idToDelete)
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(delete(getEndpointUris().getDeleteByIdUri(), idToDelete), user)
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
   }
@@ -39,8 +41,8 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions update(UUID entityId, User user, Object requestDto) throws Exception {
     return getMockMvc()
         .perform(
-            put(getEndpointUris().getUpdateUri(), entityId.toString())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(
+                    put(getEndpointUris().getUpdateUri(), entityId.toString()), user)
                 .content(asJsonString(requestDto))
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
@@ -49,8 +51,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions create(User user, Object requestDto) throws Exception {
     return getMockMvc()
         .perform(
-            post(getEndpointUris().getCreationUri())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(post(getEndpointUris().getCreationUri()), user)
                 .content(asJsonString(requestDto))
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
@@ -59,8 +60,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions fetch(FetchRequestDto requestDto, User user) throws Exception {
     return getMockMvc()
         .perform(
-            post(getEndpointUris().getFetchUri())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(post(getEndpointUris().getFetchUri()), user)
                 .content(asJsonString(requestDto))
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON));
@@ -69,8 +69,8 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions getById(UUID entityId, User user) throws Exception {
     return getMockMvc()
         .perform(
-            get(getEndpointUris().getRetrieveByIdUri(), entityId.toString())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(
+                    get(getEndpointUris().getRetrieveByIdUri(), entityId.toString()), user)
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
   }
@@ -78,8 +78,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions getAll(User user) throws Exception {
     return getMockMvc()
         .perform(
-            get(getEndpointUris().getAllUri())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(get(getEndpointUris().getAllUri()), user)
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
   }
@@ -87,8 +86,7 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions getAllInCsv(User user) throws Exception {
     return getMockMvc()
         .perform(
-            get(getEndpointUris().getExportInCsvUri())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(get(getEndpointUris().getExportInCsvUri()), user)
                 .contentType(APPLICATION_JSON)
                 .accept("application/csv"));
   }
@@ -96,13 +94,22 @@ public abstract class EntityResultActions<T extends EndpointUris> {
   public ResultActions getMetadata(User user) throws Exception {
     return getMockMvc()
         .perform(
-            get(getEndpointUris().getMetadataUri())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(get(getEndpointUris().getMetadataUri()), user)
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON_VALUE));
   }
 
-  public String getAccessToken(User user) {
-    return AUTHORIZATION_HEADER_PREFIX + getTokenManager().generateAccessToken(user);
+  public MockHttpServletRequestBuilder addAuthorizationHeaders(
+      MockHttpServletRequestBuilder builder, User user) throws JsonProcessingException {
+    return builder
+        .header(USER_ID_HEADER, user.getId())
+        .header(USERNAME_HEADER, user.getEmail())
+        .header(
+            AUTHORITIES_HEADER,
+            new ObjectMapper()
+                .writeValueAsString(
+                    user.getRole().getAuthorities().stream()
+                        .map(SimpleGrantedAuthority::toString)
+                        .toList()));
   }
 }

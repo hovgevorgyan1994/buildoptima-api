@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,7 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.auth.impl.AuthServiceImpl;
 import com.vecondev.buildoptima.service.auth.impl.ConfirmationTokenServiceImpl;
 import com.vecondev.buildoptima.service.auth.impl.RefreshTokenServiceImpl;
-import com.vecondev.buildoptima.service.mail.MailService;
+import com.vecondev.buildoptima.service.sqs.SqsService;
 import com.vecondev.buildoptima.validation.UserValidator;
 import java.util.Locale;
 import java.util.Optional;
@@ -46,7 +47,7 @@ class AuthServiceTest {
   private final UserServiceTestParameters testParameters = new UserServiceTestParameters();
 
   @InjectMocks private AuthServiceImpl authService;
-  @Mock private MailService mailService;
+  @Mock private SqsService sqsService;
   @Mock private ConfirmationTokenServiceImpl confirmationTokenService;
   @Mock private RefreshTokenServiceImpl refreshTokenService;
   @Mock private UserValidator userValidator;
@@ -57,49 +58,33 @@ class AuthServiceTest {
 
   @Test
   void failedRegistrationAsPhoneIsDuplicated() {
-    Locale locale = new Locale("en");
     UserRegistrationRequestDto requestDto = testParameters.getUserRegistrationRequestDto();
     User user = testParameters.getUserFromRegistrationDto(requestDto);
 
     when(userMapper.mapToEntity(requestDto)).thenReturn(user);
     doThrow(AlreadyBuiltException.class).when(userValidator).validateUserRegistration(user);
 
-    assertThrows(AlreadyBuiltException.class, () -> authService.register(requestDto, locale));
+    assertThrows(AlreadyBuiltException.class, () -> authService.register(requestDto));
     verify(userMapper).mapToEntity(requestDto);
   }
 
   @Test
-  void successfulRegistration() throws MessagingException {
+  void successfulRegistration() {
     UserRegistrationRequestDto requestDto = testParameters.getUserRegistrationRequestDto();
     User user = testParameters.getUserFromRegistrationDto(requestDto);
     User savedUser = testParameters.getSavedUser(user);
     UserResponseDto responseDto = testParameters.getUserResponseDto(savedUser);
+    ConfirmationToken confirmationToken = testParameters.confirmationToken(user);
 
+    when(confirmationTokenService.create(any(User.class))).thenReturn(confirmationToken);
     when(userMapper.mapToEntity(requestDto)).thenReturn(user);
     when(userRepository.saveAndFlush(user)).thenReturn(savedUser);
     when(userMapper.mapToResponseDto(savedUser)).thenReturn(responseDto);
 
-    UserResponseDto registrationResponseDto = authService.register(requestDto, new Locale("en"));
+    UserResponseDto registrationResponseDto = authService.register(requestDto);
     assertEquals(requestDto.getEmail(), registrationResponseDto.getEmail());
     assertEquals(savedUser.getCreatedAt(), registrationResponseDto.getCreatedAt());
-    verify(mailService).sendConfirm(any(), any());
-    verify(confirmationTokenService).create(savedUser);
-    verify(userValidator).validateUserRegistration(user);
-  }
-
-  @Test
-  void failedRegistrationAsThrowsExceptionWhileSendingEmail() throws MessagingException {
-    final Locale locale = new Locale("en");
-    UserRegistrationRequestDto requestDto = testParameters.getUserRegistrationRequestDto();
-    User user = testParameters.getUserFromRegistrationDto(requestDto);
-    User savedUser = testParameters.getSavedUser(user);
-
-    when(userMapper.mapToEntity(requestDto)).thenReturn(user);
-    when(userRepository.saveAndFlush(user)).thenReturn(savedUser);
-    doThrow(MessagingException.class).when(mailService).sendConfirm(any(), any());
-
-    assertThrows(AuthenticationException.class, () -> authService
-        .register(requestDto, locale));
+    verify(sqsService).sendMessage(anyString());
     verify(confirmationTokenService).create(savedUser);
     verify(userValidator).validateUserRegistration(user);
   }
@@ -147,28 +132,17 @@ class AuthServiceTest {
   }
 
   @Test
-  void successfulVerifyingUser() throws MessagingException {
+  void successfulVerifyingUser() {
     User user = testParameters.getSavedUser();
     ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto(user.getEmail());
+    ConfirmationToken confirmationToken = testParameters.confirmationToken(user);
 
     when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-    authService.verify(requestDto, new Locale("en"));
+    when(confirmationTokenService.create(any(User.class))).thenReturn(confirmationToken);
+    authService.verify(requestDto);
 
     verify(confirmationTokenService).create(user);
-    verify(mailService).sendVerify(any(), any());
-  }
-
-  @Test
-  void failedUserVerifyingAsMailCantSend() throws MessagingException {
-    User user = testParameters.getSavedUser();
-    ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto(user.getEmail());
-    Locale locale = new Locale("en");
-
-    when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-    doThrow(MessagingException.class).when(mailService).sendVerify(any(), any());
-
-    assertThrows(AuthenticationException.class, () -> authService.verify(requestDto, locale));
-    verify(confirmationTokenService).create(user);
+    verify(sqsService).sendMessage(anyString());
   }
 
   @Test

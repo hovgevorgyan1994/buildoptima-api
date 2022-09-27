@@ -33,9 +33,6 @@ public enum Error {
   INVALID_SORTING_FIELD(40014, BAD_REQUEST, "Invalid Sorting Field In Fetch Request"),
 
   BAD_CREDENTIALS(4011, UNAUTHORIZED, "Bad Credentials"),
-  ACCESS_TOKEN_MISSING(4012, UNAUTHORIZED, "Access Token Missing"),
-  INVALID_ACCESS_TOKEN(4013, UNAUTHORIZED, "Invalid Access Token"),
-  ACCESS_TOKEN_EXPIRED(4014, UNAUTHORIZED, "Expired Access Token"),
   NOT_ACTIVE_ACCOUNT(4015, UNAUTHORIZED, "User Email Is Not Verified"),
 
   ACCESS_DENIED(4031, FORBIDDEN, "Permission Denied To Requested Resource"),

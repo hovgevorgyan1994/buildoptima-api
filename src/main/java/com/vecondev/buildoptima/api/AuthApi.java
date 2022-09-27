@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Locale;
 import org.springframework.http.ResponseEntity;
 
 @Tag(
@@ -46,7 +45,7 @@ public interface AuthApi {
                     schema = @Schema(implementation = UserResponseDto.class))),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "409",
             description = "There already is an duplicate value either for email or phone number.",
@@ -55,8 +54,7 @@ public interface AuthApi {
                     mediaType = APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiError.class)))
       })
-  ResponseEntity<UserResponseDto> register(
-      UserRegistrationRequestDto userRegistrationRequestDto, Locale locale);
+  ResponseEntity<UserResponseDto> register(UserRegistrationRequestDto userRegistrationRequestDto);
 
   @Operation(summary = "Activate email", description = "Possible error codes: 4041")
   @ApiResponses(
@@ -90,7 +88,7 @@ public interface AuthApi {
                     mediaType = APPLICATION_JSON_VALUE)),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "401",
             description = "Bad credentials",
@@ -141,7 +139,7 @@ public interface AuthApi {
                     schema = @Schema(implementation = ApiError.class),
                     mediaType = APPLICATION_JSON_VALUE))
       })
-  ResponseEntity<Void> verify(ConfirmEmailRequestDto email, Locale locale);
+  ResponseEntity<Void> verify(ConfirmEmailRequestDto email);
 
   @Operation(
       summary = "Restore forgotten password",
@@ -156,7 +154,7 @@ public interface AuthApi {
         @ApiResponse(responseCode = "200", description = "User password successfully changed"),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "404",
             description = "Confirmation token not found",

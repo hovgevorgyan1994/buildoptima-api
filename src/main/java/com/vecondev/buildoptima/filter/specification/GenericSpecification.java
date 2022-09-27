@@ -35,6 +35,8 @@ public class GenericSpecification<T> implements Specification<T> {
 
   private final transient Map<String, FieldDefinition<T, ?>> fieldDefinitionMap;
   private transient Map<String, Object> filter;
+  private static final String OR = "or";
+  private static final String AND = "and";
 
   @Nullable
   @Override
@@ -48,7 +50,7 @@ public class GenericSpecification<T> implements Specification<T> {
       return builder.and();
     }
 
-    if (!filter.isEmpty() && (filter.get("or") == null && filter.get("and") == null)) {
+    if (!filter.isEmpty() && (filter.get(OR) == null && filter.get(AND) == null)) {
       if (!filter.containsKey(NAME)
           || !filter.containsKey(OPERATION)
               && (!filter.containsKey(VALUE) || !filter.containsKey(VALUES))) {
@@ -73,13 +75,13 @@ public class GenericSpecification<T> implements Specification<T> {
 
       return SingleCriteriaConverter.toPredicate(
           root, builder, searchOperation, criteria, fieldDefinitionMap.get(criteria.getName()));
-    } else if (filter.get("or") != null) {
+    } else if (filter.get(OR) != null) {
       List<HashMap<String, Object>> values = (ArrayList) filter.get("or");
       return builder.or(
           values.stream()
               .map(stringObjectHashMap -> convertTree(root, builder, stringObjectHashMap))
               .toArray(Predicate[]::new));
-    } else if (filter.containsKey("and")) {
+    } else if (filter.containsKey(AND)) {
       List<HashMap<String, Object>> values = (ArrayList) filter.get("and");
       return builder.and(
           values.stream()

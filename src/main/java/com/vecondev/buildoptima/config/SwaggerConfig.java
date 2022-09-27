@@ -4,7 +4,6 @@ import static com.vecondev.buildoptima.util.FileReader.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -33,8 +32,7 @@ import org.springframework.context.annotation.Configuration;
     name = "api-security",
     scheme = "bearer",
     type = SecuritySchemeType.HTTP,
-    bearerFormat = "JWT",
-    in = SecuritySchemeIn.HEADER)
+    bearerFormat = "JWT")
 @Configuration
 public class SwaggerConfig {
 
@@ -42,7 +40,7 @@ public class SwaggerConfig {
   public OpenAPI methodArgumentNotValidDocumentation() {
     return new OpenAPI()
         .components(new Components()
-                .addResponses("methodArgumentNotValidResponse",
+                .addResponses("MethodArgumentNotValidResponse",
                     new ApiResponse().description("There is an invalid value in user input.")
                         .content(new Content().addMediaType(APPLICATION_JSON_VALUE,
                                     new MediaType().schema(new MapSchema()
@@ -77,7 +75,7 @@ public class SwaggerConfig {
                                                                          one lowercase character, one digit,
                                                                          one special symbol and no whitespaces!""")))))))
                 .addRequestBodies(
-                        "fetchUsersRequestExample",
+                        "FetchUsersRequestExample",
                         new RequestBody()
                                 .content(
                                         new Content()
@@ -86,7 +84,7 @@ public class SwaggerConfig {
                                                         new io.swagger.v3.oas.models.media.MediaType()
                                                                 .schema(new MapSchema().example(readFromJson("docs/json/user-filter-sorting-example.json"))))))
                 .addRequestBodies(
-                    "fetchFaqCategoriesRequestExample",
+                    "FetchFaqCategoriesRequestExample",
                     new RequestBody()
                             .content(
                                     new Content()
@@ -95,7 +93,7 @@ public class SwaggerConfig {
                                                     new io.swagger.v3.oas.models.media.MediaType()
                                                             .schema(new MapSchema().example(readFromJson("docs/json/faq_category-filter-sorting-example.json"))))))
                 .addRequestBodies(
-                        "fetchFaqQuestionsRequestExample",
+                        "FetchFaqQuestionsRequestExample",
                         new RequestBody()
                                 .content(
                                         new Content()
@@ -104,7 +102,7 @@ public class SwaggerConfig {
                                                         new io.swagger.v3.oas.models.media.MediaType()
                                                                 .schema(new MapSchema().example(readFromJson("docs/json/faq_question-filter-sorting-example.json"))))))
                 .addRequestBodies(
-                        "fetchNewsRequestExample",
+                        "FetchNewsRequestExample",
                         new RequestBody()
                                 .content(
                                         new Content()

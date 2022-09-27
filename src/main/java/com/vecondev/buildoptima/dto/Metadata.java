@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Resource metadata")
 public class Metadata {
 
   @Schema(example = "2022-06-24 13:29:00.887950")

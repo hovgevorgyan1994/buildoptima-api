@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Property Reprocess Response DTO")
 public class PropertyReprocessResponseDto {
 
   @Schema(

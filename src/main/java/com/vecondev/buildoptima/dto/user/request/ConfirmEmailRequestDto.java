@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Confirm Email Request DTO")
 public class ConfirmEmailRequestDto {
 
   @NotNull

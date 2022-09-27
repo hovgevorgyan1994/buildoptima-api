@@ -43,6 +43,9 @@ public class MigrationHistory implements Serializable {
   @UpdateTimestamp
   private Instant processedAt;
 
+  @Column(name = "delta")
+  private boolean delta;
+
   @Column(name = "failed_at")
   private Instant failedAt;
 

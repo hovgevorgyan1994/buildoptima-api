@@ -53,7 +53,7 @@ public interface FaqQuestionApi extends SecuredApi, FetchingApi {
                     schema = @Schema(implementation = FaqQuestionResponseDto.class))),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "404",
             description = "There is no category OR user found with such id.",
@@ -110,7 +110,7 @@ public interface FaqQuestionApi extends SecuredApi, FetchingApi {
       })
   ResponseEntity<List<FaqQuestionResponseDto>> getAll();
 
-  @RequestBody(ref = "#/components/requestBodies/fetchFaqQuestionsRequestExample")
+  @RequestBody(ref = "#/components/requestBodies/FetchFaqQuestionsRequestExample")
   ResponseEntity<FetchResponseDto> fetch(FetchRequestDto fetchRequestDto);
 
   @Operation(
@@ -129,7 +129,7 @@ public interface FaqQuestionApi extends SecuredApi, FetchingApi {
                     schema = @Schema(implementation = FaqQuestionResponseDto.class))),
         @ApiResponse(
             responseCode = "400",
-            ref = "#/components/responses/methodArgumentNotValidResponse"),
+            ref = "#/components/responses/MethodArgumentNotValidResponse"),
         @ApiResponse(
             responseCode = "404",
             description = "One of the resources of category, question and user not found",

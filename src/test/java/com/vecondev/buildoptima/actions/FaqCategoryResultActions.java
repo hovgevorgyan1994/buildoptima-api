@@ -12,7 +12,6 @@ public class FaqCategoryResultActions extends EntityResultActions<FaqCategoryEnd
 
   private final FaqCategoryEndpointUris endpointUris;
   private final MockMvc mvc;
-  private final JwtTokenManager tokenManager;
 
   @Override
   protected FaqCategoryEndpointUris getEndpointUris() {
@@ -24,8 +23,4 @@ public class FaqCategoryResultActions extends EntityResultActions<FaqCategoryEnd
     return mvc;
   }
 
-  @Override
-  protected JwtTokenManager getTokenManager() {
-    return tokenManager;
-  }
 }

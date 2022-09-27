@@ -34,7 +34,6 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
 
   private final UserEndpointUris endpointUris;
   private final MockMvc mvc;
-  private final JwtTokenManager tokenManager;
 
   @Override
   protected UserEndpointUris getEndpointUris() {
@@ -46,16 +45,11 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
     return mvc;
   }
 
-  @Override
-  protected JwtTokenManager getTokenManager() {
-    return tokenManager;
-  }
-
   public ResultActions deleteImage(UUID ownerId, User user) throws Exception {
     return getMockMvc()
         .perform(
-            delete(getEndpointUris().getImageDeletionUri(), ownerId.toString())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(
+                    delete(getEndpointUris().getImageDeletionUri(), ownerId.toString()), user)
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON));
   }
@@ -63,8 +57,9 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
   public ResultActions downloadImage(String imageType, UUID ownerId, User user) throws Exception {
     return getMockMvc()
         .perform(
-            get(getEndpointUris().getImageDownloadingUri() + imageType, ownerId.toString())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(
+                    get(getEndpointUris().getImageDownloadingUri() + imageType, ownerId.toString()),
+                    user)
                 .contentType(APPLICATION_JSON)
                 .accept("*/*"));
   }
@@ -73,9 +68,8 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
       throws Exception {
     return getMockMvc()
         .perform(
-            multipart(getEndpointUris().getImageUploadingUri(), ownerId)
-                .file(file)
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(
+                    multipart(getEndpointUris().getImageUploadingUri(), ownerId).file(file), user)
                 .contentType(MULTIPART_FORM_DATA)
                 .accept("*/*"));
   }
@@ -102,8 +96,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
       throws Exception {
     return getMockMvc()
         .perform(
-            put(getEndpointUris().getChangePasswordUri())
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(put(getEndpointUris().getChangePasswordUri()), user)
                 .content(asJsonString(requestDto))
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON));
@@ -149,8 +142,7 @@ public class UserResultActions extends EntityResultActions<UserEndpointUris> {
       throws Exception {
     return getMockMvc()
         .perform(
-            patch(getEndpointUris().getEditUserUri(), id, locale)
-                .header(AUTHORIZATION_HEADER, getAccessToken(user))
+            addAuthorizationHeaders(patch(getEndpointUris().getEditUserUri(), id, locale), user)
                 .content(asJsonString(requestDto))
                 .contentType(APPLICATION_JSON)
                 .accept(APPLICATION_JSON));

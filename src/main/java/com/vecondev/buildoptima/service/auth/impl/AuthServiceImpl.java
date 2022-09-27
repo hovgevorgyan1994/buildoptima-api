@@ -1,9 +1,9 @@
 package com.vecondev.buildoptima.service.auth.impl;
 
 import static com.vecondev.buildoptima.exception.Error.BAD_CREDENTIALS;
-import static com.vecondev.buildoptima.exception.Error.SEND_EMAIL_FAILED;
 import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
 
+import com.vecondev.buildoptima.dto.user.ConfirmationMessage;
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
 import com.vecondev.buildoptima.dto.user.request.ConfirmEmailRequestDto;
 import com.vecondev.buildoptima.dto.user.request.RefreshTokenRequestDto;
@@ -23,11 +23,9 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import com.vecondev.buildoptima.service.auth.AuthService;
 import com.vecondev.buildoptima.service.auth.ConfirmationTokenService;
 import com.vecondev.buildoptima.service.auth.RefreshTokenService;
-import com.vecondev.buildoptima.service.mail.MailService;
+import com.vecondev.buildoptima.service.sqs.SqsService;
 import com.vecondev.buildoptima.validation.UserValidator;
-import java.util.Locale;
 import java.util.Optional;
-import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,25 +45,20 @@ public class AuthServiceImpl implements AuthService {
   private final JwtTokenManager tokenManager;
   private final ConfirmationTokenService confirmationTokenService;
   private final RefreshTokenService refreshTokenService;
-  private final MailService mailService;
+  private final SqsService sqsService;
+  private static final String CONFIRM_TEMPLATE = "confirm.html";
+  private static final String RESTORE_TEMPLATE = "restore.html";
 
   @Override
-  public UserResponseDto register(UserRegistrationRequestDto dto, Locale locale) {
+  public UserResponseDto register(UserRegistrationRequestDto dto) {
     User user = userMapper.mapToEntity(dto);
     userValidator.validateUserRegistration(user);
     user = userRepository.saveAndFlush(user);
-    sendEmail(locale, user);
-    return userMapper.mapToResponseDto(user);
-  }
-
-  public void sendEmail(Locale locale, User user) {
     ConfirmationToken confirmationToken = confirmationTokenService.create(user);
-    try {
-      mailService.sendConfirm(locale, confirmationToken);
-    } catch (MessagingException e) {
-      throw new AuthenticationException(SEND_EMAIL_FAILED);
-    }
+    log.info("New user registered.");
+    sendEmail(confirmationToken, CONFIRM_TEMPLATE);
     log.info("Verification email was sent to user {}", user.getEmail());
+    return userMapper.mapToResponseDto(user);
   }
 
   @Override
@@ -107,7 +100,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public void verify(ConfirmEmailRequestDto requestDto, Locale locale) {
+  public void verify(ConfirmEmailRequestDto requestDto) {
     log.info(
         "Request from optional user {} to get a password restoring email", requestDto.getEmail());
     User user =
@@ -116,14 +109,9 @@ public class AuthServiceImpl implements AuthService {
             .orElseThrow(() -> new AuthenticationException(USER_NOT_FOUND));
 
     ConfirmationToken token = confirmationTokenService.create(user);
-    try {
-      log.info("Sending a password restoring email to user {}", user.getEmail());
-      mailService.sendVerify(locale, token);
-      log.info("Password restoring email was sent to user {}", user.getEmail());
-    } catch (MessagingException e) {
-      log.error("Something went wrong while sending email to user {}", user.getEmail());
-      throw new AuthenticationException(SEND_EMAIL_FAILED);
-    }
+    log.info("Sending a password restoring email to user {}", user.getEmail());
+    sendEmail(token, RESTORE_TEMPLATE);
+    log.info("Password restoring email was sent to user {}", user.getEmail());
   }
 
   @Override
@@ -157,9 +145,19 @@ public class AuthServiceImpl implements AuthService {
     log.info("Access token is created for user {}", user.getEmail());
     return AuthResponseDto.builder()
         .userId(user.getId())
-        .imageVersion(user.getImageVersion())
         .accessToken(accessToken)
         .refreshToken(refreshToken.getPlainRefreshToken())
         .build();
+  }
+
+  private void sendEmail(ConfirmationToken confirmationToken, String template) {
+    ConfirmationMessage message =
+        ConfirmationMessage.builder()
+            .template(template)
+            .token(confirmationToken.getToken())
+            .userEmail(confirmationToken.getUser().getEmail())
+            .userFirstName(confirmationToken.getUser().getFirstName())
+            .build();
+    sqsService.sendMessage(message.toString());
   }
 }

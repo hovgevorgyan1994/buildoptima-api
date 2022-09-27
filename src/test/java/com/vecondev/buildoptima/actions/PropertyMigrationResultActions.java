@@ -20,7 +20,6 @@ public class PropertyMigrationResultActions
 
   private final PropertyMigrationEndpointUris endpointUris;
   private final MockMvc mockMvc;
-  private final JwtTokenManager jwtTokenManager;
 
   @Override
   protected PropertyMigrationEndpointUris getEndpointUris() {
@@ -30,11 +29,6 @@ public class PropertyMigrationResultActions
   @Override
   protected MockMvc getMockMvc() {
     return mockMvc;
-  }
-
-  @Override
-  protected JwtTokenManager getTokenManager() {
-    return jwtTokenManager;
   }
 
   public ResultActions migrate(User user) throws Exception {
@@ -47,16 +41,14 @@ public class PropertyMigrationResultActions
 
   public ResultActions trackProgress(User user) throws Exception {
     return mockMvc.perform(
-        get(endpointUris.getTrackProgressUri())
-            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+        addAuthorizationHeaders(get(endpointUris.getTrackProgressUri()), user)
             .contentType(APPLICATION_JSON)
             .accept(APPLICATION_JSON_VALUE));
   }
 
   private ResultActions getPostRequest(User user, String uri) throws Exception {
     return mockMvc.perform(
-        post(uri)
-            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+        addAuthorizationHeaders(post(uri), user)
             .contentType(APPLICATION_JSON)
             .accept(APPLICATION_JSON_VALUE));
   }

@@ -1,16 +1,12 @@
 package com.vecondev.buildoptima.api;
 
 import static com.vecondev.buildoptima.exception.Error.USER_NOT_FOUND;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.icegreen.greenmail.configuration.GreenMailConfiguration;
-import com.icegreen.greenmail.junit5.GreenMailExtension;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import com.vecondev.buildoptima.actions.UserResultActions;
 import com.vecondev.buildoptima.config.AmazonS3Config;
 import com.vecondev.buildoptima.dto.user.request.AuthRequestDto;
@@ -29,13 +25,11 @@ import com.vecondev.buildoptima.repository.user.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import javax.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,16 +48,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class AuthControllerTest {
 
   private static final String MAIL_EXAMPLE = "Example@mail.ru";
-  private static final String GREENMAIL_EMAIL_ADDRESS = "buildoptima-test@gmail.com";
-  private static final String GREENMAIL_EMAIL_PASSWORD = "buildoptima";
-
-  @RegisterExtension
-  private static final GreenMailExtension greenMail =
-      new GreenMailExtension(ServerSetupTest.SMTP)
-          .withConfiguration(
-              GreenMailConfiguration.aConfig()
-                  .withUser(GREENMAIL_EMAIL_ADDRESS, GREENMAIL_EMAIL_PASSWORD))
-          .withPerMethodLifecycle(true);
 
   private UserControllerTestParameters userControllerTestParameters;
   @Autowired private UserRepository userRepository;
@@ -71,7 +55,6 @@ class AuthControllerTest {
   @Autowired private RefreshTokenRepository refreshTokenRepository;
   @Autowired private PasswordEncoder encoder;
   @Autowired private UserResultActions resultActions;
-
 
   @BeforeEach
   void setUp() {
@@ -102,10 +85,6 @@ class AuthControllerTest {
         .register(requestDto)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.firstName").exists());
-
-    MimeMessage[] messages = greenMail.getReceivedMessages();
-    assertEquals(1, messages.length);
-    assertEquals(requestDto.getEmail(), messages[0].getAllRecipients()[0].toString());
   }
 
   @Test
@@ -185,9 +164,6 @@ class AuthControllerTest {
     ConfirmEmailRequestDto requestDto = new ConfirmEmailRequestDto(user.getEmail());
 
     resultActions.verify(requestDto).andExpect(status().isOk());
-    MimeMessage[] messages = greenMail.getReceivedMessages();
-    assertEquals(1, messages.length);
-    assertEquals(user.getEmail(), messages[0].getAllRecipients()[0].toString());
   }
 
   @Test

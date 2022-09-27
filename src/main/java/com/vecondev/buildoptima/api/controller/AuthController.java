@@ -10,7 +10,6 @@ import com.vecondev.buildoptima.dto.user.response.AuthResponseDto;
 import com.vecondev.buildoptima.dto.user.response.RefreshTokenResponseDto;
 import com.vecondev.buildoptima.dto.user.response.UserResponseDto;
 import com.vecondev.buildoptima.service.auth.AuthService;
-import java.util.Locale;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +33,11 @@ public class AuthController implements AuthApi {
   @Override
   @PostMapping("/registration")
   public ResponseEntity<UserResponseDto> register(
-      @Valid @RequestBody UserRegistrationRequestDto userRegistrationRequestDto, Locale locale) {
+      @Valid @RequestBody UserRegistrationRequestDto userRegistrationRequestDto) {
     log.info("Attempt to register user with email: {}", userRegistrationRequestDto.getEmail());
 
     return new ResponseEntity<>(
-        authService.register(userRegistrationRequestDto, locale), HttpStatus.CREATED);
+        authService.register(userRegistrationRequestDto), HttpStatus.CREATED);
   }
 
   @Override
@@ -64,8 +63,8 @@ public class AuthController implements AuthApi {
 
   @Override
   @PostMapping("/verification")
-  public ResponseEntity<Void> verify(@RequestBody ConfirmEmailRequestDto email, Locale locale) {
-    authService.verify(email, locale);
+  public ResponseEntity<Void> verify(@RequestBody ConfirmEmailRequestDto email) {
+    authService.verify(email);
     return ResponseEntity.ok().build();
   }
 

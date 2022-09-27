@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Change Password Request DTO")
 public class ChangePasswordRequestDto {
 
   @NotNull private String oldPassword;

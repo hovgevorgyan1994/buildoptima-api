@@ -5,7 +5,6 @@ import com.vecondev.buildoptima.model.property.Details;
 import com.vecondev.buildoptima.model.property.Hazards;
 import com.vecondev.buildoptima.model.property.Locations;
 import com.vecondev.buildoptima.model.property.ZoningDetails;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Property Response DTO")
 public class PropertyResponseDto {
 
   private String ain;

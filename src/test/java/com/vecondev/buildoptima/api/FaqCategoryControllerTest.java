@@ -39,8 +39,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @AutoConfigureMockMvc
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("test")
-@Import({FaqCategoryEndpointUris.class, FaqCategoryResultActions.class, AmazonS3Config.class})
-class FaqCategoryControllerTest  {
+@Import({
+  FaqCategoryEndpointUris.class,
+  FaqCategoryResultActions.class,
+  AmazonS3Config.class
+})
+class FaqCategoryControllerTest {
 
   @Autowired private UserRepository userRepository;
   @Autowired private FaqCategoryRepository faqCategoryRepository;

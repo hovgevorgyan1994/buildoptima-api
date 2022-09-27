@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Data
-@Schema(name = "Entity Overview")
 public class EntityOverview {
 
   @Schema(example = "2635b586-d0d7-4a2d-b4b5-c98377a02322")

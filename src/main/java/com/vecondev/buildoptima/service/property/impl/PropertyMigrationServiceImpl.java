@@ -1,7 +1,6 @@
 package com.vecondev.buildoptima.service.property.impl;
 
-import static com.vecondev.buildoptima.filter.model.PropertySearchCriteria.ADDRESS;
-import static com.vecondev.buildoptima.util.FileUtil.*;
+import static com.vecondev.buildoptima.util.FileUtil.convertS3ObjectToPath;
 import static com.vecondev.buildoptima.util.JsonUtil.*;
 
 import com.amazonaws.services.s3.model.S3Object;
@@ -10,12 +9,7 @@ import com.vecondev.buildoptima.dto.property.PropertyListDto;
 import com.vecondev.buildoptima.dto.property.PropertyReadDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyOverview;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
-import com.vecondev.buildoptima.dto.property.response.PropertyResponseDto;
-import com.vecondev.buildoptima.exception.Error;
-import com.vecondev.buildoptima.exception.ResourceNotFoundException;
-import com.vecondev.buildoptima.filter.model.PropertySearchCriteria;
 import com.vecondev.buildoptima.mapper.property.AddressMapper;
 import com.vecondev.buildoptima.mapper.property.PropertyMapper;
 import com.vecondev.buildoptima.model.property.Address;
@@ -36,7 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.opensearch.search.SearchHit;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = Exception.class)
+@Transactional(isolation = Isolation.REPEATABLE_READ, noRollbackFor = Exception.class)
 public class PropertyMigrationServiceImpl implements PropertyMigrationService {
 
   private final PropertyMapper propertyMapper;
@@ -55,6 +49,7 @@ public class PropertyMigrationServiceImpl implements PropertyMigrationService {
   private final AmazonS3Service amazonS3Service;
   private final OpenSearchService openSearchService;
   private final S3ConfigProperties s3ConfigProperties;
+  private final AsyncTaskExecutor asyncExecutor;
 
   @Override
   public List<MigrationHistory> migrateFromS3() {
@@ -66,12 +61,17 @@ public class PropertyMigrationServiceImpl implements PropertyMigrationService {
     log.info("Retrieved {} property files from S3 to process", sizeOfUnprocessedFiles);
     List<MigrationHistory> processedFilesBefore = migrationHistoryService.findAll();
     if (sizeOfUnprocessedFiles != 0) {
-      processFiles(unprocessedFiles);
+      processFiles(unprocessedFiles, false);
       log.info("{} property files from S3 were processed", sizeOfUnprocessedFiles);
     } else {
       log.info("No new property files were found in S3 bucket");
     }
     return processedFilesBefore;
+  }
+
+  @Override
+  public void migrateFromS3(S3Object s3Object) {
+    processFiles(List.of(s3Object), true);
   }
 
   @Override
@@ -122,7 +122,7 @@ public class PropertyMigrationServiceImpl implements PropertyMigrationService {
         .forEach(file -> migrationHistoryService.deleteByFilePath(file.getFilePath()));
     int filesToReprocessCount = filesToReprocess.size();
     if (filesToReprocessCount != 0) {
-      processFiles(filesToReprocess);
+      processFiles(filesToReprocess, false);
       log.info("{} property files from S3 were re-processed", filesToReprocessCount);
     } else {
       log.info("No property files were found in S3 bucket to re-process");
@@ -156,27 +156,27 @@ public class PropertyMigrationServiceImpl implements PropertyMigrationService {
         allProcessedFiles.size(), allFailedFilesToProcess, allProperties.size());
   }
 
-  private void processFiles(List<S3Object> unprocessedFiles) {
+  private void  processFiles(List<S3Object> unprocessedFiles, boolean isDelta) {
     int sizeOfUnprocessedFiles = unprocessedFiles.size();
-    ExecutorService executorService = Executors.newFixedThreadPool(sizeOfUnprocessedFiles);
     CountDownLatch countDownLatch = new CountDownLatch(sizeOfUnprocessedFiles);
+    ExecutorService executorService = Executors.newFixedThreadPool(sizeOfUnprocessedFiles);
     unprocessedFiles.forEach(
             s3Object -> {
               Runnable runnable = () -> {
                 try {
                   saveProperty(
                       readFromJson(convertS3ObjectToPath(s3Object).toFile()),
-                      migrationHistoryService.saveSucceededHistory(s3Object.getKey()));
+                      migrationHistoryService.saveSucceededHistory(s3Object.getKey(), isDelta));
                   log.info("""
-                            {} file from S3 was successfully processed
-                            and removed from local storage""",
+                          {} file from S3 was successfully processed
+                          and removed from local storage""",
                       s3Object.getKey());
                 } catch (Exception e) {
                   migrationHistoryService
-                      .saveFailedHistory(s3Object.getKey(), e.getMessage());
+                      .saveFailedHistory(s3Object.getKey(), e.getMessage(), isDelta);
                   log.info("""
-                            Failed processing {} file from S3.
-                            See failed reason in migration metadata""",
+                          Failed processing {} file from S3.
+                          See failed reason in migration metadata""",
                       s3Object.getKey());
                 }
                 countDownLatch.countDown();
@@ -190,6 +190,7 @@ public class PropertyMigrationServiceImpl implements PropertyMigrationService {
       Thread.currentThread().interrupt();
     }
   }
+
 
   /**
    * Saves the whole property data in database and the property addresses in OpenSearch.
@@ -234,6 +235,6 @@ public class PropertyMigrationServiceImpl implements PropertyMigrationService {
     toUpdate.setDetails(property.getDetails());
     toUpdate.setHazards(property.getHazards());
     toUpdate.setZoningDetails(property.getZoningDetails());
-    return propertyRepository.saveAndFlush(toUpdate);
+    return propertyRepository.save(toUpdate);
   }
 }

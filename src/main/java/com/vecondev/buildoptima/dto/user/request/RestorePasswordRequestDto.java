@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "Restore Password Request DTO")
 public class RestorePasswordRequestDto {
 
   @NotNull

@@ -26,7 +26,6 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
 
   private final NewsEndpointUris newsEndpointUris;
   private final MockMvc mockMvc;
-  private final JwtTokenManager tokenManager;
 
   @Override
   protected NewsEndpointUris getEndpointUris() {
@@ -38,17 +37,12 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
     return mockMvc;
   }
 
-  @Override
-  protected JwtTokenManager getTokenManager() {
-    return tokenManager;
-  }
 
   @Override
   public ResultActions create(User user, Object requestDto) throws Exception {
     NewsCreateRequestDto createRequestDto = (NewsCreateRequestDto) requestDto;
     return mockMvc.perform(
-        multipart(getEndpointUris().getCreationUri())
-            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+        addAuthorizationHeaders(multipart(getEndpointUris().getCreationUri()), user)
             .content(createRequestDto.getImage().getBytes())
             .param("title", createRequestDto.getTitle())
             .param("summary", createRequestDto.getSummary())
@@ -61,8 +55,7 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
   public ResultActions update(UUID entityId, User user, Object requestDto) throws Exception {
     NewsUpdateRequestDto updateRequestDto = (NewsUpdateRequestDto) requestDto;
     return mockMvc.perform(
-        patch(getEndpointUris().getUpdateUri(), entityId)
-            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+        addAuthorizationHeaders(patch(getEndpointUris().getUpdateUri(), entityId), user)
             .content(updateRequestDto.getImage().getBytes())
             .contentType(MULTIPART_FORM_DATA_VALUE)
             .param("title", updateRequestDto.getTitle())
@@ -73,14 +66,12 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
   }
 
   public ResultActions getMetadata(User user) throws Exception {
-    return mockMvc.perform(
-        get(getEndpointUris().getMetadataUri()).header(AUTHORIZATION_HEADER, getAccessToken(user)));
+    return mockMvc.perform(addAuthorizationHeaders(get(getEndpointUris().getMetadataUri()), user));
   }
 
   public ResultActions getAllInCsv(FetchRequestDto fetchRequest, User user) throws Exception {
     return mockMvc.perform(
-        post(getEndpointUris().getExportInCsvUri())
-            .header(AUTHORIZATION_HEADER, getAccessToken(user))
+        addAuthorizationHeaders(post(getEndpointUris().getExportInCsvUri()), user)
             .content(asJsonString(fetchRequest))
             .contentType(APPLICATION_JSON)
             .accept("application/csv"));
@@ -88,7 +79,6 @@ public class NewsResultActions extends EntityResultActions<NewsEndpointUris> {
 
   public ResultActions archive(UUID id, User user) throws Exception {
     return mockMvc.perform(
-        patch(getEndpointUris().getArchiveUri(), id)
-            .header(AUTHORIZATION_HEADER, getAccessToken(user)));
+        addAuthorizationHeaders(patch(getEndpointUris().getArchiveUri(), id), user));
   }
 }

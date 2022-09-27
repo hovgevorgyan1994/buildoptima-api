@@ -3,7 +3,6 @@ package com.vecondev.buildoptima.dto.news.response;
 import com.vecondev.buildoptima.dto.EntityOverview;
 import com.vecondev.buildoptima.model.Status;
 import com.vecondev.buildoptima.model.news.NewsCategory;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "News Response DTO")
 public class NewsResponseDto {
 
   private UUID id;

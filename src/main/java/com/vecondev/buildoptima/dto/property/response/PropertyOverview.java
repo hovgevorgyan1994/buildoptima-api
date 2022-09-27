@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Schema(name = "Entity Overview")
 public class PropertyOverview {
 
   @Schema(example = "5482003013")

@@ -1,5 +1,7 @@
 package com.vecondev.buildoptima.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationProgressResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyMigrationResponseDto;
 import com.vecondev.buildoptima.dto.property.response.PropertyReprocessResponseDto;
@@ -34,12 +36,17 @@ public interface PropertyMigrationApi extends SecuredApi {
             responseCode = "200",
             description = "All files were processed",
             content =
-                @Content(schema = @Schema(implementation = PropertyMigrationResponseDto.class))),
+                @Content(
+                    schema = @Schema(implementation = PropertyMigrationResponseDto.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
         @ApiResponse(
             responseCode = "404",
             description =
                 "Migration metadata or Migration history not found with such id/property_ain",
-            content = @Content(schema = @Schema(implementation = ApiError.class)))
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<PropertyMigrationResponseDto> migrateUnprocessedFiles();
 
@@ -53,12 +60,17 @@ public interface PropertyMigrationApi extends SecuredApi {
             responseCode = "200",
             description = "All failed files were re-processed",
             content =
-                @Content(schema = @Schema(implementation = PropertyReprocessResponseDto.class))),
+                @Content(
+                    schema = @Schema(implementation = PropertyReprocessResponseDto.class),
+                    mediaType = APPLICATION_JSON_VALUE)),
         @ApiResponse(
             responseCode = "404",
             description =
                 "Migration metadata or Migration history not found with such id/property_ain",
-            content = @Content(schema = @Schema(implementation = ApiError.class)))
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiError.class),
+                    mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<PropertyReprocessResponseDto> reprocessFailedToProcessFiles();
 
@@ -73,7 +85,8 @@ public interface PropertyMigrationApi extends SecuredApi {
             description = "The information about file migrations was got",
             content =
                 @Content(
-                    schema = @Schema(implementation = PropertyMigrationProgressResponseDto.class)))
+                    schema = @Schema(implementation = PropertyMigrationProgressResponseDto.class),
+                    mediaType = APPLICATION_JSON_VALUE))
       })
   ResponseEntity<PropertyMigrationProgressResponseDto> trackMigrationProgress();
 }
