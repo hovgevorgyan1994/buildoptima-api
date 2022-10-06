@@ -105,8 +105,8 @@ opensearch:
 sqs:
   propertyQueueName: PropertyQueue
   mailQueueName: SendEmail
-  accessKey: AKIA2AHFPMZSMHWKHZO6
-  secretKey: 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
+  accessKey: asdasd
+  secretKey: asdasd
   url: https://sqs.us-east-1.amazonaws.com/687676024420/SendEmail
 
 
